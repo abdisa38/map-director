@@ -322,9 +322,16 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
                     No account or password needed! Just enter your name so our staff knows which guest to serve.
                   </p>
 
-                  <label htmlFor="customer-name" style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                    Your Full Name <span style={{ color: '#b83b3b' }}>*</span>
-                  </label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label htmlFor="customer-name" style={{ fontWeight: 600 }}>
+                      Your Full Name <span style={{ color: '#b83b3b' }}>*</span>
+                    </label>
+                    {name && (
+                      <span style={{ fontSize: '11px', color: '#23734b', background: '#eef6ee', border: '1px solid #cce5ce', padding: '2px 7px', borderRadius: '4px', fontWeight: 600 }}>
+                        ✓ Saved to your profile
+                      </span>
+                    )}
+                  </div>
                   <input
                     id="customer-name"
                     type="text"
