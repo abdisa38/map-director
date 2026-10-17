@@ -49,3 +49,45 @@
 .profile-logout-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#ffffff;color:#b83b3b;border:1px solid #f5c6c6;padding:9px 14px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s ease}
 .profile-logout-btn:hover{background:#fdf2f2;border-color:#b83b3b}
 
+/* Session History Action (Your Orders Pill) */
+.session-history-action{display:inline-flex;align-items:center;gap:6px;background:#fdfaf3;color:#7a581e;border:1px solid #ebd8b2;border-radius:6px;padding:6px 11px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.18s ease;white-space:nowrap}
+.session-history-action:hover{background:#fbf2dc;border-color:#c69234;transform:translateY(-1px)}
+.session-history-action b{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:#c69234;color:#ffffff;font-size:10px;padding:0 4px;font-weight:700}
+
+/* Header & Mobile Responsiveness Enhancements */
+@media (max-width: 640px) {
+  .restaurant-header{height:70px}
+  .header-inner{padding:0 12px;gap:6px}
+  .restaurant-logo{font-size:12.5px;letter-spacing:0.8px;gap:8px}
+  .abay-symbol{font-size:28px;padding-right:10px;line-height:26px;letter-spacing:-6px}
+  .abay-symbol>span{font-size:21px}
+  .restaurant-logo small{display:none}
+  .header-actions{gap:5px}
+  .navbar-auth-cluster{gap:4px}
+  .nav-logout-text{display:none}
+  .navbar-logout-btn{padding:6px 7px;min-height:36px}
+  .session-history-action{padding:6px 8px;gap:4px;min-height:36px}
+  .session-history-action span{display:none}
+  .profile-chip-name{max-width:55px}
+  .menu-modal-backdrop{padding:10px}
+  .menu-modal{width:100%;max-width:440px;padding:22px 16px;border-radius:12px}
+  .menu-modal h2{font-size:21px}
+  .login-role-tabs{gap:4px;padding:3px}
+  .login-role-tab{padding:8px 6px;font-size:11.5px}
+  .profile-field-group input{font-size:15px;padding:10px 12px}
+  .profile-dialog-buttons{flex-direction:row}
+  .profile-dialog-buttons .button,
+  .profile-logout-btn{flex:1;min-height:42px}
+}
+
+@media (max-width: 400px) {
+  .header-inner{padding:0 8px;gap:4px}
+  .restaurant-logo{font-size:11px;letter-spacing:0.3px;gap:5px}
+  .abay-symbol{font-size:24px;padding-right:6px;line-height:22px;letter-spacing:-5px}
+  .profile-chip-name{display:none}
+  .customer-profile-pill{padding:4px 6px}
+  .nav-btn-text{display:none}
+  .navbar-login-btn{padding:6px 8px}
+}
+
+
