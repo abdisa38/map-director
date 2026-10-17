@@ -63,7 +63,6 @@ export default function App(){
   const closeRef=useRef<HTMLButtonElement>(null);
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [loginMode, setLoginMode] = useState<'staff' | 'customer'>('staff');
   const [staffUser, setStaffUser] = useState<any>(() => {
     try {
       return JSON.parse(localStorage.getItem('gebeta_staff_user') || 'null');
@@ -73,56 +72,54 @@ export default function App(){
   });
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPin, setLoginPin] = useState('');
-  const [loginCustomerName, setLoginCustomerName] = useState('');
-  const [loginCustomerPhone, setLoginCustomerPhone] = useState('');
   const [loginBusy, setLoginBusy] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  const handleStaffLogin = async (e: React.FormEvent) => {
+  const handleAuthLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginUsername.trim()) {
+    const username = loginUsername.trim();
+    const pin = loginPin.trim();
+
+    if (!username) {
       setLoginError('Please enter your username or email');
       return;
     }
-    if (!loginPin.trim()) {
+    if (!pin) {
       setLoginError('Please enter your password / PIN');
       return;
     }
+
     setLoginBusy(true);
     setLoginError('');
+
     try {
-      const user = await api.loginStaff({ username: loginUsername.trim(), pin: loginPin.trim() });
-      localStorage.setItem('gebeta_staff_user', JSON.stringify(user));
-      setStaffUser(user);
+      const user = await api.loginStaff({ username, pin });
       setLoginModalOpen(false);
-      setToast(`Welcome back, ${user.name} (${user.role})!`);
-      setAdmin(true);
-      location.hash = 'admin';
+
+      const staffRoles = ['Owner', 'Admin', 'Manager', 'Kitchen', 'Waiter', 'Cashier'];
+      if (staffRoles.includes(user.role)) {
+        // Staff / Admin Role -> Redirect to Admin Dashboard
+        localStorage.setItem('gebeta_staff_user', JSON.stringify(user));
+        setStaffUser(user);
+        setToast(`Welcome back, ${user.name} (${user.role})!`);
+        setAdmin(true);
+        location.hash = 'admin';
+      } else {
+        // Customer Role -> Redirect to Customer Dining Dashboard
+        localStorage.setItem('gebeta_customer_name', user.name);
+        if (user.phone) localStorage.setItem('gebeta_customer_phone', user.phone);
+        setCustomerName(user.name);
+        if (user.phone) setCustomerPhone(user.phone);
+        setProfileInputName(user.name);
+        if (user.phone) setProfileInputPhone(user.phone);
+        setToast(`Welcome back, ${user.name}!`);
+        setPanel('profile');
+      }
     } catch (err: any) {
       setLoginError(err.message || 'Login failed. Please check credentials.');
     } finally {
       setLoginBusy(false);
     }
-  };
-
-  const handleCustomerLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = loginCustomerName.trim();
-    if (!trimmed) {
-      setLoginError('Please enter your full name');
-      return;
-    }
-    localStorage.setItem('gebeta_customer_name', trimmed);
-    if (loginCustomerPhone.trim()) {
-      localStorage.setItem('gebeta_customer_phone', loginCustomerPhone.trim());
-    }
-    setCustomerName(trimmed);
-    setCustomerPhone(loginCustomerPhone.trim());
-    setProfileInputName(trimmed);
-    setProfileInputPhone(loginCustomerPhone.trim());
-    setLoginModalOpen(false);
-    setToast(`Welcome, ${trimmed}! Your dining dashboard is ready.`);
-    setPanel('profile');
   };
 
   const handleStaffLogout = () => {

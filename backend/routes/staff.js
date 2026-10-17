@@ -18,13 +18,15 @@ router.post('/login', async (req, res) => {
         query = { role: 'Kitchen' };
       } else if (rawId === 'waiter') {
         query = { role: 'Waiter' };
+      } else if (rawId === 'customer') {
+        query = { role: 'Customer' };
       } else {
-        query = { email: rawId };
+        query = { $or: [{ email: rawId }, { name: new RegExp('^' + rawId + '$', 'i') }] };
       }
     } else if (role) {
       query = { role };
     } else {
-      return res.status(400).json({ success: false, error: 'Username, email, or role required for staff login.' });
+      return res.status(400).json({ success: false, error: 'Username or email required for login.' });
     }
 
     let staff = await Staff.findOne(query);
@@ -39,16 +41,36 @@ router.post('/login', async (req, res) => {
         pin: '1234',
         status: 'Active'
       });
+    } else if (!staff && rawId === 'customer') {
+      staff = await Staff.create({
+        name: 'Guest Diner',
+        email: 'customer@abaykitchen.et',
+        phone: '+251 91 234 5678',
+        role: 'Customer',
+        pin: '1234',
+        status: 'Active'
+      });
+    } else if (!staff && rawId && !['admin', 'manager', 'kitchen', 'waiter', 'owner'].includes(rawId)) {
+      // Auto-register customer account on login
+      const displayName = rawId.includes('@') ? rawId.split('@')[0] : rawId;
+      const capitalized = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+      staff = await Staff.create({
+        name: capitalized,
+        email: rawId.includes('@') ? rawId : `${rawId}@customer.abaykitchen.et`,
+        role: 'Customer',
+        pin: (pin || '').trim() || '1234',
+        status: 'Active'
+      });
     }
 
     if (!staff) {
-      return res.status(404).json({ success: false, error: `No staff member found for "${rawId || role}". Default username is "admin".` });
+      return res.status(404).json({ success: false, error: 'No account found with this username or email.' });
     }
 
-    // Check PIN (default '1234')
+    // Check PIN / password
     const enteredPin = (pin || '').trim();
     if (staff.pin && enteredPin && staff.pin !== enteredPin) {
-      return res.status(401).json({ success: false, error: 'Incorrect password / PIN. (Default PIN: 1234)' });
+      return res.status(401).json({ success: false, error: 'Incorrect password or PIN.' });
     }
 
     staff.lastLogin = new Date();
@@ -56,7 +78,7 @@ router.post('/login', async (req, res) => {
 
     res.json({
       success: true,
-      message: `Welcome back, ${staff.name} (${staff.role})`,
+      message: `Welcome back, ${staff.name}`,
       data: {
         id: staff._id,
         name: staff.name,

@@ -7,7 +7,7 @@ const StaffSchema = new mongoose.Schema(
     phone: { type: String, default: '' },
     role: {
       type: String,
-      enum: ['Owner', 'Manager', 'Kitchen', 'Waiter'],
+      enum: ['Owner', 'Manager', 'Kitchen', 'Waiter', 'Customer'],
       default: 'Waiter'
     },
     pin: { type: String, default: '1234' },
