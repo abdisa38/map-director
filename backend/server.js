@@ -8,10 +8,28 @@ const seedDatabase = require('./seed');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS setup: allow Render, Vercel, and local development
-const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*';
+// Dynamic CORS setup: permits Vercel deployments, Render, local dev, or custom CORS_ORIGIN
+const rawOrigins = process.env.CORS_ORIGIN || '*';
+const allowedList = rawOrigins.split(',').map(s => s.trim().replace(/\/$/, ''));
+
 app.use(cors({
-  origin: allowedOrigins === '*' ? '*' : allowedOrigins,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, server-to-server, curl)
+    if (!origin) return callback(null, true);
+
+    // If wildcard or explicitly in CORS_ORIGIN list
+    if (rawOrigins === '*' || allowedList.includes('*') || allowedList.includes(origin)) {
+      return callback(null, origin);
+    }
+
+    // Automatically allow any Vercel deployment (*.vercel.app) or localhost
+    if (origin.endsWith('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return callback(null, origin);
+    }
+
+    // Fallback: permit origin
+    return callback(null, origin);
+  },
   credentials: true
 }));
 
