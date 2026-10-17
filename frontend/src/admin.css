@@ -301,6 +301,30 @@
   background: #e3ebd6;
 }
 
+.admin-topbar-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #b83b3b;
+  background: #fdf2f2;
+  border: 1px solid #f5c6c6;
+  padding: 8px 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  min-height: 38px;
+}
+
+.admin-topbar-logout-btn:hover {
+  background: #fae4e4;
+  border-color: #b83b3b;
+  color: #9c2727;
+  transform: translateY(-1px);
+}
+
 .admin-icon-btn {
   background: #fff;
   border: 1px solid var(--border);

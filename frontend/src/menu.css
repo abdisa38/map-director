@@ -27,19 +27,25 @@
 .status-highlight{font-weight:700;color:#1e6091}
 
 /* Staff Login Button in Header */
+.navbar-auth-cluster{display:inline-flex;align-items:center;gap:6px}
 .navbar-login-btn{display:inline-flex;align-items:center;gap:6px;background:#f3f6f1;color:#143d2b;border:1px solid #c9d8c6;padding:6px 13px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.18s ease}
 .navbar-login-btn:hover{background:#e7f0e4;border-color:#143d2b;transform:translateY(-1px)}
 .navbar-login-btn.logged-in{background:#e8f4ec;border-color:#82c496;color:#143d2b}
 .navbar-login-btn svg{width:14px;height:14px}
+.navbar-logout-btn{display:inline-flex;align-items:center;gap:4px;background:#fdf2f2;color:#b83b3b;border:1px solid #f5c6c6;padding:6px 10px;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.18s ease}
+.navbar-logout-btn:hover{background:#fae4e4;border-color:#b83b3b;color:#9c2727;transform:translateY(-1px)}
+.navbar-logout-btn svg{width:13px;height:13px}
 
 /* Login Modal Styling */
 .staff-login-dialog{display:flex;flex-direction:column;gap:16px}
 .staff-login-header{display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1px solid #eaede8}
 .staff-login-avatar{width:50px;height:50px;border-radius:50%;background:#143d2b;color:#c69234;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;box-shadow:0 4px 14px rgba(20,61,43,0.15)}
 .staff-login-form{display:flex;flex-direction:column;gap:14px}
-.login-quick-roles{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
-.quick-role-btn{background:#f4f6f1;border:1px solid #dce4d9;border-radius:5px;padding:4px 9px;font-size:11px;font-weight:550;color:#143d2b;cursor:pointer;transition:all 0.15s ease}
-.quick-role-btn:hover{background:#e8efe5;border-color:#143d2b}
-.login-hint-box{background:#fdfcf7;border:1px solid #ebe5cf;border-radius:6px;padding:9px 12px;font-size:11.5px;color:#786438;display:flex;align-items:center;gap:8px}
+.login-role-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#f0f3ed;padding:4px;border-radius:8px}
+.login-role-tab{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:0;border-radius:6px;font-size:12.5px;font-weight:600;background:transparent;color:#556358;cursor:pointer;font-family:inherit;transition:all 0.16s ease}
+.login-role-tab:hover{color:#143d2b}
+.login-role-tab.active{background:#143d2b;color:#faf8f5;box-shadow:0 2px 6px rgba(20,61,43,0.2)}
 .login-error-msg{background:#fdf2f2;border:1px solid #f5c6c6;color:#b83b3b;padding:9px 12px;border-radius:6px;font-size:12px;font-weight:500}
+.profile-logout-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#ffffff;color:#b83b3b;border:1px solid #f5c6c6;padding:9px 14px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s ease}
+.profile-logout-btn:hover{background:#fdf2f2;border-color:#b83b3b}
 

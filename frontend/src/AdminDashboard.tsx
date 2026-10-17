@@ -669,23 +669,37 @@ type Props = {
   sharedOrders: SessionOrder[];
   onUpdateOrders: (orders: SessionOrder[]) => void;
   onNavigateToCustomer: () => void;
+  onLogout?: () => void;
 };
 
-export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigateToCustomer }: Props) {
+export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigateToCustomer, onLogout }: Props) {
   const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories' | 'tables' | 'staff' | 'reports' | 'settings'>('overview');
   const [tables, setTables] = useState<DiningTable[]>(initialTables);
   const [dishes, setDishes] = useState<MenuItem[]>(defaultDishes);
   const [categories, setCategories] = useState<string[]>(initialCategories);
 
   // Staff Role Login State
-  const [activeStaffUser, setActiveStaffUser] = useState<{ name: string; role: 'Owner' | 'Manager' | 'Kitchen' | 'Waiter'; email: string } | null>({
-    name: 'Abebe Bekele',
-    role: 'Owner',
-    email: 'abebe@abaykitchen.et'
+  const [activeStaffUser, setActiveStaffUser] = useState<{ name: string; role: 'Owner' | 'Manager' | 'Kitchen' | 'Waiter'; email: string } | null>(() => {
+    try {
+      const saved = localStorage.getItem('gebeta_staff_user');
+      if (saved) {
+        const u = JSON.parse(saved);
+        return {
+          name: u.name || 'Admin',
+          role: (u.role === 'Admin' ? 'Owner' : u.role) as any,
+          email: u.email || 'admin@abaykitchen.et'
+        };
+      }
+    } catch {}
+    return {
+      name: 'Abebe Bekele',
+      role: 'Owner',
+      email: 'admin@abaykitchen.et'
+    };
   });
   const [showStaffLoginModal, setShowStaffLoginModal] = useState(false);
   const [selectedLoginRole, setSelectedLoginRole] = useState<'Owner' | 'Manager' | 'Kitchen' | 'Waiter'>('Owner');
-  const [loginPinInput, setLoginPinInput] = useState('1234');
+  const [loginPinInput, setLoginPinInput] = useState('');
 
   // Categories CRUD State
   const [apiCategories, setApiCategories] = useState<ApiCategory[]>([]);
@@ -1286,9 +1300,16 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
             </div>
             <button
               className="admin-logout-btn"
-              title="Switch Staff Role"
-              onClick={(e) => { e.stopPropagation(); setShowStaffLoginModal(true); }}
-              aria-label="Switch staff role"
+              title="Log out of Staff account"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onLogout) {
+                  onLogout();
+                } else {
+                  onNavigateToCustomer();
+                }
+              }}
+              aria-label="Log out"
             >
               <AdminIcon name="logout" size={16} />
             </button>
@@ -1344,6 +1365,12 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
               <AdminIcon name="external" size={14} />
               <span>Customer Menu (Live)</span>
             </button>
+            {onLogout && (
+              <button className="admin-topbar-logout-btn" onClick={onLogout} title="Sign out of Admin Dashboard">
+                <AdminIcon name="logout" size={14} />
+                <span>Log Out</span>
+              </button>
+            )}
           </div>
         </header>
 
@@ -4840,14 +4867,14 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
             </div>
 
             <div className="admin-form-group" style={{ marginBottom: '16px' }}>
-              <label className="admin-form-label">Station PIN Code (Default: 1234)</label>
+              <label className="admin-form-label">Station PIN Code</label>
               <input
                 type="password"
                 className="admin-form-input"
                 maxLength={4}
                 value={loginPinInput}
                 onChange={e => setLoginPinInput(e.target.value)}
-                placeholder="4-digit PIN"
+                placeholder="Enter 4-digit PIN"
                 style={{ letterSpacing: '4px', fontSize: '18px', textAlign: 'center' }}
               />
             </div>
