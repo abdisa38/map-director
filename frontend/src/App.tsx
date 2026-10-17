@@ -51,12 +51,42 @@ export default function App(){
   const [category,setCategory]=useState('All Items');
   const [search,setSearch]=useState('');
   const [cart,setCart]=useState<CartLine[]>([]);
-  const [panel,setPanel]=useState<'info'|'cart'|null>(null);
+  const [panel,setPanel]=useState<'info'|'cart'|'profile'|null>(null);
   const [custom,setCustom]=useState<Dish|null>(null);
   const [toast,setToast]=useState('');
   const [loading,setLoading]=useState(true);
+  const [customerName, setCustomerName] = useState(() => localStorage.getItem('gebeta_customer_name') || '');
+  const [customerPhone, setCustomerPhone] = useState(() => localStorage.getItem('gebeta_customer_phone') || '');
+  const [profileInputName, setProfileInputName] = useState(customerName);
+  const [profileInputPhone, setProfileInputPhone] = useState(customerPhone);
   const searchRef=useRef<HTMLInputElement>(null);
   const closeRef=useRef<HTMLButtonElement>(null);
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = profileInputName.trim();
+    if (!trimmed) {
+      setToast('Please enter your name');
+      return;
+    }
+    localStorage.setItem('gebeta_customer_name', trimmed);
+    if (profileInputPhone.trim()) localStorage.setItem('gebeta_customer_phone', profileInputPhone.trim());
+    setCustomerName(trimmed);
+    setCustomerPhone(profileInputPhone.trim());
+    setPanel(null);
+    setToast(`Profile saved! Welcome, ${trimmed}`);
+  };
+
+  const handleClearProfile = () => {
+    localStorage.removeItem('gebeta_customer_name');
+    localStorage.removeItem('gebeta_customer_phone');
+    setCustomerName('');
+    setCustomerPhone('');
+    setProfileInputName('');
+    setProfileInputPhone('');
+    setPanel(null);
+    setToast('Profile cleared. Ordering as a new guest.');
+  };
 
   // Fetch real data from MongoDB backend
   useEffect(() => {
