@@ -655,10 +655,13 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
             <span className="admin-nav-badge" style={{ background: 'var(--gold)', color: '#10261b' }}>{tables.length}</span>
           </button>
 
-          <button className="admin-nav-item" onClick={() => showToast('Staff Accounts (Coming in 03D)')}>
+          <button
+            className={`admin-nav-item ${activeTab === 'staff' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('staff'); setMobileMenuOpen(false); }}
+          >
             <AdminIcon name="staff" size={18} />
             <span>Staff</span>
-            <span className="admin-nav-soon">03D</span>
+            <span className="admin-nav-badge" style={{ background: '#2e6b4d', color: '#fff' }}>{staffMembers.length}</span>
           </button>
 
           <button className="admin-nav-item" onClick={() => showToast('Sales Reports (Coming in 03E)')}>
@@ -679,7 +682,7 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
             <span className="admin-user-avatar">AB</span>
             <div className="admin-user-info">
               <span className="admin-user-name">Abebe Bekele</span>
-              <span className="admin-user-role">Manager</span>
+              <span className="admin-user-role">Owner</span>
             </div>
             <button
               className="admin-logout-btn"
@@ -712,7 +715,9 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   ? 'Food Menu'
                   : activeTab === 'categories'
                   ? 'Categories'
-                  : 'Tables & QR Codes'}
+                  : activeTab === 'tables'
+                  ? 'Tables & QR Codes'
+                  : 'Staff Management'}
               </strong>
             </div>
           </div>
