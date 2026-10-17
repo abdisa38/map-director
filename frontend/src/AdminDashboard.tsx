@@ -39,7 +39,13 @@ function AdminIcon({ name, size = 18 }: { name: string; size?: number }) {
     crown: <><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></>,
     clock: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
     info: <><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></>,
-    userX: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/></>
+    userX: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/></>,
+    trendingUp: <><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></>,
+    trendingDown: <><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></>,
+    calendar: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>,
+    fileText: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></>,
+    filter: <><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></>,
+    arrowUpRight: <><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></>
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -350,6 +356,308 @@ export const permissionMatrix: PermissionCategory[] = [
   }
 ];
 
+// 03E — Reports & Analytics Types and Datasets
+export type DateRangePreset = 'today' | 'yesterday' | '7days' | '30days' | 'month' | 'custom';
+export type RankingMetric = 'quantity' | 'sales';
+export type ExportFormat = 'csv' | 'pdf';
+
+export interface TopSellingItem {
+  id: number;
+  name: string;
+  category: string;
+  quantity: number;
+  salesAmount: number;
+  sharePercent: number;
+}
+
+export interface CategoryPerformance {
+  category: string;
+  quantity: number;
+  salesAmount: number;
+  sharePercent: number;
+}
+
+export interface ChartPoint {
+  label: string;
+  sales: number;
+  previousSales: number;
+  orders: number;
+}
+
+export interface HistoricalOrderRecord {
+  id: string;
+  reference: string;
+  time: string;
+  date: string;
+  table: string;
+  itemsSummary: string;
+  total: number;
+  status: 'Completed' | 'Preparing' | 'Cancelled';
+  paymentMethod: string;
+}
+
+export interface ReportDataset {
+  periodLabel: string;
+  grossSales: number;
+  grossSalesChange: number;
+  completedOrders: number;
+  completedOrdersChange: number;
+  averageOrderValue: number;
+  averageOrderValueChange: number;
+  cancelledOrders: number;
+  cancelledRate: number;
+  cancelledChange: number;
+  chartPoints: ChartPoint[];
+  topItems: TopSellingItem[];
+  categories: CategoryPerformance[];
+  recentOrders: HistoricalOrderRecord[];
+}
+
+export const reportsDataByPreset: Record<DateRangePreset, ReportDataset> = {
+  today: {
+    periodLabel: 'Today · 17 Oct 2026',
+    grossSales: 18450,
+    grossSalesChange: 8.4,
+    completedOrders: 46,
+    completedOrdersChange: 6.2,
+    averageOrderValue: 401,
+    averageOrderValueChange: 2.1,
+    cancelledOrders: 1,
+    cancelledRate: 2.1,
+    cancelledChange: -1.2,
+    chartPoints: [
+      { label: '11:00', sales: 980, previousSales: 840, orders: 3 },
+      { label: '12:00', sales: 2450, previousSales: 2100, orders: 7 },
+      { label: '13:00', sales: 4200, previousSales: 3800, orders: 11 },
+      { label: '14:00', sales: 3100, previousSales: 2950, orders: 8 },
+      { label: '15:00', sales: 1200, previousSales: 1150, orders: 3 },
+      { label: '16:00', sales: 850, previousSales: 920, orders: 2 },
+      { label: '17:00', sales: 1100, previousSales: 1050, orders: 3 },
+      { label: '18:00', sales: 2150, previousSales: 1980, orders: 5 },
+      { label: '19:00', sales: 4800, previousSales: 4250, orders: 12 },
+      { label: '20:00', sales: 3850, previousSales: 3400, orders: 9 },
+      { label: '21:00', sales: 2100, previousSales: 1950, orders: 5 }
+    ],
+    topItems: [
+      { id: 1, name: 'Doro Wat', category: 'Ethiopian Food', quantity: 24, salesAmount: 16320, sharePercent: 32.5 },
+      { id: 2, name: 'Sizzling Beef Tibs', category: 'Ethiopian Food', quantity: 19, salesAmount: 13680, sharePercent: 27.2 },
+      { id: 5, name: 'Abay Signature Burger', category: 'Burgers', quantity: 14, salesAmount: 8120, sharePercent: 16.2 },
+      { id: 7, name: 'Fresh Mango Juice', category: 'Drinks', quantity: 28, salesAmount: 5040, sharePercent: 10.0 },
+      { id: 3, name: 'The Garden Beyaynetu', category: 'Ethiopian Food', quantity: 9, salesAmount: 4140, sharePercent: 8.2 },
+      { id: 9, name: 'Morning Shakshuka', category: 'Breakfast', quantity: 8, salesAmount: 2720, sharePercent: 5.4 }
+    ],
+    categories: [
+      { category: 'Ethiopian Food', quantity: 52, salesAmount: 34140, sharePercent: 68.0 },
+      { category: 'Burgers & Mains', quantity: 14, salesAmount: 8120, sharePercent: 16.2 },
+      { category: 'Drinks & Coffee', quantity: 42, salesAmount: 6840, sharePercent: 13.6 },
+      { category: 'Desserts', quantity: 4, salesAmount: 1280, sharePercent: 2.2 }
+    ],
+    recentOrders: [
+      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Table 08', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'o2', reference: '#GQ-1047', time: '13:10', date: '17 Oct 2026', table: 'Table 02', itemsSummary: '1× Beyaynetu, 2× Mango Juice', total: 820, status: 'Completed', paymentMethod: 'Cash' },
+      { id: 'o3', reference: '#GQ-1046', time: '12:55', date: '17 Oct 2026', table: 'Table 04', itemsSummary: '1× Beef Tibs, 1× Macchiato', total: 800, status: 'Completed', paymentMethod: 'CBE Birr' },
+      { id: 'o4', reference: '#GQ-1045', time: '12:42', date: '17 Oct 2026', table: 'Terrace 01', itemsSummary: '2× Abay Signature Burger', total: 1160, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'o5', reference: '#GQ-1044', time: '12:30', date: '17 Oct 2026', table: 'Table 10', itemsSummary: '4× Doro Wat, 4× Drinks', total: 3440, status: 'Completed', paymentMethod: 'Card' }
+    ]
+  },
+  yesterday: {
+    periodLabel: 'Yesterday · 16 Oct 2026',
+    grossSales: 17020,
+    grossSalesChange: 4.2,
+    completedOrders: 43,
+    completedOrdersChange: 2.3,
+    averageOrderValue: 395,
+    averageOrderValueChange: 1.8,
+    cancelledOrders: 2,
+    cancelledRate: 4.4,
+    cancelledChange: 0.5,
+    chartPoints: [
+      { label: '11:00', sales: 840, previousSales: 780, orders: 2 },
+      { label: '12:00', sales: 2100, previousSales: 1950, orders: 6 },
+      { label: '13:00', sales: 3800, previousSales: 3500, orders: 9 },
+      { label: '14:00', sales: 2950, previousSales: 2800, orders: 7 },
+      { label: '15:00', sales: 1150, previousSales: 1100, orders: 3 },
+      { label: '16:00', sales: 920, previousSales: 890, orders: 2 },
+      { label: '17:00', sales: 1050, previousSales: 1000, orders: 3 },
+      { label: '18:00', sales: 1980, previousSales: 1850, orders: 5 },
+      { label: '19:00', sales: 4250, previousSales: 3900, orders: 11 },
+      { label: '20:00', sales: 3400, previousSales: 3100, orders: 8 },
+      { label: '21:00', sales: 1950, previousSales: 1800, orders: 4 }
+    ],
+    topItems: [
+      { id: 1, name: 'Doro Wat', category: 'Ethiopian Food', quantity: 21, salesAmount: 14280, sharePercent: 30.5 },
+      { id: 2, name: 'Sizzling Beef Tibs', category: 'Ethiopian Food', quantity: 18, salesAmount: 12960, sharePercent: 27.8 },
+      { id: 5, name: 'Abay Signature Burger', category: 'Burgers', quantity: 12, salesAmount: 6960, sharePercent: 14.9 },
+      { id: 7, name: 'Fresh Mango Juice', category: 'Drinks', quantity: 24, salesAmount: 4320, sharePercent: 9.3 },
+      { id: 3, name: 'The Garden Beyaynetu', category: 'Ethiopian Food', quantity: 10, salesAmount: 4600, sharePercent: 9.8 }
+    ],
+    categories: [
+      { category: 'Ethiopian Food', quantity: 49, salesAmount: 31840, sharePercent: 68.2 },
+      { category: 'Burgers & Mains', quantity: 12, salesAmount: 6960, sharePercent: 14.9 },
+      { category: 'Drinks & Coffee', quantity: 38, salesAmount: 5880, sharePercent: 12.6 },
+      { category: 'Desserts', quantity: 3, salesAmount: 960, sharePercent: 2.1 }
+    ],
+    recentOrders: [
+      { id: 'oy1', reference: '#GQ-1038', time: '20:45', date: '16 Oct 2026', table: 'Table 08', itemsSummary: '2× Beef Tibs', total: 1440, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'oy2', reference: '#GQ-1037', time: '20:15', date: '16 Oct 2026', table: 'Table 04', itemsSummary: '1× Doro Wat, 1× Beer', total: 780, status: 'Completed', paymentMethod: 'Cash' },
+      { id: 'oy3', reference: '#GQ-1036', time: '19:40', date: '16 Oct 2026', table: 'VIP Lounge', itemsSummary: '4× Doro Wat, 2× Tibs', total: 4160, status: 'Completed', paymentMethod: 'Card' }
+    ]
+  },
+  '7days': {
+    periodLabel: '11 Oct – 17 Oct 2026 (Last 7 Days)',
+    grossSales: 86400,
+    grossSalesChange: 12.4,
+    completedOrders: 286,
+    completedOrdersChange: 8.2,
+    averageOrderValue: 525,
+    averageOrderValueChange: 3.8,
+    cancelledOrders: 4,
+    cancelledRate: 1.4,
+    cancelledChange: -1.5,
+    chartPoints: [
+      { label: 'Sun 11', sales: 11200, previousSales: 10100, orders: 38 },
+      { label: 'Mon 12', sales: 8900, previousSales: 8200, orders: 31 },
+      { label: 'Tue 13', sales: 9400, previousSales: 8700, orders: 33 },
+      { label: 'Wed 14', sales: 10800, previousSales: 9600, orders: 37 },
+      { label: 'Thu 15', sales: 11900, previousSales: 10400, orders: 40 },
+      { label: 'Fri 16', sales: 16750, previousSales: 14800, orders: 54 },
+      { label: 'Sat 17', sales: 18450, previousSales: 15100, orders: 53 }
+    ],
+    topItems: [
+      { id: 1, name: 'Doro Wat', category: 'Ethiopian Food', quantity: 142, salesAmount: 96560, sharePercent: 28.1 },
+      { id: 2, name: 'Sizzling Beef Tibs', category: 'Ethiopian Food', quantity: 118, salesAmount: 84960, sharePercent: 24.7 },
+      { id: 5, name: 'Abay Signature Burger', category: 'Burgers', quantity: 74, salesAmount: 42920, sharePercent: 12.5 },
+      { id: 3, name: 'The Garden Beyaynetu', category: 'Ethiopian Food', quantity: 86, salesAmount: 39560, sharePercent: 11.5 },
+      { id: 7, name: 'Fresh Mango Juice', category: 'Drinks', quantity: 128, salesAmount: 23040, sharePercent: 6.7 },
+      { id: 9, name: 'Morning Shakshuka', category: 'Breakfast', quantity: 52, salesAmount: 17680, sharePercent: 5.1 },
+      { id: 10, name: 'Traditional Macchiato', category: 'Drinks', quantity: 184, salesAmount: 14720, sharePercent: 4.3 }
+    ],
+    categories: [
+      { category: 'Ethiopian Food', quantity: 346, salesAmount: 221080, sharePercent: 64.5 },
+      { category: 'Burgers & Western', quantity: 74, salesAmount: 42920, sharePercent: 12.5 },
+      { category: 'Drinks & Beverages', quantity: 312, salesAmount: 37760, sharePercent: 11.0 },
+      { category: 'Breakfast', quantity: 71, salesAmount: 24140, sharePercent: 7.0 },
+      { category: 'Desserts', quantity: 52, salesAmount: 16700, sharePercent: 5.0 }
+    ],
+    recentOrders: [
+      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Table 08', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'o2', reference: '#GQ-1047', time: '13:10', date: '17 Oct 2026', table: 'Table 02', itemsSummary: '1× Beyaynetu, 2× Mango Juice', total: 820, status: 'Completed', paymentMethod: 'Cash' },
+      { id: 'o3', reference: '#GQ-1046', time: '12:55', date: '17 Oct 2026', table: 'Table 04', itemsSummary: '1× Beef Tibs, 1× Macchiato', total: 800, status: 'Completed', paymentMethod: 'CBE Birr' },
+      { id: 'o4', reference: '#GQ-1045', time: '12:42', date: '17 Oct 2026', table: 'Terrace 01', itemsSummary: '2× Abay Signature Burger', total: 1160, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'o5', reference: '#GQ-1044', time: '12:30', date: '17 Oct 2026', table: 'Table 10', itemsSummary: '4× Doro Wat, 4× Drinks', total: 3440, status: 'Completed', paymentMethod: 'Card' },
+      { id: 'o6', reference: '#GQ-1043', time: '12:15', date: '17 Oct 2026', table: 'Table 01', itemsSummary: '1× Shakshuka, 1× Coffee', total: 420, status: 'Completed', paymentMethod: 'Cash' },
+      { id: 'o7', reference: '#GQ-1042', time: '11:45', date: '17 Oct 2026', table: 'Terrace 02', itemsSummary: '1× Beef Tibs', total: 720, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'o8', reference: '#GQ-1041', time: '11:30', date: '17 Oct 2026', table: 'VIP Lounge', itemsSummary: '3× Doro Wat, 1× Beyaynetu', total: 2500, status: 'Completed', paymentMethod: 'Card' },
+      { id: 'o9', reference: '#GQ-1040', time: '11:10', date: '17 Oct 2026', table: 'Table 08', itemsSummary: '1× Doro Wat', total: 680, status: 'Cancelled', paymentMethod: 'Voided' },
+      { id: 'o10', reference: '#GQ-1039', time: '10:45', date: '17 Oct 2026', table: 'Table 04', itemsSummary: '2× Morning Shakshuka', total: 680, status: 'Completed', paymentMethod: 'Telebirr' }
+    ]
+  },
+  '30days': {
+    periodLabel: '18 Sep – 17 Oct 2026 (Last 30 Days)',
+    grossSales: 342600,
+    grossSalesChange: 9.8,
+    completedOrders: 1140,
+    completedOrdersChange: 7.1,
+    averageOrderValue: 512,
+    averageOrderValueChange: 2.5,
+    cancelledOrders: 16,
+    cancelledRate: 1.4,
+    cancelledChange: -0.8,
+    chartPoints: [
+      { label: 'Week 1', sales: 78500, previousSales: 72000, orders: 260 },
+      { label: 'Week 2', sales: 84200, previousSales: 76500, orders: 280 },
+      { label: 'Week 3', sales: 93500, previousSales: 84000, orders: 310 },
+      { label: 'Week 4', sales: 86400, previousSales: 79500, orders: 290 }
+    ],
+    topItems: [
+      { id: 1, name: 'Doro Wat', category: 'Ethiopian Food', quantity: 580, salesAmount: 394400, sharePercent: 29.2 },
+      { id: 2, name: 'Sizzling Beef Tibs', category: 'Ethiopian Food', quantity: 485, salesAmount: 349200, sharePercent: 25.8 },
+      { id: 5, name: 'Abay Signature Burger', category: 'Burgers', quantity: 298, salesAmount: 172840, sharePercent: 12.8 },
+      { id: 3, name: 'The Garden Beyaynetu', category: 'Ethiopian Food', quantity: 345, salesAmount: 158700, sharePercent: 11.7 },
+      { id: 7, name: 'Fresh Mango Juice', category: 'Drinks', quantity: 520, salesAmount: 93600, sharePercent: 6.9 }
+    ],
+    categories: [
+      { category: 'Ethiopian Food', quantity: 1410, salesAmount: 902300, sharePercent: 65.0 },
+      { category: 'Burgers & Western', quantity: 298, salesAmount: 172840, sharePercent: 12.8 },
+      { category: 'Drinks & Beverages', quantity: 1240, salesAmount: 152000, sharePercent: 11.2 },
+      { category: 'Breakfast', quantity: 280, salesAmount: 95200, sharePercent: 7.0 },
+      { category: 'Desserts', quantity: 210, salesAmount: 67200, sharePercent: 4.0 }
+    ],
+    recentOrders: [
+      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Table 08', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'o2', reference: '#GQ-1047', time: '13:10', date: '17 Oct 2026', table: 'Table 02', itemsSummary: '1× Beyaynetu, 2× Mango Juice', total: 820, status: 'Completed', paymentMethod: 'Cash' }
+    ]
+  },
+  month: {
+    periodLabel: '1 Oct – 17 Oct 2026 (Month to Date)',
+    grossSales: 194800,
+    grossSalesChange: 11.2,
+    completedOrders: 648,
+    completedOrdersChange: 8.0,
+    averageOrderValue: 518,
+    averageOrderValueChange: 3.1,
+    cancelledOrders: 8,
+    cancelledRate: 1.2,
+    cancelledChange: -0.6,
+    chartPoints: [
+      { label: 'Oct 1-4', sales: 44200, previousSales: 40100, orders: 148 },
+      { label: 'Oct 5-8', sales: 46800, previousSales: 42500, orders: 156 },
+      { label: 'Oct 9-12', sales: 49500, previousSales: 44200, orders: 165 },
+      { label: 'Oct 13-17', sales: 54300, previousSales: 48900, orders: 179 }
+    ],
+    topItems: [
+      { id: 1, name: 'Doro Wat', category: 'Ethiopian Food', quantity: 330, salesAmount: 224400, sharePercent: 28.8 },
+      { id: 2, name: 'Sizzling Beef Tibs', category: 'Ethiopian Food', quantity: 275, salesAmount: 198000, sharePercent: 25.4 },
+      { id: 5, name: 'Abay Signature Burger', category: 'Burgers', quantity: 172, salesAmount: 99760, sharePercent: 12.8 },
+      { id: 3, name: 'The Garden Beyaynetu', category: 'Ethiopian Food', quantity: 198, salesAmount: 91080, sharePercent: 11.7 },
+      { id: 7, name: 'Fresh Mango Juice', category: 'Drinks', quantity: 295, salesAmount: 53100, sharePercent: 6.8 }
+    ],
+    categories: [
+      { category: 'Ethiopian Food', quantity: 803, salesAmount: 513480, sharePercent: 64.8 },
+      { category: 'Burgers & Western', quantity: 172, salesAmount: 99760, sharePercent: 12.8 },
+      { category: 'Drinks & Beverages', quantity: 710, salesAmount: 87100, sharePercent: 11.2 },
+      { category: 'Breakfast', quantity: 160, salesAmount: 54400, sharePercent: 7.0 },
+      { category: 'Desserts', quantity: 120, salesAmount: 38400, sharePercent: 4.2 }
+    ],
+    recentOrders: [
+      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Table 08', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' }
+    ]
+  },
+  custom: {
+    periodLabel: 'Custom Date Range · 10 Oct – 15 Oct 2026',
+    grossSales: 62450,
+    grossSalesChange: 6.5,
+    completedOrders: 208,
+    completedOrdersChange: 4.2,
+    averageOrderValue: 510,
+    averageOrderValueChange: 2.2,
+    cancelledOrders: 3,
+    cancelledRate: 1.4,
+    cancelledChange: -0.5,
+    chartPoints: [
+      { label: 'Day 1', sales: 9800, previousSales: 9200, orders: 33 },
+      { label: 'Day 2', sales: 10400, previousSales: 9800, orders: 35 },
+      { label: 'Day 3', sales: 10100, previousSales: 9500, orders: 34 },
+      { label: 'Day 4', sales: 10900, previousSales: 10200, orders: 36 },
+      { label: 'Day 5', sales: 10500, previousSales: 9900, orders: 35 },
+      { label: 'Day 6', sales: 10750, previousSales: 10100, orders: 35 }
+    ],
+    topItems: [
+      { id: 1, name: 'Doro Wat', category: 'Ethiopian Food', quantity: 105, salesAmount: 71400, sharePercent: 28.5 },
+      { id: 2, name: 'Sizzling Beef Tibs', category: 'Ethiopian Food', quantity: 88, salesAmount: 63360, sharePercent: 25.3 },
+      { id: 5, name: 'Abay Signature Burger', category: 'Burgers', quantity: 56, salesAmount: 32480, sharePercent: 13.0 }
+    ],
+    categories: [
+      { category: 'Ethiopian Food', quantity: 254, salesAmount: 162240, sharePercent: 64.8 },
+      { category: 'Burgers & Western', quantity: 56, salesAmount: 32480, sharePercent: 13.0 },
+      { category: 'Drinks & Beverages', quantity: 230, salesAmount: 27900, sharePercent: 11.1 }
+    ],
+    recentOrders: [
+      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '15 Oct 2026', table: 'Table 08', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' }
+    ]
+  }
+};
+
 type Props = {
   sharedOrders: SessionOrder[];
   onUpdateOrders: (orders: SessionOrder[]) => void;
@@ -357,7 +665,7 @@ type Props = {
 };
 
 export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigateToCustomer }: Props) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories' | 'tables' | 'staff'>('staff');
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories' | 'tables' | 'staff' | 'reports'>('reports');
   const [tables, setTables] = useState<DiningTable[]>(initialTables);
   const [dishes, setDishes] = useState<MenuItem[]>(defaultDishes);
   const [categories, setCategories] = useState<string[]>(initialCategories);
@@ -410,6 +718,73 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
   const [simulateInviteError, setSimulateInviteError] = useState(false);
   const [inviteErrorMsg, setInviteErrorMsg] = useState<string | null>(null);
   const [showMernDetails, setShowMernDetails] = useState(false);
+
+  // Reports & Analytics State (03E)
+  const [selectedReportPreset, setSelectedReportPreset] = useState<DateRangePreset>('7days');
+  const [comparePreviousPeriod, setComparePreviousPeriod] = useState(true);
+  const [rankingMetric, setRankingMetric] = useState<RankingMetric>('quantity');
+  const [customStartDate, setCustomStartDate] = useState('2026-10-10');
+  const [customEndDate, setCustomEndDate] = useState('2026-10-15');
+  const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('csv');
+  const [exportSections, setExportSections] = useState({
+    summary: true,
+    salesTrend: true,
+    topItems: true,
+    categories: true,
+    orderLogs: true
+  });
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportErrorSimulate, setExportErrorSimulate] = useState(false);
+  const [exportErrorMsg, setExportErrorMsg] = useState<string | null>(null);
+  const [reportOrderSearch, setReportOrderSearch] = useState('');
+  const [reportOrderStatusFilter, setReportOrderStatusFilter] = useState('all');
+  const [selectedHistoricalOrder, setSelectedHistoricalOrder] = useState<HistoricalOrderRecord | null>(null);
+  const [reportingRoleView, setReportingRoleView] = useState<StaffRole>('Owner');
+  const [showCalculationRules, setShowCalculationRules] = useState(false);
+
+  // Active Report Dataset
+  const activeReport = useMemo(() => {
+    return reportsDataByPreset[selectedReportPreset];
+  }, [selectedReportPreset]);
+
+  // Filtered Orders for the active report
+  const filteredReportOrders = useMemo(() => {
+    return activeReport.recentOrders.filter(ord => {
+      const matchSearch =
+        ord.reference.toLowerCase().includes(reportOrderSearch.toLowerCase()) ||
+        ord.table.toLowerCase().includes(reportOrderSearch.toLowerCase()) ||
+        ord.itemsSummary.toLowerCase().includes(reportOrderSearch.toLowerCase());
+      const matchStatus = reportOrderStatusFilter === 'all' || ord.status === reportOrderStatusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [activeReport, reportOrderSearch, reportOrderStatusFilter]);
+
+  // Sorted Top Items
+  const sortedTopItems = useMemo(() => {
+    const items = [...activeReport.topItems];
+    if (rankingMetric === 'quantity') {
+      return items.sort((a, b) => b.quantity - a.quantity);
+    } else {
+      return items.sort((a, b) => b.salesAmount - a.salesAmount);
+    }
+  }, [activeReport, rankingMetric]);
+
+  // Handle Export Download Action
+  const handleTriggerExport = () => {
+    setIsExporting(true);
+    setExportErrorMsg(null);
+    setTimeout(() => {
+      setIsExporting(false);
+      if (exportErrorSimulate) {
+        setExportErrorMsg('Export pipeline failed: Internal report generator timeout. Please retry.');
+        return;
+      }
+      setIsExportModalOpen(false);
+      showToast(`Abay_Kitchen_Report_${selectedReportPreset.toUpperCase()}.${exportFormat} downloaded!`);
+    }, 850);
+  };
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -664,10 +1039,12 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
             <span className="admin-nav-badge" style={{ background: '#2e6b4d', color: '#fff' }}>{staffMembers.length}</span>
           </button>
 
-          <button className="admin-nav-item" onClick={() => showToast('Sales Reports (Coming in 03E)')}>
+          <button
+            className={`admin-nav-item ${activeTab === 'reports' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('reports'); setMobileMenuOpen(false); }}
+          >
             <AdminIcon name="reports" size={18} />
             <span>Reports</span>
-            <span className="admin-nav-soon">03E</span>
           </button>
 
           <button className="admin-nav-item" onClick={() => showToast('Settings (Coming in 03F)')}>
@@ -717,7 +1094,9 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   ? 'Categories'
                   : activeTab === 'tables'
                   ? 'Tables & QR Codes'
-                  : 'Staff Management'}
+                  : activeTab === 'staff'
+                  ? 'Staff Management'
+                  : 'Reports & Analytics'}
               </strong>
             </div>
           </div>
@@ -1392,6 +1771,765 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* =========================================================
+              TAB: RESTAURANT REPORTS & ANALYTICS (03E)
+             ========================================================= */}
+          {activeTab === 'reports' && (
+            <div className="admin-reports-section">
+              {/* Permission Check for Demo */}
+              {reportingRoleView === 'Kitchen Staff' || reportingRoleView === 'Waiter' ? (
+                <div className="admin-permission-denied-card">
+                  <div className="admin-role-view-banner">
+                    <span>Simulated Role Preview:</span>
+                    <select
+                      className="admin-role-select-inline"
+                      value={reportingRoleView}
+                      onChange={e => setReportingRoleView(e.target.value as StaffRole)}
+                    >
+                      <option value="Owner">Owner (Full Analytics Access)</option>
+                      <option value="Manager">Manager (Operational Reports)</option>
+                      <option value="Kitchen Staff">Kitchen Staff (Restricted)</option>
+                      <option value="Waiter">Waiter / Service (Restricted)</option>
+                    </select>
+                  </div>
+                  <div className="admin-denied-content">
+                    <div className="admin-denied-icon">
+                      <AdminIcon name="lock" size={36} />
+                    </div>
+                    <h2>Access Restricted: Financial & Sales Analytics</h2>
+                    <p>
+                      Your account role (<strong>{reportingRoleView}</strong>) does not have authorization to view financial reports, revenue summaries, or sales trends.
+                    </p>
+                    <div className="admin-denied-notice">
+                      <AdminIcon name="info" size={16} />
+                      <span>Financial metrics are restricted to Owners and authorized Managers per GebetaQR security rules.</span>
+                    </div>
+                    <button
+                      className="admin-action-btn primary"
+                      style={{ marginTop: '20px' }}
+                      onClick={() => setReportingRoleView('Owner')}
+                    >
+                      Switch Back to Owner View
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Page Header */}
+                  <div className="admin-page-header">
+                    <div>
+                      <h1>Reports & Analytics</h1>
+                      <p>Understand your restaurant's sales, orders, and menu performance.</p>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      {/* Role Simulation Switcher for Testing/Demonstration */}
+                      <div className="admin-role-view-banner" style={{ margin: 0, padding: '6px 12px' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Role View:</span>
+                        <select
+                          className="admin-role-select-inline"
+                          value={reportingRoleView}
+                          onChange={e => setReportingRoleView(e.target.value as StaffRole)}
+                        >
+                          <option value="Owner">Owner (Full Access)</option>
+                          <option value="Manager">Manager</option>
+                          <option value="Kitchen Staff">Kitchen Staff (Denied)</option>
+                          <option value="Waiter">Waiter (Denied)</option>
+                        </select>
+                      </div>
+
+                      <button
+                        className="admin-action-btn primary"
+                        onClick={() => {
+                          setExportErrorMsg(null);
+                          setIsExportModalOpen(true);
+                        }}
+                      >
+                        <AdminIcon name="fileText" size={15} /> Export Report
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Date Range Selector & Period Controls */}
+                  <div className="admin-reports-control-bar">
+                    <div className="admin-range-presets">
+                      {(
+                        [
+                          { key: 'today', label: 'Today' },
+                          { key: 'yesterday', label: 'Yesterday' },
+                          { key: '7days', label: 'Last 7 days' },
+                          { key: '30days', label: 'Last 30 days' },
+                          { key: 'month', label: 'This month' },
+                          { key: 'custom', label: 'Custom range' }
+                        ] as { key: DateRangePreset; label: string }[]
+                      ).map(preset => (
+                        <button
+                          key={preset.key}
+                          className={`admin-range-btn ${selectedReportPreset === preset.key ? 'active' : ''}`}
+                          onClick={() => setSelectedReportPreset(preset.key)}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="admin-range-meta-row">
+                      <div className="admin-range-badge">
+                        <AdminIcon name="calendar" size={14} />
+                        <span>{activeReport.periodLabel}</span>
+                      </div>
+
+                      <label className="admin-compare-toggle">
+                        <input
+                          type="checkbox"
+                          checked={comparePreviousPeriod}
+                          onChange={e => setComparePreviousPeriod(e.target.checked)}
+                        />
+                        <span>Compare to previous equivalent period</span>
+                      </label>
+                    </div>
+
+                    {/* Custom Range Date Pickers */}
+                    {selectedReportPreset === 'custom' && (
+                      <div className="admin-custom-date-row">
+                        <div className="admin-form-group" style={{ margin: 0 }}>
+                          <label style={{ fontSize: '11px' }}>Start Date</label>
+                          <input
+                            type="date"
+                            value={customStartDate}
+                            onChange={e => setCustomStartDate(e.target.value)}
+                            style={{ padding: '6px 10px', fontSize: '12px' }}
+                          />
+                        </div>
+                        <div className="admin-form-group" style={{ margin: 0 }}>
+                          <label style={{ fontSize: '11px' }}>End Date</label>
+                          <input
+                            type="date"
+                            value={customEndDate}
+                            onChange={e => setCustomEndDate(e.target.value)}
+                            style={{ padding: '6px 10px', fontSize: '12px' }}
+                          />
+                        </div>
+                        <button
+                          className="admin-action-btn secondary sm"
+                          style={{ alignSelf: 'flex-end', height: '36px' }}
+                          onClick={() => showToast('Custom date filter applied')}
+                        >
+                          Apply Range
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 4 Summary Metric Cards */}
+                  <div className="admin-reports-kpi-grid">
+                    {/* 1. Gross Sales */}
+                    <div className="admin-report-kpi-card highlight">
+                      <div className="kpi-top">
+                        <span className="kpi-label">GROSS SALES</span>
+                        <span className="kpi-tooltip-hint" title="Total eligible sales before discounts and tax. Not profit.">
+                          <AdminIcon name="info" size={14} />
+                        </span>
+                      </div>
+                      <div className="kpi-main-val">
+                        <strong>{money(activeReport.grossSales)}</strong>
+                        {comparePreviousPeriod && (
+                          <span className={`kpi-change-pill ${activeReport.grossSalesChange >= 0 ? 'pos' : 'neg'}`}>
+                            <AdminIcon name={activeReport.grossSalesChange >= 0 ? 'trendingUp' : 'trendingDown'} size={12} />
+                            <span>{activeReport.grossSalesChange >= 0 ? `+${activeReport.grossSalesChange}%` : `${activeReport.grossSalesChange}%`}</span>
+                          </span>
+                        )}
+                      </div>
+                      <div className="kpi-subtext">Total recorded order value · Excludes cancelled orders</div>
+                    </div>
+
+                    {/* 2. Completed Orders */}
+                    <div className="admin-report-kpi-card">
+                      <div className="kpi-top">
+                        <span className="kpi-label">COMPLETED ORDERS</span>
+                        <span className="kpi-tooltip-hint" title="Number of fulfilled dining room and takeout orders.">
+                          <AdminIcon name="orders" size={14} />
+                        </span>
+                      </div>
+                      <div className="kpi-main-val">
+                        <strong>{activeReport.completedOrders}</strong>
+                        {comparePreviousPeriod && (
+                          <span className={`kpi-change-pill ${activeReport.completedOrdersChange >= 0 ? 'pos' : 'neg'}`}>
+                            <AdminIcon name={activeReport.completedOrdersChange >= 0 ? 'trendingUp' : 'trendingDown'} size={12} />
+                            <span>{activeReport.completedOrdersChange >= 0 ? `+${activeReport.completedOrdersChange}%` : `${activeReport.completedOrdersChange}%`}</span>
+                          </span>
+                        )}
+                      </div>
+                      <div className="kpi-subtext">Successfully fulfilled & marked completed</div>
+                    </div>
+
+                    {/* 3. Average Order Value */}
+                    <div className="admin-report-kpi-card">
+                      <div className="kpi-top">
+                        <span className="kpi-label">AVERAGE ORDER VALUE</span>
+                        <span className="kpi-tooltip-hint" title="Gross sales divided by count of completed orders.">
+                          <AdminIcon name="info" size={14} />
+                        </span>
+                      </div>
+                      <div className="kpi-main-val">
+                        <strong>{money(activeReport.averageOrderValue)}</strong>
+                        {comparePreviousPeriod && (
+                          <span className={`kpi-change-pill ${activeReport.averageOrderValueChange >= 0 ? 'pos' : 'neg'}`}>
+                            <AdminIcon name={activeReport.averageOrderValueChange >= 0 ? 'trendingUp' : 'trendingDown'} size={12} />
+                            <span>{activeReport.averageOrderValueChange >= 0 ? `+${activeReport.averageOrderValueChange}%` : `${activeReport.averageOrderValueChange}%`}</span>
+                          </span>
+                        )}
+                      </div>
+                      <div className="kpi-subtext">Gross sales ÷ completed orders</div>
+                    </div>
+
+                    {/* 4. Cancelled Orders */}
+                    <div className="admin-report-kpi-card">
+                      <div className="kpi-top">
+                        <span className="kpi-label">CANCELLED ORDERS</span>
+                        <span className="kpi-tooltip-hint" title="Orders voided before kitchen prep. Excluded from sales.">
+                          <AdminIcon name="alertTriangle" size={14} />
+                        </span>
+                      </div>
+                      <div className="kpi-main-val">
+                        <strong style={{ color: activeReport.cancelledOrders > 5 ? '#c53939' : 'inherit' }}>
+                          {activeReport.cancelledOrders}
+                        </strong>
+                        <span className="admin-cancelled-rate-badge">{activeReport.cancelledRate}% rate</span>
+                      </div>
+                      <div className="kpi-subtext">Voided orders · Not included in gross revenue</div>
+                    </div>
+                  </div>
+
+                  {/* Sales Trend Chart (Pure Responsive SVG) */}
+                  <div className="admin-chart-card">
+                    <div className="admin-chart-header">
+                      <div>
+                        <h3>Sales Overview Trend</h3>
+                        <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                          Revenue distribution across {activeReport.periodLabel}
+                        </span>
+                      </div>
+
+                      <div className="admin-chart-legends">
+                        <div className="chart-legend-item">
+                          <span className="legend-line current" />
+                          <span>Current Period ({money(activeReport.grossSales)})</span>
+                        </div>
+                        {comparePreviousPeriod && (
+                          <div className="chart-legend-item">
+                            <span className="legend-line previous" />
+                            <span>Previous Period</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* SVG Chart Engine */}
+                    <div className="admin-svg-chart-wrapper">
+                      {(() => {
+                        const points = activeReport.chartPoints;
+                        const maxSales = Math.max(...points.map(p => Math.max(p.sales, p.previousSales))) * 1.15 || 5000;
+                        const w = 760;
+                        const h = 200;
+                        const padL = 60;
+                        const padR = 25;
+                        const padT = 20;
+                        const padB = 35;
+                        const chartW = w - padL - padR;
+                        const chartH = h - padT - padB;
+
+                        // Coordinate calculator
+                        const getCoords = (index: number, val: number) => {
+                          const x = padL + (index / (points.length - 1)) * chartW;
+                          const y = padT + chartH - (val / maxSales) * chartH;
+                          return { x, y };
+                        };
+
+                        // Build SVG paths
+                        const currentPath = points
+                          .map((p, i) => {
+                            const { x, y } = getCoords(i, p.sales);
+                            return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                          })
+                          .join(' ');
+
+                        const areaPath = `${currentPath} L ${padL + chartW} ${padT + chartH} L ${padL} ${padT + chartH} Z`;
+
+                        const prevPath = points
+                          .map((p, i) => {
+                            const { x, y } = getCoords(i, p.previousSales);
+                            return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                          })
+                          .join(' ');
+
+                        const yGrid = [0, 0.33, 0.66, 1].map(ratio => ({
+                          val: Math.round(maxSales * ratio),
+                          y: padT + chartH - ratio * chartH
+                        }));
+
+                        return (
+                          <svg viewBox={`0 0 ${w} ${h}`} className="admin-sales-svg-chart" aria-label="Sales Trend Chart">
+                            <defs>
+                              <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#143D2B" stopOpacity="0.28" />
+                                <stop offset="100%" stopColor="#143D2B" stopOpacity="0.0" />
+                              </linearGradient>
+                            </defs>
+
+                            {/* Horizontal Grid lines */}
+                            {yGrid.map((g, idx) => (
+                              <g key={idx}>
+                                <line x1={padL} y1={g.y} x2={padL + chartW} y2={g.y} stroke="#e4e8e0" strokeDasharray="3 3" />
+                                <text x={padL - 10} y={g.y + 4} fill="#889288" fontSize="10" textAnchor="end" fontFamily="sans-serif">
+                                  {g.val >= 1000 ? `${(g.val / 1000).toFixed(0)}k` : g.val}
+                                </text>
+                              </g>
+                            ))}
+
+                            {/* Previous Period Trend Line */}
+                            {comparePreviousPeriod && (
+                              <path d={prevPath} fill="none" stroke="#C69234" strokeWidth="2" strokeDasharray="4 4" opacity="0.8" />
+                            )}
+
+                            {/* Current Period Area Fill */}
+                            <path d={areaPath} fill="url(#salesGrad)" />
+
+                            {/* Current Period Line */}
+                            <path d={currentPath} fill="none" stroke="#143D2B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+
+                            {/* Data points & X-Labels */}
+                            {points.map((p, i) => {
+                              const { x, y } = getCoords(i, p.sales);
+                              const isHovered = hoveredPointIndex === i;
+                              return (
+                                <g key={i}>
+                                  {/* X-axis label */}
+                                  <text x={x} y={padT + chartH + 20} fill="#6e7870" fontSize="10" textAnchor="middle" fontFamily="sans-serif">
+                                    {p.label}
+                                  </text>
+
+                                  {/* Outer pulse when hovered */}
+                                  {isHovered && <circle cx={x} y={y} r="8" fill="#143D2B" opacity="0.2" />}
+
+                                  {/* Interactive Point */}
+                                  <circle
+                                    cx={x}
+                                    y={y}
+                                    r={isHovered ? 6 : 4}
+                                    fill={isHovered ? '#C69234' : '#143D2B'}
+                                    stroke="#fff"
+                                    strokeWidth="2"
+                                    style={{ cursor: 'pointer', transition: 'all 0.15s' }}
+                                    onMouseEnter={() => setHoveredPointIndex(i)}
+                                    onMouseLeave={() => setHoveredPointIndex(null)}
+                                  />
+                                </g>
+                              );
+                            })}
+                          </svg>
+                        );
+                      })()}
+
+                      {/* Floating Chart Tooltip */}
+                      {hoveredPointIndex !== null && activeReport.chartPoints[hoveredPointIndex] && (
+                        <div className="admin-chart-tooltip-box">
+                          <strong>{activeReport.chartPoints[hoveredPointIndex].label}</strong>
+                          <div>Sales: <strong>{money(activeReport.chartPoints[hoveredPointIndex].sales)}</strong></div>
+                          <div>Volume: {activeReport.chartPoints[hoveredPointIndex].orders} orders</div>
+                          {comparePreviousPeriod && (
+                            <div style={{ color: '#C69234', marginTop: '2px', fontSize: '11px' }}>
+                              Prev: {money(activeReport.chartPoints[hoveredPointIndex].previousSales)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="admin-chart-footer-note">
+                      <span className="sample-badge">Sample Data</span>
+                      <span>Illustrative metrics for Abay Kitchen · Server-calculated against local timezone (Africa/Addis_Ababa)</span>
+                    </div>
+                  </div>
+
+                  {/* 2-Column Section: Order Performance & Category Performance */}
+                  <div className="admin-reports-two-col">
+                    {/* Left: Order Performance & Status Breakdown */}
+                    <div className="admin-report-card">
+                      <div className="card-header-row">
+                        <div>
+                          <h3>Order Performance</h3>
+                          <span className="card-sub">Fulfillment efficiency and operational flow</span>
+                        </div>
+                        <span className="admin-completion-pill">
+                          {((activeReport.completedOrders / (activeReport.completedOrders + activeReport.cancelledOrders)) * 100).toFixed(1)}% Completed
+                        </span>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div className="admin-order-progress-track">
+                        <div
+                          className="admin-order-progress-fill completed"
+                          style={{
+                            width: `${(activeReport.completedOrders / (activeReport.completedOrders + activeReport.cancelledOrders + 4)) * 100}%`
+                          }}
+                          title="Completed Orders"
+                        />
+                        <div className="admin-order-progress-fill preparing" style={{ width: '4%' }} title="In Preparation" />
+                        <div
+                          className="admin-order-progress-fill cancelled"
+                          style={{
+                            width: `${(activeReport.cancelledOrders / (activeReport.completedOrders + activeReport.cancelledOrders + 4)) * 100}%`
+                          }}
+                          title="Cancelled Orders"
+                        />
+                      </div>
+
+                      {/* Status Breakdown Pills */}
+                      <div className="admin-order-status-stats">
+                        <div className="status-stat-item">
+                          <span className="stat-dot completed" />
+                          <div>
+                            <strong>{activeReport.completedOrders}</strong>
+                            <span className="stat-lbl">Completed</span>
+                          </div>
+                        </div>
+
+                        <div className="status-stat-item">
+                          <span className="stat-dot preparing" />
+                          <div>
+                            <strong>4</strong>
+                            <span className="stat-lbl">In Kitchen</span>
+                          </div>
+                        </div>
+
+                        <div className="status-stat-item">
+                          <span className="stat-dot cancelled" />
+                          <div>
+                            <strong>{activeReport.cancelledOrders}</strong>
+                            <span className="stat-lbl">Cancelled</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Operational Timing Metrics */}
+                      <div className="admin-ops-timing-row">
+                        <div className="timing-box">
+                          <span className="t-lbl">Avg Kitchen Velocity</span>
+                          <strong>18 mins</strong>
+                          <span className="t-sub">QR Order to Ready</span>
+                        </div>
+                        <div className="timing-box">
+                          <span className="t-lbl">Cancellation Rate</span>
+                          <strong>{activeReport.cancelledRate}%</strong>
+                          <span className="t-sub">Voided before cook</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right: Menu Category Breakdown */}
+                    <div className="admin-report-card">
+                      <div className="card-header-row">
+                        <div>
+                          <h3>Category Breakdown</h3>
+                          <span className="card-sub">Recorded sales volume across menu sections</span>
+                        </div>
+                      </div>
+
+                      <div className="admin-category-bars-list">
+                        {activeReport.categories.map(cat => (
+                          <div key={cat.category} className="admin-category-bar-item">
+                            <div className="cat-bar-header">
+                              <strong>{cat.category}</strong>
+                              <div className="cat-bar-numbers">
+                                <span>{cat.quantity} items</span>
+                                <strong>{money(cat.salesAmount)}</strong>
+                                <span className="cat-share">({cat.sharePercent}%)</span>
+                              </div>
+                            </div>
+                            <div className="cat-bar-track">
+                              <div className="cat-bar-fill" style={{ width: `${cat.sharePercent}%` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="admin-report-card-foot">
+                        <AdminIcon name="info" size={13} />
+                        <span>Figures represent recorded order transactions, not gross product margins.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Best-Selling Menu Items */}
+                  <div className="admin-report-card" style={{ marginTop: '20px' }}>
+                    <div className="card-header-row" style={{ flexWrap: 'wrap', gap: '12px' }}>
+                      <div>
+                        <h3>Top-Selling Menu Items</h3>
+                        <span className="card-sub">Items driving highest restaurant volume during {activeReport.periodLabel}</span>
+                      </div>
+
+                      {/* Ranking Switcher */}
+                      <div className="admin-ranking-switcher">
+                        <button
+                          className={`rank-switch-btn ${rankingMetric === 'quantity' ? 'active' : ''}`}
+                          onClick={() => setRankingMetric('quantity')}
+                        >
+                          Rank by Quantity Sold
+                        </button>
+                        <button
+                          className={`rank-switch-btn ${rankingMetric === 'sales' ? 'active' : ''}`}
+                          onClick={() => setRankingMetric('sales')}
+                        >
+                          Rank by Sales Amount (ETB)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Top Items Table */}
+                    <div className="admin-table-container">
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th style={{ width: '60px' }}>Rank</th>
+                            <th>Dish Name</th>
+                            <th>Category</th>
+                            <th style={{ textAlign: 'right' }}>Quantity Sold</th>
+                            <th style={{ textAlign: 'right' }}>Recorded Sales</th>
+                            <th style={{ width: '180px' }}>Sales Share</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sortedTopItems.map((item, index) => (
+                            <tr key={item.id} className="admin-staff-table-row">
+                              <td>
+                                <span className={`admin-rank-badge ${index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : ''}`}>
+                                  #{index + 1}
+                                </span>
+                              </td>
+                              <td>
+                                <strong style={{ color: 'var(--ink)' }}>{item.name}</strong>
+                              </td>
+                              <td>
+                                <span className="admin-category-tag">{item.category}</span>
+                              </td>
+                              <td style={{ textAlign: 'right', fontWeight: 600 }}>
+                                {item.quantity} orders
+                              </td>
+                              <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--brand)' }}>
+                                {money(item.salesAmount)}
+                              </td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <div className="cat-bar-track" style={{ height: '6px', flex: 1 }}>
+                                    <div className="cat-bar-fill" style={{ width: `${item.sharePercent * 2.5}%` }} />
+                                  </div>
+                                  <span style={{ fontSize: '11px', color: 'var(--muted)', width: '38px', textAlign: 'right' }}>
+                                    {item.sharePercent}%
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="admin-report-card-foot">
+                      <AdminIcon name="info" size={13} />
+                      <span>Sales volume rankings do not incorporate food ingredient costings or net profit margins.</span>
+                    </div>
+                  </div>
+
+                  {/* Operational Time Insights */}
+                  <div className="admin-report-card" style={{ marginTop: '20px' }}>
+                    <div className="card-header-row">
+                      <div>
+                        <h3>Order Activity & Hourly Distribution</h3>
+                        <span className="card-sub">Identify peak demand periods to optimize kitchen prep and floor staffing</span>
+                      </div>
+                    </div>
+
+                    <div className="admin-ops-insights-grid">
+                      <div className="admin-ops-insight-box">
+                        <strong className="insight-title">Lunch Rush (12:30 – 14:30)</strong>
+                        <p>Accounts for <strong>41%</strong> of total daily volume. Peak orders concentrate on quick tibs and combo platters.</p>
+                      </div>
+
+                      <div className="admin-ops-insight-box">
+                        <strong className="insight-title">Dinner Peak (19:00 – 21:30)</strong>
+                        <p>Accounts for <strong>46%</strong> of total daily volume. Highest average basket sizes and beverage attach rates.</p>
+                      </div>
+
+                      <div className="admin-ops-insight-box">
+                        <strong className="insight-title">Peak Service Days</strong>
+                        <p><strong>Friday & Saturday</strong> evenings generate 38% higher recorded orders than weekday lunches.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Filterable Historical Orders Table */}
+                  <div className="admin-report-card" style={{ marginTop: '20px' }}>
+                    <div className="card-header-row" style={{ flexWrap: 'wrap', gap: '12px' }}>
+                      <div>
+                        <h3>Recorded Orders for Period</h3>
+                        <span className="card-sub">Inspect individual dining room transactions for {activeReport.periodLabel}</span>
+                      </div>
+
+                      {/* Search and Status Filters */}
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <div className="admin-search-input" style={{ width: '220px' }}>
+                          <AdminIcon name="search" size={15} />
+                          <input
+                            type="text"
+                            placeholder="Search ref or table…"
+                            value={reportOrderSearch}
+                            onChange={e => setReportOrderSearch(e.target.value)}
+                          />
+                        </div>
+
+                        <select
+                          className="admin-select"
+                          value={reportOrderStatusFilter}
+                          onChange={e => setReportOrderStatusFilter(e.target.value)}
+                        >
+                          <option value="all">All Statuses</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Cancelled">Cancelled</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="admin-table-container">
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th>Order Reference</th>
+                            <th>Date & Time</th>
+                            <th>Table</th>
+                            <th>Items Summary</th>
+                            <th style={{ textAlign: 'right' }}>Total Amount</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th style={{ textAlign: 'right' }}>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredReportOrders.map(ord => (
+                            <tr key={ord.id} className="admin-staff-table-row">
+                              <td>
+                                <strong style={{ color: 'var(--brand)' }}>{ord.reference}</strong>
+                              </td>
+                              <td style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                                {ord.time} · {ord.date}
+                              </td>
+                              <td>
+                                <span className="admin-table-tag">{ord.table}</span>
+                              </td>
+                              <td style={{ fontSize: '13px' }}>{ord.itemsSummary}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--ink)' }}>
+                                {money(ord.total)}
+                              </td>
+                              <td>
+                                <span
+                                  className={`admin-status-badge ${
+                                    ord.status === 'Completed' ? 'completed' : 'cancelled'
+                                  }`}
+                                >
+                                  {ord.status}
+                                </span>
+                              </td>
+                              <td style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                                {ord.paymentMethod}
+                              </td>
+                              <td style={{ textAlign: 'right' }}>
+                                <button
+                                  className="admin-action-btn secondary sm"
+                                  onClick={() => setSelectedHistoricalOrder(ord)}
+                                >
+                                  <AdminIcon name="eye" size={13} /> Details
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {filteredReportOrders.length === 0 && (
+                      <div className="admin-empty-state" style={{ padding: '30px 10px' }}>
+                        <AdminIcon name="orders" size={36} />
+                        <h3>No orders match your filter</h3>
+                        <p>Try clearing your search query or switching your status filter.</p>
+                        <button
+                          className="admin-action-btn secondary"
+                          onClick={() => {
+                            setReportOrderSearch('');
+                            setReportOrderStatusFilter('all');
+                          }}
+                        >
+                          Clear Filters
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Developer Calculation Standards & MERN Architecture Accordion */}
+                  <div className="admin-backend-spec-card" style={{ marginTop: '20px' }}>
+                    <div
+                      className="admin-backend-spec-header"
+                      onClick={() => setShowCalculationRules(!showCalculationRules)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <AdminIcon name="lock" size={18} />
+                        <div>
+                          <strong>Developer Calculation Specifications & Architectural Rules (MERN)</strong>
+                          <span style={{ display: 'block', fontSize: '11px', color: 'var(--muted)' }}>
+                            Financial data consistency, timezone aggregation, and price freeze rules
+                          </span>
+                        </div>
+                      </div>
+                      <span style={{ fontSize: '12px', color: 'var(--brand)', fontWeight: 600 }}>
+                        {showCalculationRules ? 'Hide Calculation Rules ▲' : 'Show Calculation Rules ▼'}
+                      </span>
+                    </div>
+
+                    {showCalculationRules && (
+                      <div className="admin-backend-spec-body">
+                        <div className="admin-spec-grid">
+                          <div className="admin-spec-item">
+                            <strong>1. Gross Sales Definition</strong>
+                            <p>Calculated strictly from eligible, non-cancelled order line items. Cancelled orders are never counted in revenue totals.</p>
+                          </div>
+                          <div className="admin-spec-item">
+                            <strong>2. Historical Price Immutability</strong>
+                            <p>Order totals capture unit prices at the time of transaction. Subsequent edits to dish prices in Menu Management do not alter historical reports.</p>
+                          </div>
+                          <div className="admin-spec-item">
+                            <strong>3. Standardized Timezone Aggregation</strong>
+                            <p>All date ranges and hourly buckets are aggregated in restaurant-local timezone (`Africa/Addis_Ababa`, UTC+3) using MongoDB `$dateTrunc`.</p>
+                          </div>
+                          <div className="admin-spec-item">
+                            <strong>4. AOV Denominator Standards</strong>
+                            <p>Average Order Value strictly uses count of fulfilled, completed orders as the denominator, excluding voided orders.</p>
+                          </div>
+                          <div className="admin-spec-item">
+                            <strong>5. Multi-Tenant Scoping</strong>
+                            <p>Every analytics aggregation query must enforce `{'{ restaurantId: req.user.restaurantId }'}` before match pipelines.</p>
+                          </div>
+                          <div className="admin-spec-item">
+                            <strong>6. Server-Side Export Verification</strong>
+                            <p>Exports are compiled on the server with user RBAC validation, ensuring staff cannot export unauthorized financial periods.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </main>
@@ -2260,6 +3398,316 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   {deactivatingTarget.status === 'Active' ? 'Deactivate Account' : 'Reactivate Account'}
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 03E Modal 9: Export Report Studio Modal */}
+      {isExportModalOpen && (
+        <div className="admin-modal-backdrop" onClick={() => { setIsExportModalOpen(false); setExportErrorMsg(null); }}>
+          <div className="admin-modal-box admin-export-modal" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <div>
+                <h3 className="admin-modal-title">Export Report Studio</h3>
+                <p className="admin-modal-subtitle">Download analytical reports and operational audits for Abay Kitchen</p>
+              </div>
+              <button
+                className="admin-icon-btn"
+                onClick={() => { setIsExportModalOpen(false); setExportErrorMsg(null); }}
+                aria-label="Close dialog"
+              >
+                <AdminIcon name="x" size={18} />
+              </button>
+            </div>
+
+            <div className="admin-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              {/* Active Scope Summary */}
+              <div className="admin-export-scope-banner">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AdminIcon name="calendar" size={16} />
+                  <strong>Target Period:</strong>
+                  <span>{activeReport.periodLabel}</span>
+                </div>
+                <span className="admin-export-records-count">
+                  {filteredReportOrders.length} records in scope
+                </span>
+              </div>
+
+              {/* Format Selection */}
+              <div>
+                <label className="admin-form-label" style={{ marginBottom: '8px' }}>Export File Format</label>
+                <div className="admin-export-format-selector">
+                  <button
+                    type="button"
+                    className={`admin-export-format-btn ${exportFormat === 'csv' ? 'active' : ''}`}
+                    onClick={() => setExportFormat('csv')}
+                  >
+                    <div className="admin-export-format-icon">
+                      <AdminIcon name="fileText" size={20} />
+                    </div>
+                    <div style={{ textAlign: 'left' }}>
+                      <div className="admin-export-format-name">CSV Spreadsheet (.csv)</div>
+                      <div className="admin-export-format-desc">Raw tabular data ready for Microsoft Excel, Google Sheets, or accountant audits.</div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-export-format-btn ${exportFormat === 'pdf' ? 'active' : ''}`}
+                    onClick={() => setExportFormat('pdf')}
+                  >
+                    <div className="admin-export-format-icon">
+                      <AdminIcon name="download" size={20} />
+                    </div>
+                    <div style={{ textAlign: 'left' }}>
+                      <div className="admin-export-format-name">Printable PDF Report (.pdf)</div>
+                      <div className="admin-export-format-desc">Formatted executive summary with Abay Kitchen letterhead and charts.</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Data Inclusions */}
+              <div>
+                <label className="admin-form-label" style={{ marginBottom: '8px' }}>Report Sections to Include</label>
+                <div className="admin-export-checkbox-grid">
+                  <label className="admin-export-check-item">
+                    <input
+                      type="checkbox"
+                      checked={exportSections.summary}
+                      onChange={e => setExportSections({ ...exportSections, summary: e.target.checked })}
+                    />
+                    <div>
+                      <strong>Executive KPI Summary</strong>
+                      <p>Gross sales, order volumes, average order value, cancellation rates.</p>
+                    </div>
+                  </label>
+
+                  <label className="admin-export-check-item">
+                    <input
+                      type="checkbox"
+                      checked={exportSections.salesTrend}
+                      onChange={e => setExportSections({ ...exportSections, salesTrend: e.target.checked })}
+                    />
+                    <div>
+                      <strong>Sales & Revenue Timeline</strong>
+                      <p>Daily and hourly revenue data points with comparison period deltas.</p>
+                    </div>
+                  </label>
+
+                  <label className="admin-export-check-item">
+                    <input
+                      type="checkbox"
+                      checked={exportSections.topItems}
+                      onChange={e => setExportSections({ ...exportSections, topItems: e.target.checked })}
+                    />
+                    <div>
+                      <strong>Top Performing Dishes</strong>
+                      <p>Full ranking by volume sold and revenue generated in ETB.</p>
+                    </div>
+                  </label>
+
+                  <label className="admin-export-check-item">
+                    <input
+                      type="checkbox"
+                      checked={exportSections.categories}
+                      onChange={e => setExportSections({ ...exportSections, categories: e.target.checked })}
+                    />
+                    <div>
+                      <strong>Menu Category Breakdown</strong>
+                      <p>Share of revenue and item distribution across all categories.</p>
+                    </div>
+                  </label>
+
+                  <label className="admin-export-check-item">
+                    <input
+                      type="checkbox"
+                      checked={exportSections.orderLogs}
+                      onChange={e => setExportSections({ ...exportSections, orderLogs: e.target.checked })}
+                    />
+                    <div>
+                      <strong>Detailed Order Logs</strong>
+                      <p>Individual order receipts, timestamps, table numbers, and payment channels.</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Developer Test Toggle */}
+              <div style={{ padding: '10px 14px', background: 'rgba(0,0,0,0.02)', borderRadius: '8px', border: '1px dashed var(--border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12px', color: 'var(--muted)' }}>
+                  <input
+                    type="checkbox"
+                    checked={exportErrorSimulate}
+                    onChange={e => setExportErrorSimulate(e.target.checked)}
+                  />
+                  <span>Simulate export pipeline timeout (demonstrates failure & retry UI)</span>
+                </label>
+              </div>
+
+              {/* Error Alert if simulation triggered */}
+              {exportErrorMsg && (
+                <div className="admin-alert-box error">
+                  <AdminIcon name="alertTriangle" size={18} />
+                  <div style={{ flex: 1 }}>
+                    <strong>Export Failed</strong>
+                    <p>{exportErrorMsg}</p>
+                  </div>
+                  <button
+                    className="admin-action-btn secondary"
+                    style={{ fontSize: '11px', padding: '4px 8px', height: 'auto' }}
+                    onClick={handleTriggerExport}
+                  >
+                    Retry Now
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="admin-modal-actions" style={{ marginTop: '16px' }}>
+              <button
+                type="button"
+                className="admin-action-btn secondary"
+                onClick={() => { setIsExportModalOpen(false); setExportErrorMsg(null); }}
+                disabled={isExporting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="admin-action-btn primary"
+                onClick={handleTriggerExport}
+                disabled={isExporting || (!exportSections.summary && !exportSections.salesTrend && !exportSections.topItems && !exportSections.categories && !exportSections.orderLogs)}
+              >
+                {isExporting ? (
+                  <>
+                    <span className="admin-spinner" style={{ width: 14, height: 14, borderWidth: 2, marginRight: 6 }}></span>
+                    Generating {exportFormat.toUpperCase()}...
+                  </>
+                ) : (
+                  <>
+                    <AdminIcon name="download" size={15} />
+                    <span>Download {exportFormat.toUpperCase()}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 03E Modal 10: Selected Historical Order Detail Modal */}
+      {selectedHistoricalOrder && (
+        <div className="admin-modal-backdrop" onClick={() => setSelectedHistoricalOrder(null)}>
+          <div className="admin-modal-box admin-order-detail-modal" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h3 className="admin-modal-title">Order {selectedHistoricalOrder.reference}</h3>
+                  <span className={`admin-order-status-badge ${selectedHistoricalOrder.status === 'Completed' ? 'delivered' : 'cancelled'}`}>
+                    {selectedHistoricalOrder.status}
+                  </span>
+                </div>
+                <p className="admin-modal-subtitle">
+                  {selectedHistoricalOrder.date} at {selectedHistoricalOrder.time} • {selectedHistoricalOrder.table}
+                </p>
+              </div>
+              <button
+                className="admin-icon-btn"
+                onClick={() => setSelectedHistoricalOrder(null)}
+                aria-label="Close dialog"
+              >
+                <AdminIcon name="x" size={18} />
+              </button>
+            </div>
+
+            <div className="admin-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Order Key Metas */}
+              <div className="admin-order-detail-meta-grid">
+                <div className="admin-order-meta-card">
+                  <span className="admin-order-meta-label">Total Amount</span>
+                  <strong className="admin-order-meta-val" style={{ color: 'var(--color-primary)' }}>
+                    {selectedHistoricalOrder.total.toLocaleString()} ETB
+                  </strong>
+                </div>
+                <div className="admin-order-meta-card">
+                  <span className="admin-order-meta-label">Payment Channel</span>
+                  <strong className="admin-order-meta-val">
+                    {selectedHistoricalOrder.paymentMethod}
+                  </strong>
+                </div>
+                <div className="admin-order-meta-card">
+                  <span className="admin-order-meta-label">Origin</span>
+                  <strong className="admin-order-meta-val">
+                    QR Scan Dine-in
+                  </strong>
+                </div>
+              </div>
+
+              {/* Items List */}
+              <div>
+                <label className="admin-form-label" style={{ marginBottom: '8px' }}>Dishes Ordered</label>
+                <div className="admin-order-detail-items">
+                  <div className="admin-order-detail-item-row">
+                    <span className="admin-order-detail-item-name">{selectedHistoricalOrder.itemsSummary}</span>
+                    <strong className="admin-order-detail-item-price">{selectedHistoricalOrder.total.toLocaleString()} ETB</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Operational Audit Log */}
+              <div>
+                <label className="admin-form-label" style={{ marginBottom: '8px' }}>Operational Timeline</label>
+                <div className="admin-order-timeline">
+                  <div className="admin-order-timeline-step done">
+                    <div className="admin-timeline-bullet"></div>
+                    <div className="admin-timeline-content">
+                      <div className="admin-timeline-title">QR Order Submitted</div>
+                      <div className="admin-timeline-time">{selectedHistoricalOrder.time} — Guest placed order from mobile menu</div>
+                    </div>
+                  </div>
+                  <div className="admin-order-timeline-step done">
+                    <div className="admin-timeline-bullet"></div>
+                    <div className="admin-timeline-content">
+                      <div className="admin-timeline-title">Kitchen Ticket Printed & Prepared</div>
+                      <div className="admin-timeline-time">Ticket dispatched to Chef Dawit (Station 1)</div>
+                    </div>
+                  </div>
+                  <div className={`admin-order-timeline-step ${selectedHistoricalOrder.status === 'Completed' ? 'done' : 'cancelled'}`}>
+                    <div className="admin-timeline-bullet"></div>
+                    <div className="admin-timeline-content">
+                      <div className="admin-timeline-title">
+                        {selectedHistoricalOrder.status === 'Completed' ? 'Dispatched to Table & Paid' : 'Order Cancelled / Voided'}
+                      </div>
+                      <div className="admin-timeline-time">
+                        {selectedHistoricalOrder.status === 'Completed' 
+                          ? `Settled via ${selectedHistoricalOrder.paymentMethod}`
+                          : 'Cancelled by customer / manager request'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-modal-actions" style={{ marginTop: '16px' }}>
+              <button
+                type="button"
+                className="admin-action-btn secondary"
+                onClick={() => {
+                  showToast(`Receipt for ${selectedHistoricalOrder.reference} sent to thermal printer`);
+                }}
+              >
+                <AdminIcon name="printer" size={15} />
+                <span>Print Thermal Receipt</span>
+              </button>
+              <button
+                type="button"
+                className="admin-action-btn primary"
+                onClick={() => setSelectedHistoricalOrder(null)}
+              >
+                Close Details
+              </button>
             </div>
           </div>
         </div>
