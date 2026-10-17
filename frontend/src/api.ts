@@ -224,5 +224,34 @@ export const api = {
     });
     const json = await res.json();
     return json.data;
+  },
+
+  // Chapa Payments
+  async initializeChapaPayment(params: {
+    amount: number;
+    customerName: string;
+    customerPhone?: string;
+    email?: string;
+    txRef?: string;
+    orderReference: string;
+    returnUrl?: string;
+  }): Promise<{ checkout_url: string; tx_ref: string; amount: number }> {
+    const res = await fetch(`${API_BASE}/payments/chapa/initialize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    const json = await res.json();
+    if (!json.success || !json.data?.checkout_url) {
+      throw new Error(json.error || 'Failed to initialize Chapa payment');
+    }
+    return json.data;
+  },
+
+  async verifyChapaPayment(txRef: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/payments/chapa/verify/${txRef}`);
+    const json = await res.json();
+    return json;
   }
 };
+

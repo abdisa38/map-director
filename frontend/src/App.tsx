@@ -82,36 +82,115 @@ export default function App(){
       }
     }).catch(() => {});
 
+    const mapOrder = (o: any) => ({
+      reference: o.reference,
+      placedAt: o.placedAt || new Date().toISOString(),
+      status: o.status === 'New' ? 'Received' : o.status,
+      customerName: o.customerName,
+      paymentMethod: o.paymentMethod || 'Chapa',
+      paymentStatus: o.paymentStatus || (o.paymentMethod === 'Cash' ? 'Pending' : 'Paid'),
+      lines: (o.lines || []).map((l: any) => ({
+        key: l.key || l.name,
+        dish: {
+          id: l.dishId || 1,
+          name: l.name,
+          description: '',
+          price: l.unitPrice,
+          category: 'Ethiopian Food',
+          image: 'photo-1746716447103-e1618bbd0669'
+        },
+        portion: l.portion || 'Regular',
+        extras: l.extras || [],
+        instructions: l.instructions || '',
+        unitPrice: l.unitPrice,
+        quantity: l.quantity
+      }))
+    });
+
     api.getOrders().then(ords => {
       if (ords && ords.length) {
-        setOrders(ords.map((o: any) => ({
-          reference: o.reference,
-          placedAt: o.placedAt || new Date().toISOString(),
-          status: o.status === 'New' ? 'Received' : o.status,
-          customerName: o.customerName,
-          lines: (o.lines || []).map((l: any) => ({
-            key: l.key || l.name,
-            dish: {
-              id: l.dishId || 1,
-              name: l.name,
-              description: '',
-              price: l.unitPrice,
-              category: 'Ethiopian Food',
-              image: 'photo-1746716447103-e1618bbd0669'
-            },
-            portion: l.portion || 'Regular',
-            extras: l.extras || [],
-            instructions: l.instructions || '',
-            unitPrice: l.unitPrice,
-            quantity: l.quantity
-          }))
-        })));
+        setOrders(ords.map(mapOrder));
       }
     }).catch(() => {});
   }, []);
 
   useEffect(()=>{const t=setTimeout(()=>setLoading(false),600);return()=>clearTimeout(t)},[]);
-  useEffect(()=>{const handleHash=()=>{if(location.hash==='#foundation'){setFoundation(true);setTracking(null);setPanel(null);setAdmin(false)}else if(location.hash==='#tracking'){setFoundation(false);setTracking(orders[0]?.reference||defaultSampleOrders[0].reference);setPanel(null);setAdmin(false)}else if(location.hash==='#admin'||location.hash==='#orders'){setFoundation(false);setTracking(null);setPanel(null);setAdmin(true)}else{setFoundation(false);setTracking(null);setAdmin(false)}};window.addEventListener('hashchange',handleHash);return()=>window.removeEventListener('hashchange',handleHash)},[orders]);
+
+  useEffect(()=>{
+    const handleHash = async () => {
+      const hash = location.hash || '';
+      const search = location.search || '';
+
+      // Check URL search or hash parameters for Chapa redirect
+      const urlParams = new URLSearchParams(search);
+      const hashQuery = hash.includes('?') ? hash.substring(hash.indexOf('?')) : '';
+      const hashParams = new URLSearchParams(hashQuery);
+
+      const txRef = urlParams.get('tx_ref') || urlParams.get('trx_ref') || hashParams.get('tx_ref');
+      const orderRef = urlParams.get('ref') || hashParams.get('ref');
+
+      if (txRef) {
+        try {
+          await api.verifyChapaPayment(txRef);
+          const fresh = await api.getOrders();
+          if (fresh && fresh.length) {
+            setOrders(fresh.map((o: any) => ({
+              reference: o.reference,
+              placedAt: o.placedAt || new Date().toISOString(),
+              status: o.status === 'New' ? 'Received' : o.status,
+              customerName: o.customerName,
+              paymentMethod: o.paymentMethod || 'Chapa',
+              paymentStatus: o.paymentStatus || 'Paid',
+              lines: (o.lines || []).map((l: any) => ({
+                key: l.key || l.name,
+                dish: {
+                  id: l.dishId || 1,
+                  name: l.name,
+                  description: '',
+                  price: l.unitPrice,
+                  category: 'Ethiopian Food',
+                  image: 'photo-1746716447103-e1618bbd0669'
+                },
+                portion: l.portion || 'Regular',
+                extras: l.extras || [],
+                instructions: l.instructions || '',
+                unitPrice: l.unitPrice,
+                quantity: l.quantity
+              }))
+            })));
+          }
+        } catch (e) {
+          console.warn('Chapa verification notice:', e);
+        }
+      }
+
+      if (hash === '#foundation') {
+        setFoundation(true);
+        setTracking(null);
+        setPanel(null);
+        setAdmin(false);
+      } else if (hash.startsWith('#tracking')) {
+        setFoundation(false);
+        const targetRef = orderRef || orders[0]?.reference || defaultSampleOrders[0].reference;
+        setTracking(targetRef);
+        setPanel(null);
+        setAdmin(false);
+      } else if (hash === '#admin' || hash === '#orders') {
+        setFoundation(false);
+        setTracking(null);
+        setPanel(null);
+        setAdmin(true);
+      } else {
+        setFoundation(false);
+        setTracking(null);
+        setAdmin(false);
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, [orders.length]);
   useEffect(()=>{if(panel!=='info')return;const prev=document.activeElement as HTMLElement;closeRef.current?.focus();const listener=(e:KeyboardEvent)=>{if(e.key==='Escape'){setPanel(null);setCustom(null)}if(e.key==='Tab'){const els=Array.from(document.querySelectorAll<HTMLElement>('.menu-modal button:not(:disabled),.menu-modal input'));const first=els[0],last=els[els.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}};document.addEventListener('keydown',listener);return()=>{document.removeEventListener('keydown',listener);prev?.focus()}},[panel,custom]);
   useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(''),2800);return()=>clearTimeout(t)},[toast]);
   const count=cart.reduce((a,l)=>a+l.quantity,0),total=cart.reduce((a,l)=>a+l.unitPrice*l.quantity,0);

@@ -55,6 +55,7 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
     setBusy(true);
 
     try {
+      const txRef = `GQ-AK-TX-${Date.now()}`;
       // Connect to backend MongoDB
       const savedOrder = await api.checkoutOrder({
         customerName: name.trim(),
@@ -73,7 +74,7 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
         })),
         orderNotes: notes,
         paymentMethod,
-        chapaTxRef: paymentMethod === 'Chapa' ? `CHAPA-${Date.now()}` : undefined
+        chapaTxRef: txRef
       });
 
       const newRef = savedOrder.reference;
@@ -89,26 +90,39 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
         customerName: name.trim()
       } as any);
 
+      // If user selected Chapa, redirect directly to real Chapa checkout page
+      if (paymentMethod === 'Chapa') {
+        try {
+          const returnUrl = `${window.location.origin}${window.location.pathname}#tracking?ref=${newRef}&payment=success&tx_ref=${txRef}`;
+          const chapaRes = await api.initializeChapaPayment({
+            amount: total,
+            customerName: name.trim(),
+            customerPhone: phone.trim(),
+            orderReference: newRef,
+            txRef,
+            returnUrl
+          });
+
+          if (chapaRes && chapaRes.checkout_url) {
+            setCart([]);
+            // Direct real redirect to Chapa hosted payment portal
+            window.location.href = chapaRes.checkout_url;
+            return;
+          }
+        } catch (chapaErr: any) {
+          console.error('Chapa direct initialization error:', chapaErr);
+          setNameError(`Chapa Error: ${chapaErr.message || 'Unable to open Chapa payment gateway'}. Please try again or pay with Cash.`);
+          setBusy(false);
+          return;
+        }
+      }
+
       setCart([]);
       setStep('confirmation');
     } catch (err: any) {
-      // Fallback offline mock in case backend is loading
-      console.warn('Backend order submission fallback:', err.message);
-      const fallbackRef = `GQ-AK-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-      setReference(fallbackRef);
-      setSnapshot(cart.map(l => ({ ...l, extras: [...l.extras] })));
-      setStatus('Received');
-
-      onRecord({
-        reference: fallbackRef,
-        placedAt: new Date().toISOString(),
-        lines: cart.map(l => ({ ...l, extras: [...l.extras] })),
-        status: 'Received',
-        customerName: name.trim()
-      } as any);
-
-      setCart([]);
-      setStep('confirmation');
+      console.error('Backend order submission error:', err);
+      setNameError(err.message || 'Unable to send order to kitchen. Please retry.');
+      setBusy(false);
     } finally {
       setBusy(false);
     }
@@ -513,7 +527,7 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
                     >
                       {busy ? (
                         <>
-                          <span className="submit-spinner" /> Connecting to Kitchen…
+                          <span className="submit-spinner" /> {paymentMethod === 'Chapa' ? 'Redirecting to Chapa Secure Portal…' : 'Connecting to Kitchen…'}
                         </>
                       ) : step === 'cart' ? (
                         <>
