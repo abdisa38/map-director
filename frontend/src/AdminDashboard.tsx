@@ -460,7 +460,7 @@ export const reportsDataByPreset: Record<DateRangePreset, ReportDataset> = {
       { category: 'Desserts', quantity: 4, salesAmount: 1280, sharePercent: 2.2 }
     ],
     recentOrders: [
-      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Table 08', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Dine-in', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' },
       { id: 'o2', reference: '#GQ-1047', time: '13:10', date: '17 Oct 2026', table: 'Table 02', itemsSummary: '1× Beyaynetu, 2× Mango Juice', total: 820, status: 'Completed', paymentMethod: 'Cash' },
       { id: 'o3', reference: '#GQ-1046', time: '12:55', date: '17 Oct 2026', table: 'Table 04', itemsSummary: '1× Beef Tibs, 1× Macchiato', total: 800, status: 'Completed', paymentMethod: 'CBE Birr' },
       { id: 'o4', reference: '#GQ-1045', time: '12:42', date: '17 Oct 2026', table: 'Terrace 01', itemsSummary: '2× Abay Signature Burger', total: 1160, status: 'Completed', paymentMethod: 'Telebirr' },
@@ -505,7 +505,7 @@ export const reportsDataByPreset: Record<DateRangePreset, ReportDataset> = {
       { category: 'Desserts', quantity: 3, salesAmount: 960, sharePercent: 2.1 }
     ],
     recentOrders: [
-      { id: 'oy1', reference: '#GQ-1038', time: '20:45', date: '16 Oct 2026', table: 'Table 08', itemsSummary: '2× Beef Tibs', total: 1440, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'oy1', reference: '#GQ-1038', time: '20:45', date: '16 Oct 2026', table: 'Dine-in', itemsSummary: '2× Beef Tibs', total: 1440, status: 'Completed', paymentMethod: 'Telebirr' },
       { id: 'oy2', reference: '#GQ-1037', time: '20:15', date: '16 Oct 2026', table: 'Table 04', itemsSummary: '1× Doro Wat, 1× Beer', total: 780, status: 'Completed', paymentMethod: 'Cash' },
       { id: 'oy3', reference: '#GQ-1036', time: '19:40', date: '16 Oct 2026', table: 'VIP Lounge', itemsSummary: '4× Doro Wat, 2× Tibs', total: 4160, status: 'Completed', paymentMethod: 'Card' }
     ]
@@ -547,7 +547,7 @@ export const reportsDataByPreset: Record<DateRangePreset, ReportDataset> = {
       { category: 'Desserts', quantity: 52, salesAmount: 16700, sharePercent: 5.0 }
     ],
     recentOrders: [
-      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Table 08', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Dine-in', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' },
       { id: 'o2', reference: '#GQ-1047', time: '13:10', date: '17 Oct 2026', table: 'Table 02', itemsSummary: '1× Beyaynetu, 2× Mango Juice', total: 820, status: 'Completed', paymentMethod: 'Cash' },
       { id: 'o3', reference: '#GQ-1046', time: '12:55', date: '17 Oct 2026', table: 'Table 04', itemsSummary: '1× Beef Tibs, 1× Macchiato', total: 800, status: 'Completed', paymentMethod: 'CBE Birr' },
       { id: 'o4', reference: '#GQ-1045', time: '12:42', date: '17 Oct 2026', table: 'Terrace 01', itemsSummary: '2× Abay Signature Burger', total: 1160, status: 'Completed', paymentMethod: 'Telebirr' },
@@ -555,7 +555,7 @@ export const reportsDataByPreset: Record<DateRangePreset, ReportDataset> = {
       { id: 'o6', reference: '#GQ-1043', time: '12:15', date: '17 Oct 2026', table: 'Table 01', itemsSummary: '1× Shakshuka, 1× Coffee', total: 420, status: 'Completed', paymentMethod: 'Cash' },
       { id: 'o7', reference: '#GQ-1042', time: '11:45', date: '17 Oct 2026', table: 'Terrace 02', itemsSummary: '1× Beef Tibs', total: 720, status: 'Completed', paymentMethod: 'Telebirr' },
       { id: 'o8', reference: '#GQ-1041', time: '11:30', date: '17 Oct 2026', table: 'VIP Lounge', itemsSummary: '3× Doro Wat, 1× Beyaynetu', total: 2500, status: 'Completed', paymentMethod: 'Card' },
-      { id: 'o9', reference: '#GQ-1040', time: '11:10', date: '17 Oct 2026', table: 'Table 08', itemsSummary: '1× Doro Wat', total: 680, status: 'Cancelled', paymentMethod: 'Voided' },
+      { id: 'o9', reference: '#GQ-1040', time: '11:10', date: '17 Oct 2026', table: 'Dine-in', itemsSummary: '1× Doro Wat', total: 680, status: 'Cancelled', paymentMethod: 'Voided' },
       { id: 'o10', reference: '#GQ-1039', time: '10:45', date: '17 Oct 2026', table: 'Table 04', itemsSummary: '2× Morning Shakshuka', total: 680, status: 'Completed', paymentMethod: 'Telebirr' }
     ]
   },
@@ -591,7 +591,7 @@ export const reportsDataByPreset: Record<DateRangePreset, ReportDataset> = {
       { category: 'Desserts', quantity: 210, salesAmount: 67200, sharePercent: 4.0 }
     ],
     recentOrders: [
-      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Table 08', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' },
+      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Dine-in', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' },
       { id: 'o2', reference: '#GQ-1047', time: '13:10', date: '17 Oct 2026', table: 'Table 02', itemsSummary: '1× Beyaynetu, 2× Mango Juice', total: 820, status: 'Completed', paymentMethod: 'Cash' }
     ]
   },
@@ -627,7 +627,7 @@ export const reportsDataByPreset: Record<DateRangePreset, ReportDataset> = {
       { category: 'Desserts', quantity: 120, salesAmount: 38400, sharePercent: 4.2 }
     ],
     recentOrders: [
-      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Table 08', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' }
+      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '17 Oct 2026', table: 'Dine-in', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' }
     ]
   },
   custom: {
@@ -660,7 +660,7 @@ export const reportsDataByPreset: Record<DateRangePreset, ReportDataset> = {
       { category: 'Drinks & Beverages', quantity: 230, salesAmount: 27900, sharePercent: 11.1 }
     ],
     recentOrders: [
-      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '15 Oct 2026', table: 'Table 08', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' }
+      { id: 'o1', reference: '#GQ-1048', time: '13:24', date: '15 Oct 2026', table: 'Dine-in', itemsSummary: '2× Doro Wat, 1× Tibs', total: 2080, status: 'Completed', paymentMethod: 'Telebirr' }
     ]
   }
 };
