@@ -1971,4 +1971,677 @@
   border-radius: 6px;
 }
 
+/* ==========================================================================
+   GebetaQR 03D — Staff Management, Roles & Permissions
+   ========================================================================== */
+
+.admin-staff-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* KPI Status Counters */
+.admin-staff-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.admin-staff-kpi-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.admin-staff-kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+
+.admin-staff-kpi-val-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-staff-kpi-val-row strong {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+}
+
+.admin-staff-kpi-icon {
+  color: var(--brand);
+  background: #f0f4f0;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-staff-kpi-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.admin-staff-kpi-dot.active {
+  background: #23734b;
+  box-shadow: 0 0 0 4px #eaf5ef;
+}
+
+.admin-staff-kpi-dot.pending {
+  background: #c69234;
+  box-shadow: 0 0 0 4px #fdf8ed;
+}
+
+.admin-staff-kpi-dot.inactive {
+  background: #9ca69e;
+  box-shadow: 0 0 0 4px #f2f4f2;
+}
+
+.admin-staff-kpi-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Staff Table & Row Styling */
+.admin-staff-table-row:hover td {
+  background: #fafbf9;
+}
+
+.admin-staff-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-staff-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #143D2B;
+  color: #FAF8F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  border: 1px solid #234b35;
+}
+
+.admin-staff-avatar.lg {
+  width: 52px;
+  height: 52px;
+  font-size: 18px;
+  border: 2px solid var(--gold);
+}
+
+.admin-staff-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.admin-staff-email {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Role Badges */
+.admin-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.admin-role-badge.owner {
+  background: #143D2B;
+  color: #FAF8F5;
+  border: 1px solid var(--gold);
+}
+
+.admin-role-badge.owner svg {
+  color: var(--gold);
+}
+
+.admin-role-badge.manager {
+  background: #eaf5ef;
+  color: #1a573a;
+  border: 1px solid #cce5d6;
+}
+
+.admin-role-badge.kitchen {
+  background: #fef6ee;
+  color: #b86218;
+  border: 1px solid #fedec2;
+}
+
+.admin-role-badge.waiter {
+  background: #edf5fb;
+  color: #1f577a;
+  border: 1px solid #cde4f5;
+}
+
+.admin-role-badge.cashier {
+  background: #f7f0f9;
+  color: #643175;
+  border: 1px solid #ead6ef;
+}
+
+/* Status Pills */
+.admin-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.admin-status-pill .admin-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.admin-status-pill.active {
+  background: #eaf5ef;
+  color: #1a573a;
+}
+
+.admin-status-pill.active .admin-status-dot {
+  background: #23734b;
+}
+
+.admin-status-pill.pending {
+  background: #fdf8ed;
+  color: #8c5d10;
+}
+
+.admin-status-pill.pending .admin-status-dot {
+  background: #c69234;
+}
+
+.admin-status-pill.inactive {
+  background: #f1f3f1;
+  color: #6b776e;
+}
+
+.admin-status-pill.inactive .admin-status-dot {
+  background: #9aa59d;
+}
+
+/* Actions Cell */
+.admin-staff-actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-action-btn.sm {
+  padding: 6px 10px;
+  font-size: 12px;
+  gap: 5px;
+  min-height: 32px;
+}
+
+/* Role Selector Grid in Add Staff Form */
+.admin-role-selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.admin-role-card {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  background: #fff;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-role-card:hover {
+  border-color: #a4b3a4;
+  background: #fafbf9;
+}
+
+.admin-role-card.selected {
+  border-color: var(--brand);
+  background: #f2f7f3;
+}
+
+.admin-role-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-role-card-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.admin-radio-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #a2b0a2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+.admin-role-card.selected .admin-radio-circle {
+  border-color: var(--brand);
+}
+
+.admin-radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+/* Validation Feedback */
+.input-error {
+  border-color: #d32f2f !important;
+  background: #fffafa !important;
+}
+
+.admin-field-error {
+  display: block;
+  font-size: 11px;
+  color: #d32f2f;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Security Callout Banners */
+.admin-security-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #f4f7f4;
+  border: 1px solid #d2ded2;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #264230;
+  line-height: 1.4;
+  margin-top: 10px;
+}
+
+.admin-security-banner svg {
+  flex-shrink: 0;
+  color: var(--brand);
+  margin-top: 1px;
+}
+
+/* Alert Boxes (Error, Warning, Info) */
+.admin-alert-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.admin-alert-box strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.admin-alert-box p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.admin-alert-box.error {
+  background: #fdf2f2;
+  border: 1px solid #f8c8c8;
+  color: #991b1b;
+}
+
+.admin-alert-box.warning {
+  background: #fffbeb;
+  border: 1px solid #fce793;
+  color: #92400e;
+}
+
+.admin-alert-box.info {
+  background: #f0f7ff;
+  border: 1px solid #c9e2fd;
+  color: #1e40af;
+}
+
+/* Invitation Success View */
+.admin-invite-success-view {
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.admin-invite-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #eaf5ef;
+  color: #1a573a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  border: 2px solid #a3d4b6;
+}
+
+.admin-invite-success-view h3 {
+  font-size: 20px;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.admin-invite-success-view p {
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 420px;
+  margin: 0 auto 16px;
+  line-height: 1.5;
+}
+
+.admin-invite-note-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fafbf9;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: left;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+/* Roles & Permissions Matrix Modal */
+.admin-matrix-role-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+}
+
+.admin-role-summary-banner {
+  background: #f5f8f5;
+  border-left: 3px solid var(--brand);
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 14px;
+}
+
+.admin-role-summary-banner strong {
+  display: block;
+  font-size: 13px;
+  color: var(--brand);
+}
+
+.admin-role-summary-banner p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.admin-matrix-table-container {
+  max-height: 380px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.admin-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.admin-matrix-table th {
+  position: sticky;
+  top: 0;
+  background: #f7f9f6;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  z-index: 2;
+}
+
+.admin-matrix-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #edf0ea;
+  vertical-align: middle;
+}
+
+.admin-matrix-table tr:hover td {
+  background: #fafbf9;
+}
+
+.admin-matrix-table td.highlight-col {
+  background: #f4f8f4;
+  font-weight: 600;
+}
+
+.perm-chip {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.perm-chip.full {
+  background: #eaf5ef;
+  color: #175436;
+}
+
+.perm-chip.partial {
+  background: #f4f6f4;
+  color: #2b3b2f;
+}
+
+.perm-chip.none {
+  color: #a4ada5;
+}
+
+/* Staff Profile Details Drawer */
+.admin-profile-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: #fafbf9;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-profile-stat-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-profile-stat-box .stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.admin-profile-stat-box strong {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.admin-profile-invite-box {
+  background: #fef9ed;
+  border: 1px solid #f9e2ab;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.admin-profile-perms-section {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fff;
+}
+
+.admin-profile-perms-section .section-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.admin-profile-perms-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-profile-perms-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.admin-profile-perms-list li svg {
+  color: #23734b;
+  flex-shrink: 0;
+}
+
+/* Backend Specifications Accordion */
+.admin-backend-spec-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  margin-top: 10px;
+}
+
+.admin-backend-spec-header {
+  padding: 14px 18px;
+  background: #f7f9f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-backend-spec-header strong {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.admin-backend-spec-body {
+  padding: 18px;
+  border-top: 1px solid var(--border);
+  background: #fafbf9;
+}
+
+.admin-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.admin-spec-item {
+  background: #fff;
+  border: 1px solid #e2e6df;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.admin-spec-item strong {
+  display: block;
+  font-size: 12px;
+  color: var(--brand);
+  margin-bottom: 4px;
+}
+
+.admin-spec-item p {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .admin-staff-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .admin-spec-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-role-selector-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-profile-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 

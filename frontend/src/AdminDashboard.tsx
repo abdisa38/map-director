@@ -1085,6 +1085,315 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
               </div>
             </div>
           )}
+
+          {/* =========================================================
+              TAB: STAFF MANAGEMENT, ROLES & PERMISSIONS (03D)
+             ========================================================= */}
+          {activeTab === 'staff' && (
+            <div className="admin-staff-section">
+              {/* Page Header */}
+              <div className="admin-page-header">
+                <div>
+                  <h1>Staff Management</h1>
+                  <p>Manage your team and control access to your restaurant workspace.</p>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    className="admin-action-btn secondary"
+                    onClick={() => setIsPermissionsMatrixOpen(true)}
+                    title="View permissions by role"
+                  >
+                    <AdminIcon name="shield" size={15} /> Roles & Permissions
+                  </button>
+                  <button
+                    className="admin-action-btn primary"
+                    onClick={() => {
+                      setAddForm({ name: '', email: '', phone: '', role: 'Waiter', note: '' });
+                      setFormErrors({});
+                      setInviteSentSuccess(null);
+                      setInviteErrorMsg(null);
+                      setIsAddStaffOpen(true);
+                    }}
+                  >
+                    <AdminIcon name="userPlus" size={15} /> Add Staff Member
+                  </button>
+                </div>
+              </div>
+
+              {/* KPI Status Counters */}
+              <div className="admin-staff-kpi-grid">
+                <div className="admin-staff-kpi-card">
+                  <span className="admin-staff-kpi-label">TOTAL STAFF</span>
+                  <div className="admin-staff-kpi-val-row">
+                    <strong>{staffMembers.length}</strong>
+                    <span className="admin-staff-kpi-icon"><AdminIcon name="staff" size={18} /></span>
+                  </div>
+                  <span className="admin-staff-kpi-sub">Across all roles</span>
+                </div>
+
+                <div className="admin-staff-kpi-card">
+                  <span className="admin-staff-kpi-label">ACTIVE STAFF</span>
+                  <div className="admin-staff-kpi-val-row">
+                    <strong style={{ color: '#1f693e' }}>
+                      {staffMembers.filter(s => s.status === 'Active').length}
+                    </strong>
+                    <span className="admin-staff-kpi-dot active" />
+                  </div>
+                  <span className="admin-staff-kpi-sub">Active login privileges</span>
+                </div>
+
+                <div className="admin-staff-kpi-card">
+                  <span className="admin-staff-kpi-label">PENDING INVITATIONS</span>
+                  <div className="admin-staff-kpi-val-row">
+                    <strong style={{ color: '#b0791a' }}>
+                      {staffMembers.filter(s => s.status === 'Pending Invitation').length}
+                    </strong>
+                    <span className="admin-staff-kpi-dot pending" />
+                  </div>
+                  <span className="admin-staff-kpi-sub">Awaiting activation</span>
+                </div>
+
+                <div className="admin-staff-kpi-card">
+                  <span className="admin-staff-kpi-label">INACTIVE</span>
+                  <div className="admin-staff-kpi-val-row">
+                    <strong style={{ color: '#7a857e' }}>
+                      {staffMembers.filter(s => s.status === 'Inactive').length}
+                    </strong>
+                    <span className="admin-staff-kpi-dot inactive" />
+                  </div>
+                  <span className="admin-staff-kpi-sub">Deactivated accounts</span>
+                </div>
+              </div>
+
+              {/* Search & Filter Controls */}
+              <div className="admin-orders-controls">
+                <div className="admin-filter-row" style={{ width: '100%' }}>
+                  <div className="admin-search-input" style={{ flex: 1, minWidth: '220px' }}>
+                    <AdminIcon name="search" size={16} />
+                    <input
+                      type="text"
+                      placeholder="Search staff by name or email…"
+                      value={searchStaff}
+                      onChange={e => setSearchStaff(e.target.value)}
+                    />
+                  </div>
+
+                  <select
+                    className="admin-select"
+                    value={staffRoleFilter}
+                    onChange={e => setStaffRoleFilter(e.target.value)}
+                  >
+                    <option value="All">All Roles</option>
+                    <option value="Owner">Owner</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Kitchen Staff">Kitchen Staff</option>
+                    <option value="Waiter">Waiter / Service</option>
+                    <option value="Cashier">Cashier</option>
+                  </select>
+
+                  <select
+                    className="admin-select"
+                    value={staffStatusFilter}
+                    onChange={e => setStaffStatusFilter(e.target.value)}
+                  >
+                    <option value="All">All Statuses</option>
+                    <option value="Active">Active</option>
+                    <option value="Pending Invitation">Pending Invitation</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+
+                  {(searchStaff || staffRoleFilter !== 'All' || staffStatusFilter !== 'All') && (
+                    <button
+                      className="admin-action-btn secondary"
+                      onClick={() => {
+                        setSearchStaff('');
+                        setStaffRoleFilter('All');
+                        setStaffStatusFilter('All');
+                      }}
+                      title="Clear filters"
+                    >
+                      Clear Filters
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Staff Table */}
+              <div className="admin-table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Staff Member</th>
+                      <th>Role</th>
+                      <th>Account Status</th>
+                      <th>Date Added</th>
+                      <th>Last Active</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredStaff.map(member => {
+                      const roleMeta = roleDescriptions[member.role];
+                      return (
+                        <tr key={member.id} className="admin-staff-table-row">
+                          <td style={{ cursor: 'pointer' }} onClick={() => setSelectedStaffProfile(member)}>
+                            <div className="admin-staff-user-cell">
+                              <span className="admin-staff-avatar">{member.avatar}</span>
+                              <div>
+                                <strong className="admin-staff-name">{member.name}</strong>
+                                <span className="admin-staff-email">{member.email}</span>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td>
+                            <span className={`admin-role-badge ${roleMeta.badgeClass}`}>
+                              <AdminIcon name={roleMeta.icon} size={13} />
+                              <span>{roleMeta.title}</span>
+                            </span>
+                          </td>
+
+                          <td>
+                            <span
+                              className={`admin-status-pill ${
+                                member.status === 'Active'
+                                  ? 'active'
+                                  : member.status === 'Pending Invitation'
+                                  ? 'pending'
+                                  : 'inactive'
+                              }`}
+                            >
+                              <span className="admin-status-dot" />
+                              <span>{member.status}</span>
+                            </span>
+                          </td>
+
+                          <td style={{ color: 'var(--muted)', fontSize: '13px' }}>{member.dateAdded}</td>
+
+                          <td style={{ color: 'var(--muted)', fontSize: '13px' }}>{member.lastActive}</td>
+
+                          <td>
+                            <div className="admin-staff-actions-cell">
+                              {member.status === 'Pending Invitation' && (
+                                <button
+                                  className="admin-action-btn secondary sm"
+                                  onClick={() => handleResendInvite(member)}
+                                  title="Resend invitation email"
+                                >
+                                  <AdminIcon name="mail" size={13} /> Resend
+                                </button>
+                              )}
+
+                              <button
+                                className="admin-action-btn secondary sm"
+                                onClick={() => setSelectedStaffProfile(member)}
+                                title="View staff profile & permissions"
+                              >
+                                <AdminIcon name="eye" size={13} /> Profile
+                              </button>
+
+                              <button
+                                className="admin-action-btn secondary sm"
+                                onClick={() => {
+                                  setRoleChangeTarget(member);
+                                  setNewSelectedRole(member.role);
+                                }}
+                                title="Change role"
+                              >
+                                <AdminIcon name="shield" size={13} />
+                              </button>
+
+                              <button
+                                className={`admin-action-btn sm ${member.status === 'Active' ? 'danger' : 'secondary'}`}
+                                onClick={() => setDeactivatingTarget(member)}
+                                title={member.status === 'Active' ? 'Deactivate account' : 'Reactivate account'}
+                              >
+                                {member.status === 'Active' ? (
+                                  <AdminIcon name="userX" size={13} />
+                                ) : (
+                                  <AdminIcon name="check" size={13} />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {filteredStaff.length === 0 && (
+                <div className="admin-empty-state">
+                  <AdminIcon name="staff" size={40} />
+                  <h3>No staff members found</h3>
+                  <p>No team members match your current filter or search criteria.</p>
+                  <button
+                    className="admin-action-btn secondary"
+                    onClick={() => {
+                      setSearchStaff('');
+                      setStaffRoleFilter('All');
+                      setStaffStatusFilter('All');
+                    }}
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              )}
+
+              {/* Engineering & Security Handoff Accordion */}
+              <div className="admin-backend-spec-card">
+                <div
+                  className="admin-backend-spec-header"
+                  onClick={() => setShowMernDetails(!showMernDetails)}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <AdminIcon name="lock" size={18} />
+                    <div>
+                      <strong>Security Architecture & Backend Implementation Notes (MERN)</strong>
+                      <span style={{ display: 'block', fontSize: '11px', color: 'var(--muted)' }}>
+                        Production RBAC, tenant scoping, and JWT authorization rules
+                      </span>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '12px', color: 'var(--brand)', fontWeight: 600 }}>
+                    {showMernDetails ? 'Hide Architecture Notes ▲' : 'Show Architecture Notes ▼'}
+                  </span>
+                </div>
+
+                {showMernDetails && (
+                  <div className="admin-backend-spec-body">
+                    <div className="admin-spec-grid">
+                      <div className="admin-spec-item">
+                        <strong>1. Workspace Multi-Tenancy</strong>
+                        <p>Every staff document in MongoDB belongs strictly to one restaurant workspace (`restaurantId`). Staff cannot access another venue by altering route IDs.</p>
+                      </div>
+                      <div className="admin-spec-item">
+                        <strong>2. Cryptographic Expiring Invitations</strong>
+                        <p>Invitations use signed, hashed single-use tokens expiring in 24 hours. Passwords are never sent or stored in plain text.</p>
+                      </div>
+                      <div className="admin-spec-item">
+                        <strong>3. Server-Side RBAC Enforcement</strong>
+                        <p>Never trust browser claims. Express middleware validates role permissions against JWT claims on every single protected API endpoint.</p>
+                      </div>
+                      <div className="admin-spec-item">
+                        <strong>4. Non-Destructive Deactivation</strong>
+                        <p>Deactivating revokes active refresh tokens instantly while preserving historical orders, audit logs, and prep records.</p>
+                      </div>
+                      <div className="admin-spec-item">
+                        <strong>5. Primary Owner Safeguard</strong>
+                        <p>Backend rejects attempts to delete, deactivate, or demote the last remaining Owner account without formal ownership transfer.</p>
+                      </div>
+                      <div className="admin-spec-item">
+                        <strong>6. Audit Logging</strong>
+                        <p>Sensitive operations (role changes, staff invitations, menu price adjustments) append immutable entries to the workspace audit trail.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
@@ -1349,6 +1658,608 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
               <button className="admin-action-btn primary" onClick={handleSaveTable}>
                 Save Table
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL 4: ADD STAFF MEMBER MODAL (03D)
+         ========================================================= */}
+      {isAddStaffOpen && (
+        <div className="admin-modal-backdrop" onClick={() => setIsAddStaffOpen(false)}>
+          <div className="admin-modal" style={{ width: '560px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>Add Staff Member</h3>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Send an invitation link to join Abay Kitchen</span>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setIsAddStaffOpen(false)}>
+                <AdminIcon name="close" size={20} />
+              </button>
+            </div>
+
+            {inviteSentSuccess ? (
+              <div className="admin-invite-success-view">
+                <div className="admin-invite-success-icon">
+                  <AdminIcon name="check" size={32} />
+                </div>
+                <h3>Invitation Dispatched!</h3>
+                <p>
+                  A secure invitation link has been emailed to <strong>{inviteSentSuccess.email}</strong> with the <strong>{inviteSentSuccess.role}</strong> role.
+                </p>
+                <div className="admin-invite-note-card">
+                  <AdminIcon name="info" size={16} />
+                  <span>The link expires in 24 hours. The recipient will choose their own password upon opening the link.</span>
+                </div>
+                <div className="admin-modal-actions" style={{ marginTop: '20px' }}>
+                  <button
+                    className="admin-action-btn primary"
+                    onClick={() => {
+                      setIsAddStaffOpen(false);
+                      setInviteSentSuccess(null);
+                    }}
+                  >
+                    Done
+                  </button>
+                  <button
+                    className="admin-action-btn secondary"
+                    onClick={() => {
+                      setInviteSentSuccess(null);
+                      setAddForm({ name: '', email: '', phone: '', role: 'Waiter', note: '' });
+                    }}
+                  >
+                    Invite Another Member
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={e => { e.preventDefault(); handleSendInvitation(); }}>
+                {inviteErrorMsg && (
+                  <div className="admin-alert-box error" style={{ marginBottom: '16px' }}>
+                    <AdminIcon name="alertTriangle" size={18} />
+                    <div style={{ flex: 1 }}>
+                      <strong>Invitation Failed</strong>
+                      <p>{inviteErrorMsg}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="admin-action-btn secondary sm"
+                      onClick={handleSendInvitation}
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
+
+                <div className="admin-form-group">
+                  <label>Full Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Almaz Ayana"
+                    value={addForm.name}
+                    onChange={e => {
+                      setAddForm({ ...addForm, name: e.target.value });
+                      if (formErrors.name) setFormErrors({ ...formErrors, name: undefined });
+                    }}
+                    className={formErrors.name ? 'input-error' : ''}
+                  />
+                  {formErrors.name && <span className="admin-field-error">{formErrors.name}</span>}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <div className="admin-form-group">
+                    <label>Email Address *</label>
+                    <input
+                      type="email"
+                      placeholder="e.g. almaz@abaykitchen.com"
+                      value={addForm.email}
+                      onChange={e => {
+                        setAddForm({ ...addForm, email: e.target.value });
+                        if (formErrors.email) setFormErrors({ ...formErrors, email: undefined });
+                      }}
+                      className={formErrors.email ? 'input-error' : ''}
+                    />
+                    {formErrors.email && <span className="admin-field-error">{formErrors.email}</span>}
+                  </div>
+
+                  <div className="admin-form-group">
+                    <label>Phone Number (Optional)</label>
+                    <input
+                      type="tel"
+                      placeholder="+251 91 123 4567"
+                      value={addForm.phone}
+                      onChange={e => setAddForm({ ...addForm, phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-form-group">
+                  <label>Select Role Profile *</label>
+                  <div className="admin-role-selector-grid">
+                    {(['Manager', 'Kitchen Staff', 'Waiter', 'Cashier', 'Owner'] as StaffRole[]).map(r => {
+                      const desc = roleDescriptions[r];
+                      const isSelected = addForm.role === r;
+                      return (
+                        <div
+                          key={r}
+                          className={`admin-role-card ${isSelected ? 'selected' : ''}`}
+                          onClick={() => setAddForm({ ...addForm, role: r })}
+                        >
+                          <div className="admin-role-card-top">
+                            <span className={`admin-role-badge ${desc.badgeClass}`}>
+                              <AdminIcon name={desc.icon} size={12} />
+                              <span>{desc.title}</span>
+                            </span>
+                            <span className="admin-radio-circle">{isSelected && <span className="admin-radio-dot" />}</span>
+                          </div>
+                          <p className="admin-role-card-desc">{desc.desc}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="admin-form-group">
+                  <label>Invitation Note (Optional)</label>
+                  <textarea
+                    rows={2}
+                    placeholder="e.g. Welcome to the Abay Kitchen team! Look forward to working together."
+                    value={addForm.note}
+                    onChange={e => setAddForm({ ...addForm, note: e.target.value })}
+                  />
+                </div>
+
+                {/* Password Notice Callout */}
+                <div className="admin-security-banner">
+                  <AdminIcon name="lock" size={16} />
+                  <span>No password required. The staff member will receive a secure activation link to set their own credentials.</span>
+                </div>
+
+                {/* Simulated Error Toggle for Testing */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: '#f5f7f3', borderRadius: '6px', margin: '14px 0 6px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                    Testing: Simulate network dispatch failure
+                  </span>
+                  <button
+                    type="button"
+                    className={`admin-toggle ${simulateInviteError ? 'on' : ''}`}
+                    onClick={() => setSimulateInviteError(!simulateInviteError)}
+                  >
+                    <span className="admin-toggle-knob" />
+                  </button>
+                </div>
+
+                <div className="admin-modal-actions" style={{ marginTop: '16px' }}>
+                  <button
+                    type="button"
+                    className="admin-action-btn secondary"
+                    onClick={() => setIsAddStaffOpen(false)}
+                    disabled={isSubmittingInvite}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="admin-action-btn primary"
+                    disabled={isSubmittingInvite || !addForm.name.trim() || !addForm.email.trim()}
+                  >
+                    {isSubmittingInvite ? (
+                      <>
+                        <AdminIcon name="refreshCw" size={15} /> Sending Invitation…
+                      </>
+                    ) : (
+                      <>
+                        <AdminIcon name="mail" size={15} /> Send Invitation
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL 5: ROLES & PERMISSION MATRIX (03D)
+         ========================================================= */}
+      {isPermissionsMatrixOpen && (
+        <div className="admin-modal-backdrop" onClick={() => setIsPermissionsMatrixOpen(false)}>
+          <div className="admin-modal" style={{ width: '740px', maxWidth: '95vw' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>Roles & Permissions Matrix</h3>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Predefined access profiles enforced by server authorization</span>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setIsPermissionsMatrixOpen(false)}>
+                <AdminIcon name="close" size={20} />
+              </button>
+            </div>
+
+            {/* Role Filter Tabs for Quick Inspection */}
+            <div className="admin-matrix-role-tabs">
+              {(['Owner', 'Manager', 'Kitchen Staff', 'Waiter', 'Cashier'] as StaffRole[]).map(r => (
+                <button
+                  key={r}
+                  className={`admin-tab-btn ${selectedMatrixRole === r ? 'active' : ''}`}
+                  onClick={() => setSelectedMatrixRole(r)}
+                >
+                  <AdminIcon name={roleDescriptions[r].icon} size={14} />
+                  <span>{r}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Selected Role Summary Banner */}
+            <div className="admin-role-summary-banner">
+              <strong>{selectedMatrixRole} Profile</strong>
+              <p>{roleDescriptions[selectedMatrixRole].desc}</p>
+            </div>
+
+            {/* Permission Table */}
+            <div className="admin-matrix-table-container">
+              <table className="admin-matrix-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th style={{ color: selectedMatrixRole === 'Owner' ? 'var(--gold)' : undefined }}>Owner</th>
+                    <th style={{ color: selectedMatrixRole === 'Manager' ? 'var(--brand)' : undefined }}>Manager</th>
+                    <th style={{ color: selectedMatrixRole === 'Kitchen Staff' ? '#b87333' : undefined }}>Kitchen Staff</th>
+                    <th style={{ color: selectedMatrixRole === 'Waiter' ? '#2a5d7c' : undefined }}>Waiter / Service</th>
+                    <th style={{ color: selectedMatrixRole === 'Cashier' ? '#6b3f7a' : undefined }}>Cashier</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {permissionMatrix.map(row => (
+                    <tr key={row.category}>
+                      <td><strong>{row.category}</strong></td>
+                      <td className={selectedMatrixRole === 'Owner' ? 'highlight-col' : ''}>
+                        <span className="perm-chip full">{row.Owner}</span>
+                      </td>
+                      <td className={selectedMatrixRole === 'Manager' ? 'highlight-col' : ''}>
+                        <span className={`perm-chip ${row.Manager === 'Restricted' ? 'none' : 'partial'}`}>{row.Manager}</span>
+                      </td>
+                      <td className={selectedMatrixRole === 'Kitchen Staff' ? 'highlight-col' : ''}>
+                        <span className={`perm-chip ${row['Kitchen Staff'] === 'Restricted' ? 'none' : 'partial'}`}>{row['Kitchen Staff']}</span>
+                      </td>
+                      <td className={selectedMatrixRole === 'Waiter' ? 'highlight-col' : ''}>
+                        <span className={`perm-chip ${row.Waiter === 'Restricted' ? 'none' : 'partial'}`}>{row.Waiter}</span>
+                      </td>
+                      <td className={selectedMatrixRole === 'Cashier' ? 'highlight-col' : ''}>
+                        <span className={`perm-chip ${row.Cashier === 'Restricted' ? 'none' : 'partial'}`}>{row.Cashier}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Security Notice */}
+            <div className="admin-security-banner" style={{ marginTop: '16px' }}>
+              <AdminIcon name="shield" size={16} />
+              <span>
+                Access is enforced by the server. The visible controls reflect the permissions assigned to your account. Every backend API request validates authentication and role permissions.
+              </span>
+            </div>
+
+            <div className="admin-modal-actions" style={{ marginTop: '16px' }}>
+              <button className="admin-action-btn primary" onClick={() => setIsPermissionsMatrixOpen(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL 6: STAFF PROFILE & DETAILS DRAWER (03D)
+         ========================================================= */}
+      {selectedStaffProfile && (
+        <div className="admin-modal-backdrop" onClick={() => setSelectedStaffProfile(null)}>
+          <div className="admin-modal" style={{ width: '520px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <span className="admin-staff-avatar lg">{selectedStaffProfile.avatar}</span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px' }}>{selectedStaffProfile.name}</h3>
+                  <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{selectedStaffProfile.email}</span>
+                </div>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setSelectedStaffProfile(null)}>
+                <AdminIcon name="close" size={20} />
+              </button>
+            </div>
+
+            {/* Profile Overview Card */}
+            <div className="admin-profile-details-grid">
+              <div className="admin-profile-stat-box">
+                <span className="stat-label">Assigned Role</span>
+                <span className={`admin-role-badge ${roleDescriptions[selectedStaffProfile.role].badgeClass}`} style={{ marginTop: '4px' }}>
+                  <AdminIcon name={roleDescriptions[selectedStaffProfile.role].icon} size={12} />
+                  <span>{selectedStaffProfile.role}</span>
+                </span>
+              </div>
+
+              <div className="admin-profile-stat-box">
+                <span className="stat-label">Account Status</span>
+                <span
+                  className={`admin-status-pill ${
+                    selectedStaffProfile.status === 'Active'
+                      ? 'active'
+                      : selectedStaffProfile.status === 'Pending Invitation'
+                      ? 'pending'
+                      : 'inactive'
+                  }`}
+                  style={{ marginTop: '4px' }}
+                >
+                  <span className="admin-status-dot" />
+                  <span>{selectedStaffProfile.status}</span>
+                </span>
+              </div>
+
+              <div className="admin-profile-stat-box">
+                <span className="stat-label">Phone Number</span>
+                <strong>{selectedStaffProfile.phone || 'Not provided'}</strong>
+              </div>
+
+              <div className="admin-profile-stat-box">
+                <span className="stat-label">Restaurant Workspace</span>
+                <strong>Abay Kitchen (Bole)</strong>
+              </div>
+
+              <div className="admin-profile-stat-box">
+                <span className="stat-label">Date Added</span>
+                <strong>{selectedStaffProfile.dateAdded}</strong>
+              </div>
+
+              <div className="admin-profile-stat-box">
+                <span className="stat-label">Last Active</span>
+                <strong>{selectedStaffProfile.lastActive}</strong>
+              </div>
+            </div>
+
+            {/* Invitation Details if Pending */}
+            {selectedStaffProfile.status === 'Pending Invitation' && (
+              <div className="admin-profile-invite-box">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong style={{ fontSize: '13px' }}>Invitation Pending</strong>
+                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--muted)' }}>
+                      Invitation sent · Token valid for 24 hours
+                    </span>
+                  </div>
+                  <button
+                    className="admin-action-btn secondary sm"
+                    onClick={() => handleResendInvite(selectedStaffProfile)}
+                  >
+                    <AdminIcon name="mail" size={13} /> Resend Invite
+                  </button>
+                </div>
+                {selectedStaffProfile.invitationNote && (
+                  <p style={{ fontSize: '12px', color: 'var(--ink)', fontStyle: 'italic', margin: '8px 0 0' }}>
+                    "{selectedStaffProfile.invitationNote}"
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Permitted Actions */}
+            <div className="admin-profile-perms-section">
+              <span className="section-title">Permitted System Capabilities</span>
+              <ul className="admin-profile-perms-list">
+                {selectedStaffProfile.role === 'Owner' && (
+                  <>
+                    <li><AdminIcon name="check" size={14} /> Full management of restaurant settings & team accounts</li>
+                    <li><AdminIcon name="check" size={14} /> View and export all financial and sales analytics</li>
+                    <li><AdminIcon name="check" size={14} /> Manage bank payouts and Telebirr merchant billing</li>
+                    <li><AdminIcon name="check" size={14} /> Create and modify digital menu dishes, prices, and QR codes</li>
+                  </>
+                )}
+                {selectedStaffProfile.role === 'Manager' && (
+                  <>
+                    <li><AdminIcon name="check" size={14} /> Manage daily kitchen orders, dining tables, and QR cards</li>
+                    <li><AdminIcon name="check" size={14} /> Update dish availability and edit menu pricing</li>
+                    <li><AdminIcon name="check" size={14} /> View daily shift reports and customer feedback</li>
+                    <li><AdminIcon name="check" size={14} /> View staff directory (cannot invite or alter owner credentials)</li>
+                  </>
+                )}
+                {selectedStaffProfile.role === 'Kitchen Staff' && (
+                  <>
+                    <li><AdminIcon name="check" size={14} /> View incoming live QR orders with customer dietary notes</li>
+                    <li><AdminIcon name="check" size={14} /> Update kitchen prep status (Preparing → Ready)</li>
+                    <li><AdminIcon name="check" size={14} /> View food recipes and menu items</li>
+                  </>
+                )}
+                {selectedStaffProfile.role === 'Waiter' && (
+                  <>
+                    <li><AdminIcon name="check" size={14} /> View table orders and guest seating allocations</li>
+                    <li><AdminIcon name="check" size={14} /> Mark food items as served to guest tables</li>
+                    <li><AdminIcon name="check" size={14} /> Inspect table QR codes and customer feedback</li>
+                  </>
+                )}
+                {selectedStaffProfile.role === 'Cashier' && (
+                  <>
+                    <li><AdminIcon name="check" size={14} /> View orders, bill totals, and tax breakdowns</li>
+                    <li><AdminIcon name="check" size={14} /> Record and confirm payments (Cash, Telebirr, Card)</li>
+                    <li><AdminIcon name="check" size={14} /> View shift settlement history and print guest receipts</li>
+                  </>
+                )}
+              </ul>
+            </div>
+
+            {/* Profile Action Buttons */}
+            <div className="admin-modal-actions" style={{ marginTop: '20px' }}>
+              <button
+                className="admin-action-btn secondary"
+                onClick={() => {
+                  setRoleChangeTarget(selectedStaffProfile);
+                  setNewSelectedRole(selectedStaffProfile.role);
+                }}
+              >
+                <AdminIcon name="shield" size={15} /> Change Role
+              </button>
+
+              <button
+                className={`admin-action-btn ${selectedStaffProfile.status === 'Active' ? 'danger' : 'secondary'}`}
+                onClick={() => setDeactivatingTarget(selectedStaffProfile)}
+              >
+                {selectedStaffProfile.status === 'Active' ? 'Deactivate Account' : 'Reactivate Account'}
+              </button>
+
+              <button className="admin-action-btn secondary" onClick={() => setSelectedStaffProfile(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL 7: CHANGE ROLE CONFIRMATION (03D)
+         ========================================================= */}
+      {roleChangeTarget && (
+        <div className="admin-modal-backdrop" onClick={() => setRoleChangeTarget(null)}>
+          <div className="admin-modal" style={{ width: '480px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>Change Staff Role</h3>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Update access privileges for {roleChangeTarget.name}</span>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setRoleChangeTarget(null)}>
+                <AdminIcon name="close" size={20} />
+              </button>
+            </div>
+
+            {roleChangeTarget.role === 'Owner' && staffMembers.filter(s => s.role === 'Owner' && s.status === 'Active').length <= 1 ? (
+              <div className="admin-alert-box warning" style={{ marginBottom: '16px' }}>
+                <AdminIcon name="alertTriangle" size={18} />
+                <div>
+                  <strong>Primary Owner Cannot Be Demoted</strong>
+                  <p>Abay Kitchen requires at least one active Owner. Transfer workspace ownership before changing this role.</p>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: '#f5f7f3', borderRadius: '8px', marginBottom: '16px' }}>
+                  <span className="admin-staff-avatar">{roleChangeTarget.avatar}</span>
+                  <div>
+                    <strong>{roleChangeTarget.name}</strong>
+                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--muted)' }}>
+                      Current role: <span className={`admin-role-badge ${roleDescriptions[roleChangeTarget.role].badgeClass}`}>{roleChangeTarget.role}</span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="admin-form-group">
+                  <label>Assign New Role *</label>
+                  <select
+                    value={newSelectedRole}
+                    onChange={e => setNewSelectedRole(e.target.value as StaffRole)}
+                  >
+                    <option value="Manager">Manager</option>
+                    <option value="Kitchen Staff">Kitchen Staff</option>
+                    <option value="Waiter">Waiter / Service</option>
+                    <option value="Cashier">Cashier</option>
+                    <option value="Owner">Owner</option>
+                  </select>
+                </div>
+
+                <div className="admin-role-summary-banner" style={{ marginTop: '12px' }}>
+                  <strong>New Role: {newSelectedRole}</strong>
+                  <p>{roleDescriptions[newSelectedRole].desc}</p>
+                </div>
+
+                <div className="admin-security-banner" style={{ marginTop: '12px' }}>
+                  <AdminIcon name="shield" size={15} />
+                  <span>Role changes require server authorization. New permissions take effect immediately upon the staff member's next request.</span>
+                </div>
+              </div>
+            )}
+
+            <div className="admin-modal-actions" style={{ marginTop: '20px' }}>
+              <button className="admin-action-btn secondary" onClick={() => setRoleChangeTarget(null)}>
+                Cancel
+              </button>
+              {!(roleChangeTarget.role === 'Owner' && staffMembers.filter(s => s.role === 'Owner' && s.status === 'Active').length <= 1) && (
+                <button className="admin-action-btn primary" onClick={handleConfirmRoleChange}>
+                  Confirm Role Change
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL 8: DEACTIVATE / REACTIVATE CONFIRMATION (03D)
+         ========================================================= */}
+      {deactivatingTarget && (
+        <div className="admin-modal-backdrop" onClick={() => setDeactivatingTarget(null)}>
+          <div className="admin-modal" style={{ width: '480px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>
+                  {deactivatingTarget.status === 'Active' ? 'Deactivate Staff Account' : 'Reactivate Staff Account'}
+                </h3>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{deactivatingTarget.name} · {deactivatingTarget.role}</span>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setDeactivatingTarget(null)}>
+                <AdminIcon name="close" size={20} />
+              </button>
+            </div>
+
+            {deactivatingTarget.role === 'Owner' && deactivatingTarget.status === 'Active' ? (
+              <div className="admin-alert-box error">
+                <AdminIcon name="alertTriangle" size={18} />
+                <div>
+                  <strong>Primary Owner Cannot Be Deactivated</strong>
+                  <p>You cannot deactivate the primary workspace owner. You must transfer restaurant ownership before removing owner credentials.</p>
+                </div>
+              </div>
+            ) : deactivatingTarget.status === 'Active' ? (
+              <div>
+                <p style={{ fontSize: '13px', lineHeight: '1.5', margin: '0 0 14px' }}>
+                  Are you sure you want to deactivate <strong>{deactivatingTarget.name}</strong>?
+                </p>
+                <div className="admin-alert-box warning" style={{ marginBottom: '14px' }}>
+                  <AdminIcon name="alertTriangle" size={18} />
+                  <div>
+                    <strong>Access Revocation Notice</strong>
+                    <p>The staff member will immediately lose access to the Abay Kitchen dashboard. All historical order entries, kitchen preparation logs, and payment records remain preserved in the system.</p>
+                  </div>
+                </div>
+                <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0 }}>
+                  This account can be reactivated at any time by an authorized administrator.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p style={{ fontSize: '13px', lineHeight: '1.5', margin: '0 0 14px' }}>
+                  Reactivate <strong>{deactivatingTarget.name}</strong>?
+                </p>
+                <div className="admin-alert-box info">
+                  <AdminIcon name="check" size={18} />
+                  <div>
+                    <strong>Restore Access</strong>
+                    <p>{deactivatingTarget.name} will regain access to their assigned <strong>{deactivatingTarget.role}</strong> workspace privileges upon logging in.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="admin-modal-actions" style={{ marginTop: '20px' }}>
+              <button className="admin-action-btn secondary" onClick={() => setDeactivatingTarget(null)}>
+                Cancel
+              </button>
+              {!(deactivatingTarget.role === 'Owner' && deactivatingTarget.status === 'Active') && (
+                <button
+                  className={`admin-action-btn ${deactivatingTarget.status === 'Active' ? 'danger' : 'primary'}`}
+                  onClick={handleConfirmDeactivation}
+                >
+                  {deactivatingTarget.status === 'Active' ? 'Deactivate Account' : 'Reactivate Account'}
+                </button>
+              )}
             </div>
           </div>
         </div>
