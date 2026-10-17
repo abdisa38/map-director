@@ -27,7 +27,19 @@ function AdminIcon({ name, size = 18 }: { name: string; size?: number }) {
     qr: <><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/></>,
     printer: <><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></>,
     copy: <><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></>,
-    download: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></>
+    download: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></>,
+    userPlus: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></>,
+    shield: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></>,
+    mail: <><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></>,
+    phone: <><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></>,
+    refreshCw: <><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></>,
+    alertTriangle: <><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>,
+    moreVertical: <><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></>,
+    lock: <><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>,
+    crown: <><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></>,
+    clock: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
+    info: <><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></>,
+    userX: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/></>
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -123,6 +135,221 @@ const defaultDishes: MenuItem[] = [
 const initialCategories = ['All Items', 'Ethiopian Food', 'Main Courses', 'Breakfast', 'Burgers', 'Pizza', 'Drinks', 'Desserts'];
 const diningAreas = ['All Areas', 'Main Dining', 'Terrace', 'VIP Lounge', 'Patio'];
 
+// 03D — Staff Management, Roles & Permissions Types & Data
+export type StaffRole = 'Owner' | 'Manager' | 'Kitchen Staff' | 'Waiter' | 'Cashier';
+export type StaffStatus = 'Active' | 'Pending Invitation' | 'Inactive';
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: StaffRole;
+  status: StaffStatus;
+  dateAdded: string;
+  lastActive: string;
+  avatar: string;
+  invitationNote?: string;
+}
+
+export const initialStaff: StaffMember[] = [
+  {
+    id: 's1',
+    name: 'Abebe Bekele',
+    email: 'abebe@abaykitchen.com',
+    phone: '+251 91 123 4567',
+    role: 'Owner',
+    status: 'Active',
+    dateAdded: '12 Jan 2026',
+    lastActive: '5m ago',
+    avatar: 'AB'
+  },
+  {
+    id: 's2',
+    name: 'Selamawit Desta',
+    email: 'selam@abaykitchen.com',
+    phone: '+251 92 345 6789',
+    role: 'Manager',
+    status: 'Active',
+    dateAdded: '15 Jan 2026',
+    lastActive: '22m ago',
+    avatar: 'SD'
+  },
+  {
+    id: 's3',
+    name: 'Tigist Haile',
+    email: 'tigist@abaykitchen.com',
+    phone: '+251 93 456 7890',
+    role: 'Kitchen Staff',
+    status: 'Active',
+    dateAdded: '18 Jan 2026',
+    lastActive: '1h ago',
+    avatar: 'TH'
+  },
+  {
+    id: 's4',
+    name: 'Dawit Tadesse',
+    email: 'dawit@abaykitchen.com',
+    phone: '+251 94 567 8901',
+    role: 'Waiter',
+    status: 'Active',
+    dateAdded: '20 Jan 2026',
+    lastActive: '3h ago',
+    avatar: 'DT'
+  },
+  {
+    id: 's5',
+    name: 'Almaz Ayana',
+    email: 'almaz@abaykitchen.com',
+    phone: '+251 95 678 9012',
+    role: 'Cashier',
+    status: 'Active',
+    dateAdded: '22 Jan 2026',
+    lastActive: '2h ago',
+    avatar: 'AA'
+  },
+  {
+    id: 's6',
+    name: 'Yared Solomon',
+    email: 'yared.s@gmail.com',
+    phone: '+251 96 789 0123',
+    role: 'Waiter',
+    status: 'Pending Invitation',
+    dateAdded: '16 Oct 2026',
+    lastActive: 'Never (Invite Sent)',
+    avatar: 'YS',
+    invitationNote: 'Welcome to the evening dining room service crew.'
+  },
+  {
+    id: 's7',
+    name: 'Bethelhem Worku',
+    email: 'bethel@gmail.com',
+    phone: '+251 97 890 1234',
+    role: 'Cashier',
+    status: 'Inactive',
+    dateAdded: '05 Feb 2026',
+    lastActive: '14 days ago',
+    avatar: 'BW'
+  }
+];
+
+export const roleDescriptions: Record<StaffRole, { title: string; desc: string; icon: string; badgeClass: string }> = {
+  Owner: {
+    title: 'Owner',
+    desc: 'Full workspace control, billing, settings, and team access.',
+    icon: 'crown',
+    badgeClass: 'owner'
+  },
+  Manager: {
+    title: 'Manager',
+    desc: 'Daily floor operations, orders, food menu, and dining tables.',
+    icon: 'shield',
+    badgeClass: 'manager'
+  },
+  'Kitchen Staff': {
+    title: 'Kitchen Staff',
+    desc: 'View incoming orders, prep statuses, and kitchen dietary notes.',
+    icon: 'menu',
+    badgeClass: 'kitchen'
+  },
+  Waiter: {
+    title: 'Waiter / Service',
+    desc: 'View table orders, update serving status, and table QR info.',
+    icon: 'orders',
+    badgeClass: 'waiter'
+  },
+  Cashier: {
+    title: 'Cashier',
+    desc: 'View orders, record payments, and confirm guest billing.',
+    icon: 'check',
+    badgeClass: 'cashier'
+  }
+};
+
+export interface PermissionCategory {
+  category: string;
+  Owner: string;
+  Manager: string;
+  'Kitchen Staff': string;
+  Waiter: string;
+  Cashier: string;
+}
+
+export const permissionMatrix: PermissionCategory[] = [
+  {
+    category: 'Dashboard & Overview',
+    Owner: 'Full View & KPI Controls',
+    Manager: 'View Real-time Metrics',
+    'Kitchen Staff': 'Restricted',
+    Waiter: 'Restricted',
+    Cashier: "View Today's Total Sales"
+  },
+  {
+    category: 'Order Management',
+    Owner: 'View, Edit, Cancel, Manage',
+    Manager: 'View, Edit, Cancel, Manage',
+    'Kitchen Staff': 'View Orders & Update Prep',
+    Waiter: 'View Orders & Mark Served',
+    Cashier: 'View Orders & Verify Pay'
+  },
+  {
+    category: 'Food Menu & Categories',
+    Owner: 'View, Create, Edit, Price',
+    Manager: 'View, Create, Edit Availability',
+    'Kitchen Staff': 'View Menu & Recipes',
+    Waiter: 'View Available Items',
+    Cashier: 'View Item Prices'
+  },
+  {
+    category: 'Tables & QR Codes',
+    Owner: 'View, Create, Print, Manage',
+    Manager: 'View, Edit, Print QR Cards',
+    'Kitchen Staff': 'Restricted',
+    Waiter: 'View Table QR Status',
+    Cashier: 'Restricted'
+  },
+  {
+    category: 'Staff Management',
+    Owner: 'Invite, Change Roles, Deactivate',
+    Manager: 'View Staff Directory',
+    'Kitchen Staff': 'Restricted',
+    Waiter: 'Restricted',
+    Cashier: 'Restricted'
+  },
+  {
+    category: 'Customer Feedback',
+    Owner: 'View, Export, Manage',
+    Manager: 'View & Respond',
+    'Kitchen Staff': 'View Food Rating Notes',
+    Waiter: 'View Service Feedback',
+    Cashier: 'Restricted'
+  },
+  {
+    category: 'Reports & Analytics',
+    Owner: 'Full Financial & Export',
+    Manager: 'Daily Sales & Shift Summary',
+    'Kitchen Staff': 'Restricted',
+    Waiter: 'Restricted',
+    Cashier: 'Restricted'
+  },
+  {
+    category: 'Payment & Billing',
+    Owner: 'Bank, Telebirr & Payouts',
+    Manager: 'Restricted',
+    'Kitchen Staff': 'Restricted',
+    Waiter: 'Restricted',
+    Cashier: 'Record & Confirm Payments'
+  },
+  {
+    category: 'Restaurant Settings',
+    Owner: 'Full Workspace Configuration',
+    Manager: 'Restricted',
+    'Kitchen Staff': 'Restricted',
+    Waiter: 'Restricted',
+    Cashier: 'Restricted'
+  }
+];
+
 type Props = {
   sharedOrders: SessionOrder[];
   onUpdateOrders: (orders: SessionOrder[]) => void;
@@ -130,7 +357,7 @@ type Props = {
 };
 
 export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigateToCustomer }: Props) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories' | 'tables'>('tables');
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories' | 'tables' | 'staff'>('staff');
   const [tables, setTables] = useState<DiningTable[]>(initialTables);
   const [dishes, setDishes] = useState<MenuItem[]>(defaultDishes);
   const [categories, setCategories] = useState<string[]>(initialCategories);
@@ -154,9 +381,156 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
   const [isNewItem, setIsNewItem] = useState(false);
   const [previewItem, setPreviewItem] = useState<MenuItem | null>(null);
 
+  // Staff Management State (03D)
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>(initialStaff);
+  const [searchStaff, setSearchStaff] = useState('');
+  const [staffRoleFilter, setStaffRoleFilter] = useState<string>('All');
+  const [staffStatusFilter, setStaffStatusFilter] = useState<string>('All');
+
+  // 03D Modals and Drawers
+  const [isAddStaffOpen, setIsAddStaffOpen] = useState(false);
+  const [selectedStaffProfile, setSelectedStaffProfile] = useState<StaffMember | null>(null);
+  const [isPermissionsMatrixOpen, setIsPermissionsMatrixOpen] = useState(false);
+  const [selectedMatrixRole, setSelectedMatrixRole] = useState<StaffRole>('Manager');
+  const [roleChangeTarget, setRoleChangeTarget] = useState<StaffMember | null>(null);
+  const [newSelectedRole, setNewSelectedRole] = useState<StaffRole>('Manager');
+  const [deactivatingTarget, setDeactivatingTarget] = useState<StaffMember | null>(null);
+
+  // Add Staff Form State
+  const [addForm, setAddForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: 'Waiter' as StaffRole,
+    note: ''
+  });
+  const [formErrors, setFormErrors] = useState<{ name?: string; email?: string }>({});
+  const [isSubmittingInvite, setIsSubmittingInvite] = useState(false);
+  const [inviteSentSuccess, setInviteSentSuccess] = useState<StaffMember | null>(null);
+  const [simulateInviteError, setSimulateInviteError] = useState(false);
+  const [inviteErrorMsg, setInviteErrorMsg] = useState<string | null>(null);
+  const [showMernDetails, setShowMernDetails] = useState(false);
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
+  };
+
+  // Filtered Staff (03D)
+  const filteredStaff = useMemo(() => {
+    return staffMembers.filter(member => {
+      const matchSearch =
+        member.name.toLowerCase().includes(searchStaff.toLowerCase()) ||
+        member.email.toLowerCase().includes(searchStaff.toLowerCase()) ||
+        (member.phone && member.phone.includes(searchStaff));
+      const matchRole = staffRoleFilter === 'All' || member.role === staffRoleFilter;
+      const matchStatus = staffStatusFilter === 'All' || member.status === staffStatusFilter;
+      return matchSearch && matchRole && matchStatus;
+    });
+  }, [staffMembers, searchStaff, staffRoleFilter, staffStatusFilter]);
+
+  // Handle Send Invitation (03D)
+  const handleSendInvitation = () => {
+    const errors: { name?: string; email?: string } = {};
+    if (!addForm.name.trim()) {
+      errors.name = 'Full name is required';
+    }
+    if (!addForm.email.trim()) {
+      errors.email = 'Email address is required';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(addForm.email.trim())) {
+        errors.email = 'Enter a valid email address (e.g. name@abaykitchen.com)';
+      } else if (staffMembers.some(s => s.email.toLowerCase() === addForm.email.trim().toLowerCase())) {
+        errors.email = 'A staff account with this email already exists in Abay Kitchen';
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormErrors({});
+    setIsSubmittingInvite(true);
+    setInviteErrorMsg(null);
+
+    // Simulate async network request
+    setTimeout(() => {
+      setIsSubmittingInvite(false);
+      if (simulateInviteError) {
+        setInviteErrorMsg('Unable to dispatch email invitation: Mail relay service unreachable. Please retry.');
+        return;
+      }
+
+      const initials = addForm.name.trim().split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      const newMember: StaffMember = {
+        id: `s-${Date.now()}`,
+        name: addForm.name.trim(),
+        email: addForm.email.trim(),
+        phone: addForm.phone.trim() || undefined,
+        role: addForm.role,
+        status: 'Pending Invitation',
+        dateAdded: 'Today',
+        lastActive: 'Never (Invite Sent)',
+        avatar: initials || 'ST',
+        invitationNote: addForm.note.trim() || undefined
+      };
+
+      setStaffMembers(prev => [newMember, ...prev]);
+      setInviteSentSuccess(newMember);
+      showToast(`Invitation sent to ${newMember.email}`);
+    }, 650);
+  };
+
+  // Resend Invite (03D)
+  const handleResendInvite = (member: StaffMember) => {
+    showToast(`Fresh 24h invitation token dispatched to ${member.email}`);
+  };
+
+  // Change Role (03D)
+  const handleConfirmRoleChange = () => {
+    if (!roleChangeTarget) return;
+    if (roleChangeTarget.role === 'Owner' && newSelectedRole !== 'Owner') {
+      const ownerCount = staffMembers.filter(s => s.role === 'Owner' && s.status === 'Active').length;
+      if (ownerCount <= 1) {
+        showToast('Cannot change role: Workspace must have at least one active Owner.');
+        return;
+      }
+    }
+
+    setStaffMembers(prev =>
+      prev.map(s => (s.id === roleChangeTarget.id ? { ...s, role: newSelectedRole } : s))
+    );
+    if (selectedStaffProfile?.id === roleChangeTarget.id) {
+      setSelectedStaffProfile({ ...selectedStaffProfile, role: newSelectedRole });
+    }
+    showToast(`${roleChangeTarget.name}'s role updated to ${newSelectedRole}`);
+    setRoleChangeTarget(null);
+  };
+
+  // Toggle Account Active / Inactive (03D)
+  const handleConfirmDeactivation = () => {
+    if (!deactivatingTarget) return;
+    if (deactivatingTarget.role === 'Owner' && deactivatingTarget.status === 'Active') {
+      showToast('Action Blocked: Primary Owner account cannot be deactivated.');
+      setDeactivatingTarget(null);
+      return;
+    }
+
+    const nextStatus: StaffStatus = deactivatingTarget.status === 'Active' ? 'Inactive' : 'Active';
+    setStaffMembers(prev =>
+      prev.map(s => (s.id === deactivatingTarget.id ? { ...s, status: nextStatus } : s))
+    );
+    if (selectedStaffProfile?.id === deactivatingTarget.id) {
+      setSelectedStaffProfile({ ...selectedStaffProfile, status: nextStatus });
+    }
+    showToast(
+      nextStatus === 'Inactive'
+        ? `${deactivatingTarget.name} has been deactivated. Historical records preserved.`
+        : `${deactivatingTarget.name} has been reactivated.`
+    );
+    setDeactivatingTarget(null);
   };
 
   // Toggle Table Active Status
