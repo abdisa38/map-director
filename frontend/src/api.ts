@@ -192,11 +192,14 @@ export const api = {
   },
 
   // Staff & Auth
-  async loginStaff(role: string, pin: string): Promise<ApiStaff> {
+  async loginStaff(credentials: { email?: string; username?: string; role?: string; pin: string } | string, pin?: string): Promise<ApiStaff> {
+    const body = typeof credentials === 'string'
+      ? { role: credentials, pin }
+      : credentials;
     const res = await fetch(`${API_BASE}/staff/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role, pin })
+      body: JSON.stringify(body)
     });
     const json = await res.json();
     if (!json.success) throw new Error(json.error || 'Staff authentication failed');

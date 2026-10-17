@@ -67,7 +67,7 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
       const savedOrder = await api.checkoutOrder({
         customerName: name.trim(),
         customerPhone: phone.trim(),
-        table: 'Table 08',
+        table: 'Dine-in',
         lines: cart.map(l => ({
           key: l.key,
           dishId: String(l.dish.id),
@@ -160,7 +160,7 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
         <a href="#" onClick={e => { e.preventDefault(); if (!busy) onBack(); }} className="checkout-brand">
           ABAY KITCHEN<small>AUTHENTIC ETHIOPIAN DINING</small>
         </a>
-        <span><Icon size={15} /> Table 08</span>
+        <span><Icon name="check" size={15} /> Dine-in</span>
         <span className="checkout-preview" style={{ background: '#e8f5e9', color: '#143d2b', border: '1px solid #c9e4c3' }}>
           ✓ LIVE QR ORDERING
         </span>
@@ -173,7 +173,7 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
 
         <div className="checkout-title">
           <span className="menu-eyebrow">
-            {submitted ? 'ORDER CONFIRMED & RECEIVED' : 'YOUR TABLE · DELICIOUS FOOD'}
+            {submitted ? 'ORDER CONFIRMED & RECEIVED' : 'AUTHENTIC ETHIOPIAN DINING'}
           </span>
           <h1 ref={heading} tabIndex={-1}>
             {step === 'cart'
@@ -234,7 +234,7 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
                   <span className={`confirmation-symbol ${status === 'Cancelled' ? 'cancel-symbol' : ''}`}>
                     <Icon name={status === 'Cancelled' ? 'info' : 'check'} size={28} />
                   </span>
-                  <span className="menu-eyebrow">ABAY KITCHEN · TABLE 08</span>
+                  <span className="menu-eyebrow">ABAY KITCHEN · DINE-IN</span>
                   <h2>Order Received Successfully!</h2>
                   <p>
                     The chef has been notified and is preparing your meal. No need to call a server.
@@ -244,7 +244,7 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
                     <strong>{reference}</strong>
                   </div>
                   <div className="confirmation-meta" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <span><Icon size={15} /> Table 08</span>
+                    <span><Icon name="check" size={15} /> Dine-in</span>
                     <span className="badge success">{paymentMethod} · Paid</span>
                     <span>Guest: <strong>{name}</strong></span>
                   </div>
@@ -500,16 +500,16 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
                 </section>
               )}
 
-              {/* Table Confirmation Box */}
+              {/* Dine-in Confirmation Box */}
               {!submitted && (
                 <section className="checkout-panel table-confirmation">
                   <div className="table-confirm-icon">
-                    <Icon size={25} />
+                    <Icon name="check" size={25} />
                   </div>
                   <div>
-                    <span className="menu-eyebrow">YOUR DINING TABLE</span>
-                    <h2>Ordering for Table 08</h2>
-                    <p>Abay Kitchen · Bole Medhanialem, Addis Ababa</p>
+                    <span className="menu-eyebrow">DINE-IN SERVICE</span>
+                    <h2>Abay Kitchen Dining</h2>
+                    <p>Bole Medhanialem, Addis Ababa · Prepared fresh upon ordering</p>
                   </div>
                 </section>
               )}
@@ -518,7 +518,7 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
             {/* Order Summary Column */}
             <aside className="checkout-summary-column">
               <section className="checkout-panel checkout-summary">
-                <span className="menu-eyebrow">ABAY KITCHEN · TABLE 08</span>
+                <span className="menu-eyebrow">ABAY KITCHEN · DINE-IN</span>
                 <h2>{submitted ? 'Order Summary' : 'Total Amount'}</h2>
                 <div className="summary-detail">
                   <span>Subtotal · {count} items</span>

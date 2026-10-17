@@ -1244,9 +1244,9 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
             className={`admin-nav-item ${activeTab === 'tables' ? 'active' : ''}`}
             onClick={() => { setActiveTab('tables'); setMobileMenuOpen(false); }}
           >
-            <AdminIcon name="tables" size={18} />
-            <span>Tables & QR</span>
-            <span className="admin-nav-badge" style={{ background: 'var(--gold)', color: '#10261b' }}>{tables.length}</span>
+            <AdminIcon name="qr" size={18} />
+            <span>Universal QR</span>
+            <span className="admin-nav-badge" style={{ background: 'var(--gold)', color: '#10261b' }}>Live</span>
           </button>
 
           <button
@@ -1342,184 +1342,207 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
           <div className="admin-topbar-right">
             <button className="admin-live-link" onClick={onNavigateToCustomer} title="View live customer menu">
               <AdminIcon name="external" size={14} />
-              <span>Customer Menu (Table 08)</span>
+              <span>Customer Menu (Live)</span>
             </button>
           </div>
         </header>
 
         <main className="admin-content">
           {/* =========================================================
-              TAB: TABLES & QR CODE GENERATION (03C)
+              TAB: UNIVERSAL RESTAURANT QR CODE (03C)
              ========================================================= */}
           {activeTab === 'tables' && (
             <>
               <div className="admin-page-header">
                 <div>
-                  <h1>Tables & QR Codes</h1>
-                  <p>Generate digital menu QR codes for dining tables. Print table tents and cards.</p>
+                  <h1>Universal Restaurant QR Code</h1>
+                  <p>One official QR code for all tables, stands, and counter cards at Abay Kitchen.</p>
                 </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <button
                     className="admin-action-btn secondary"
                     onClick={() => {
-                      setPrintModalTable(tables[0]);
-                      setPrintConcept('bulk');
+                      navigator.clipboard.writeText(window.location.origin);
+                      showToast('Digital Menu URL copied to clipboard!');
                     }}
                   >
-                    <AdminIcon name="printer" size={15} /> Print All QR Codes
+                    <AdminIcon name="copy" size={15} /> Copy Menu URL
                   </button>
                   <button
                     className="admin-action-btn primary"
-                    onClick={() => {
-                      setIsNewTable(true);
-                      setEditingTable({
-                        id: `t-${Date.now()}`,
-                        number: `Table 0${tables.length + 1}`,
-                        area: 'Main Dining',
-                        capacity: 4,
-                        active: true,
-                        qrToken: `ak-t${tables.length + 1}-${Math.random().toString(36).substring(2, 6)}`
-                      });
-                    }}
+                    onClick={() => window.print()}
                   >
-                    <AdminIcon name="plus" size={15} /> Add Dining Table
+                    <AdminIcon name="printer" size={15} /> Print Table Stand
                   </button>
                 </div>
               </div>
 
-              {/* Area Filters & Search */}
-              <div className="admin-orders-controls">
-                <div className="admin-status-tabs">
-                  {diningAreas.map(area => (
-                    <button
-                      key={area}
-                      className={`admin-tab-btn ${selectedArea === area ? 'active' : ''}`}
-                      onClick={() => setSelectedArea(area)}
-                    >
-                      <span>{area}</span>
-                      <span className="admin-tab-count">
-                        {area === 'All Areas' ? tables.length : tables.filter(t => t.area === area).length}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+              {/* Universal QR Code Display & Print Card */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px', alignItems: 'start' }}>
+                {/* Print Stand Card (Physical Stand Preview) */}
+                <div
+                  style={{
+                    background: '#FAF8F5',
+                    border: '2px solid #C69234',
+                    borderRadius: '16px',
+                    padding: '36px 28px',
+                    textAlign: 'center',
+                    boxShadow: '0 12px 36px rgba(20, 61, 43, 0.08)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    position: 'relative'
+                  }}
+                >
+                  <span style={{ fontSize: '11px', letterSpacing: '2px', fontWeight: 700, color: '#C69234', textTransform: 'uppercase', marginBottom: '8px' }}>
+                    TABLETOP STAND · ALL TABLES
+                  </span>
 
-                <div className="admin-filter-row">
-                  <div className="admin-search-input">
-                    <AdminIcon name="search" size={16} />
-                    <input
-                      type="text"
-                      placeholder="Search table number…"
-                      value={searchTable}
-                      onChange={e => setSearchTable(e.target.value)}
-                    />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#143D2B', marginBottom: '6px' }}>
+                    <span style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontStyle: 'italic', fontWeight: 700, color: '#143D2B' }}>
+                      a<span style={{ color: '#C69234' }}>k</span>
+                    </span>
+                    <strong style={{ fontSize: '18px', letterSpacing: '1px' }}>ABAY KITCHEN</strong>
                   </div>
 
-                  <select
-                    className="admin-select"
-                    value={tableStatusFilter}
-                    onChange={e => setTableStatusFilter(e.target.value as any)}
+                  <p style={{ margin: '0 0 20px', fontSize: '12px', color: '#6e766c', letterSpacing: '0.5px' }}>
+                    ROOTED IN TRADITION · MADE WITH LOVE
+                  </p>
+
+                  {/* QR Code Container */}
+                  <div
+                    style={{
+                      background: '#ffffff',
+                      padding: '18px',
+                      borderRadius: '12px',
+                      border: '1px solid #d4decf',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+                      marginBottom: '20px'
+                    }}
                   >
-                    <option value="all">All Tables</option>
-                    <option value="active">Active QR Codes</option>
-                    <option value="inactive">Inactive Tables</option>
-                  </select>
+                    <TableQRCodeSVG size={220} tableNumber="Universal" color="#143D2B" />
+                  </div>
+
+                  <div style={{ maxWidth: '280px', margin: '0 auto' }}>
+                    <strong style={{ display: 'block', fontSize: '16px', color: '#143D2B', marginBottom: '6px' }}>
+                      Scan to View Digital Menu & Order
+                    </strong>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#6e766c', lineHeight: 1.5 }}>
+                      Point your phone camera here to browse dishes, customize, and order instantly.
+                    </p>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: '24px',
+                      paddingTop: '16px',
+                      borderTop: '1px dashed #d9e2d5',
+                      width: '100%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      gap: '16px',
+                      fontSize: '11px',
+                      color: '#143D2B',
+                      fontWeight: 600
+                    }}
+                  >
+                    <span>✓ Telebirr & CBE Birr</span>
+                    <span>✓ Chapa Payment</span>
+                    <span>✓ Instant Kitchen Order</span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Tables Grid */}
-              <div className="admin-tables-grid">
-                {filteredTables.map(table => {
-                  const hasLiveOrder = table.number === 'Table 08' || table.number === 'Table 04';
-                  return (
-                    <div className={`admin-table-box ${!table.active ? 'inactive' : ''}`} key={table.id}>
-                      <div className="admin-table-box-top">
-                        <div className="admin-table-title">
-                          <h3>{table.number}</h3>
-                          <span className="admin-table-area-tag">{table.area}</span>
+                {/* Information & Instructions Card */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                  <div className="admin-overview-card" style={{ padding: '24px' }}>
+                    <h3 style={{ margin: '0 0 12px', fontSize: '17px', color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <AdminIcon name="qr" size={18} /> Universal QR Code Setup
+                    </h3>
+                    <p style={{ fontSize: '13px', color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 16px' }}>
+                      You no longer need individual QR codes for each table number. This single universal QR code connects every guest to the full interactive Abay Kitchen menu.
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                        <div style={{ background: '#eef4ec', color: '#143d2b', width: '28px', height: '28px', borderRadius: '50%', display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: '13px', flexShrink: 0 }}>
+                          1
                         </div>
-                        {/* Interactive mini QR preview */}
-                        <div
-                          className="admin-table-qr-mini"
-                          onClick={() => setSelectedQRTable(table)}
-                          title="Click to view full QR code"
-                        >
-                          <TableQRCodeSVG size={50} tableNumber={table.number} />
+                        <div>
+                          <strong style={{ fontSize: '13px', color: 'var(--ink)' }}>Print Table Stands or Stickers</strong>
+                          <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+                            Print this design on acrylic stands, wooden blocks, or table stickers and place one on each table.
+                          </p>
                         </div>
                       </div>
 
-                      <div className="admin-table-meta-row">
-                        <span>Capacity: <strong>{table.capacity} Guests</strong></span>
-                        <span className={`admin-table-order-pill ${hasLiveOrder ? 'active' : 'idle'}`}>
-                          {hasLiveOrder ? '● Active Order' : 'No Order'}
-                        </span>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                        <div style={{ background: '#eef4ec', color: '#143d2b', width: '28px', height: '28px', borderRadius: '50%', display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: '13px', flexShrink: 0 }}>
+                          2
+                        </div>
+                        <div>
+                          <strong style={{ fontSize: '13px', color: 'var(--ink)' }}>Guest Scans & Enters Name</strong>
+                          <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+                            When customers sit at any table, they scan the code, browse food photos, and enter their name when ordering.
+                          </p>
+                        </div>
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
-                          QR Ordering: <strong style={{ color: table.active ? '#23734b' : '#b83b3b' }}>{table.active ? 'Active' : 'Disabled'}</strong>
-                        </span>
-                        <button
-                          className={`admin-toggle ${table.active ? 'on' : ''}`}
-                          onClick={() => toggleTableActive(table.id)}
-                          title={table.active ? 'Deactivate table QR' : 'Activate table QR'}
-                          aria-label={`Toggle active for ${table.number}`}
-                        >
-                          <span className="admin-toggle-knob" />
-                        </button>
-                      </div>
-
-                      <div className="admin-table-card-actions">
-                        <button
-                          className="admin-action-btn secondary"
-                          style={{ flex: 1 }}
-                          onClick={() => setSelectedQRTable(table)}
-                        >
-                          <AdminIcon name="qr" size={14} /> QR Code
-                        </button>
-                        <button
-                          className="admin-action-btn secondary"
-                          onClick={() => {
-                            setPrintModalTable(table);
-                            setPrintConcept('card');
-                          }}
-                          title="Print physical table card"
-                        >
-                          <AdminIcon name="printer" size={14} /> Print
-                        </button>
-                        <button
-                          className="admin-action-btn secondary"
-                          onClick={() => {
-                            setIsNewTable(false);
-                            setEditingTable({ ...table });
-                          }}
-                          title="Edit table settings"
-                        >
-                          <AdminIcon name="edit" size={14} />
-                        </button>
-                        <button
-                          className="admin-action-btn danger"
-                          onClick={() => handleDeleteTable(table.id, table.number)}
-                          title="Delete table"
-                        >
-                          <AdminIcon name="trash" size={14} />
-                        </button>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                        <div style={{ background: '#eef4ec', color: '#143d2b', width: '28px', height: '28px', borderRadius: '50%', display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: '13px', flexShrink: 0 }}>
+                          3
+                        </div>
+                        <div>
+                          <strong style={{ fontSize: '13px', color: 'var(--ink)' }}>Order Appears Live in Kitchen</strong>
+                          <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+                            The order displays the customer's name, items, instructions, and payment status directly on the Kitchen Orders board.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
 
-              {filteredTables.length === 0 && (
-                <div className="admin-empty-state">
-                  <AdminIcon name="tables" size={40} />
-                  <h3>No tables found</h3>
-                  <p>Try searching another table or clearing your area filter.</p>
-                  <button className="admin-action-btn secondary" onClick={() => { setSearchTable(''); setSelectedArea('All Areas'); }}>
-                    Clear Filters
-                  </button>
+                  {/* Quick Links & Actions */}
+                  <div className="admin-overview-card" style={{ padding: '24px' }}>
+                    <h3 style={{ margin: '0 0 12px', fontSize: '16px', color: 'var(--brand)' }}>
+                      Quick Actions & Link
+                    </h3>
+                    <div style={{ background: '#f5f7f3', border: '1px solid #dce4d9', padding: '12px 14px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <span style={{ fontSize: '13px', fontFamily: 'monospace', color: '#143d2b', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {window.location.origin}
+                      </span>
+                      <button
+                        className="admin-action-btn secondary sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(window.location.origin);
+                          showToast('Digital Menu link copied!');
+                        }}
+                      >
+                        Copy
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      <a
+                        href={window.location.origin}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="admin-action-btn secondary"
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <AdminIcon name="external" size={15} /> Test Customer Menu
+                      </a>
+                      <button
+                        className="admin-action-btn secondary"
+                        onClick={() => {
+                          window.print();
+                        }}
+                      >
+                        <AdminIcon name="download" size={15} /> Print / Save as PDF
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
             </>
           )}
 
@@ -1778,7 +1801,7 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   <thead>
                     <tr>
                       <th>CUSTOMER & REF</th>
-                      <th>TABLE</th>
+                      <th>SERVICE</th>
                       <th>ITEMS & SPECIAL NOTES</th>
                       <th>PAYMENT</th>
                       <th>TOTAL</th>
@@ -1794,7 +1817,7 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                           (orderStatusTab === 'New' && (order.status === 'New' || order.status === 'Received')) ||
                           order.status === orderStatusTab;
 
-                        const guestName = (order as any).customerName || 'Guest';
+                        const guestName = (order as any).customerName || 'Dine-in Guest';
                         const searchMatch =
                           !orderSearch ||
                           order.reference.toLowerCase().includes(orderSearch.toLowerCase()) ||
@@ -1804,8 +1827,8 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                         return statusMatch && searchMatch;
                       })
                       .map(order => {
-                        const guestName = (order as any).customerName || 'Guest (Table 08)';
-                        const initials = guestName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'GT';
+                        const guestName = (order as any).customerName || 'Dine-in Guest';
+                        const initials = guestName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'DG';
                         const totalAmount = order.lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0);
                         const itemsCount = order.lines.reduce((n, l) => n + l.quantity, 0);
                         const hasNotes = order.lines.some(l => l.instructions);
@@ -1825,10 +1848,10 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                               </div>
                             </td>
 
-                            {/* Table */}
+                            {/* Service / Dine-in */}
                             <td>
                               <span className="admin-table-tag" style={{ background: '#eef4ec', color: '#143d2b', border: '1px solid #d0e2cc' }}>
-                                Table 08
+                                Dine-in
                               </span>
                             </td>
 
@@ -1966,7 +1989,7 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                                 <div className="admin-live-order-left">
                                   <span className="admin-live-order-avatar">{initials}</span>
                                   <div className="admin-live-order-meta">
-                                    <strong>{guestName} · Table 08</strong>
+                                    <strong>{guestName} · Dine-in</strong>
                                     <span>
                                       {order.lines.map(l => `${l.quantity}× ${l.dish.name}`).join(', ')}
                                     </span>

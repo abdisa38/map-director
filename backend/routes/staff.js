@@ -2,28 +2,53 @@ const express = require('express');
 const router = express.Router();
 const Staff = require('../models/Staff');
 
-// Staff Login by Role and PIN
+// Staff Login by Role/Username/Email and PIN
 router.post('/login', async (req, res) => {
   try {
-    const { role, pin, email } = req.body;
+    const { role, pin, email, username } = req.body;
     let query = {};
 
-    if (email) {
-      query.email = email.toLowerCase().trim();
+    const rawId = (email || username || '').toLowerCase().trim();
+    if (rawId) {
+      if (rawId === 'admin') {
+        query = { $or: [{ role: 'Owner' }, { email: 'admin@abaykitchen.et' }] };
+      } else if (rawId === 'manager') {
+        query = { role: 'Manager' };
+      } else if (rawId === 'kitchen') {
+        query = { role: 'Kitchen' };
+      } else if (rawId === 'waiter') {
+        query = { role: 'Waiter' };
+      } else {
+        query = { email: rawId };
+      }
     } else if (role) {
-      query.role = role;
+      query = { role };
     } else {
-      return res.status(400).json({ success: false, error: 'Role or email required for staff login.' });
+      return res.status(400).json({ success: false, error: 'Username, email, or role required for staff login.' });
     }
 
-    const staff = await Staff.findOne(query);
+    let staff = await Staff.findOne(query);
+
+    // If admin is requested and not found in database, automatically seed admin
+    if (!staff && (rawId === 'admin' || rawId === 'admin@abaykitchen.et' || role === 'Owner')) {
+      staff = await Staff.create({
+        name: 'Abay Admin',
+        email: 'admin@abaykitchen.et',
+        phone: '+251 91 123 4567',
+        role: 'Owner',
+        pin: '1234',
+        status: 'Active'
+      });
+    }
+
     if (!staff) {
-      return res.status(404).json({ success: false, error: `No staff member found with role: ${role}` });
+      return res.status(404).json({ success: false, error: `No staff member found for "${rawId || role}". Default username is "admin".` });
     }
 
     // Check PIN (default '1234')
-    if (staff.pin && pin && staff.pin !== pin) {
-      return res.status(401).json({ success: false, error: 'Incorrect staff PIN' });
+    const enteredPin = (pin || '').trim();
+    if (staff.pin && enteredPin && staff.pin !== enteredPin) {
+      return res.status(401).json({ success: false, error: 'Incorrect password / PIN. (Default PIN: 1234)' });
     }
 
     staff.lastLogin = new Date();

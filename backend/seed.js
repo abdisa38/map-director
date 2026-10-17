@@ -139,6 +139,7 @@ const initialTables = [
 ];
 
 const initialStaff = [
+  { name: 'Abay Admin', email: 'admin@abaykitchen.et', phone: '+251 91 123 4567', role: 'Owner', pin: '1234', status: 'Active' },
   { name: 'Abebe Bekele', email: 'abebe@abaykitchen.et', phone: '+251 91 123 4567', role: 'Owner', pin: '1234', status: 'Active' },
   { name: 'Tigist Alemu', email: 'tigist@abaykitchen.et', phone: '+251 91 234 5678', role: 'Manager', pin: '1234', status: 'Active' },
   { name: 'Dawit Hailu', email: 'dawit@abaykitchen.et', phone: '+251 91 345 6789', role: 'Kitchen', pin: '1234', status: 'Active' },
@@ -227,6 +228,19 @@ async function seedDatabase() {
       console.log('Seeding initial staff members...');
       await Staff.insertMany(initialStaff);
       console.log('Staff members seeded.');
+    } else {
+      const adminExists = await Staff.findOne({ email: 'admin@abaykitchen.et' });
+      if (!adminExists) {
+        await Staff.create({
+          name: 'Abay Admin',
+          email: 'admin@abaykitchen.et',
+          phone: '+251 91 123 4567',
+          role: 'Owner',
+          pin: '1234',
+          status: 'Active'
+        });
+        console.log('Admin account created: admin@abaykitchen.et (PIN: 1234)');
+      }
     }
 
     const orderCount = await Order.countDocuments();
