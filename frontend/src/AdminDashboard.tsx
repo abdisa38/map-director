@@ -1822,25 +1822,10 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   <div className="admin-page-header">
                     <div>
                       <h1>Reports & Analytics</h1>
-                      <p>Understand your restaurant's sales, orders, and menu performance.</p>
+                      <p>Sales and operational performance for Abay Kitchen.</p>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                      {/* Role Simulation Switcher for Testing/Demonstration */}
-                      <div className="admin-role-view-banner" style={{ margin: 0, padding: '6px 12px' }}>
-                        <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Role View:</span>
-                        <select
-                          className="admin-role-select-inline"
-                          value={reportingRoleView}
-                          onChange={e => setReportingRoleView(e.target.value as StaffRole)}
-                        >
-                          <option value="Owner">Owner (Full Access)</option>
-                          <option value="Manager">Manager</option>
-                          <option value="Kitchen Staff">Kitchen Staff (Denied)</option>
-                          <option value="Waiter">Waiter (Denied)</option>
-                        </select>
-                      </div>
-
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <button
                         className="admin-action-btn primary"
                         onClick={() => {
@@ -1848,193 +1833,152 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                           setIsExportModalOpen(true);
                         }}
                       >
-                        <AdminIcon name="fileText" size={15} /> Export Report
+                        <AdminIcon name="download" size={15} /> Export Report
                       </button>
                     </div>
                   </div>
 
-                  {/* Date Range Selector & Period Controls */}
-                  <div className="admin-reports-control-bar">
-                    <div className="admin-range-presets">
+                  {/* Period Filter Bar */}
+                  <div className="admin-reports-filter-bar">
+                    <div className="admin-reports-preset-pills">
                       {(
                         [
                           { key: 'today', label: 'Today' },
                           { key: 'yesterday', label: 'Yesterday' },
-                          { key: '7days', label: 'Last 7 days' },
-                          { key: '30days', label: 'Last 30 days' },
-                          { key: 'month', label: 'This month' },
-                          { key: 'custom', label: 'Custom range' }
+                          { key: '7days', label: 'Last 7 Days' },
+                          { key: '30days', label: 'Last 30 Days' },
+                          { key: 'month', label: 'This Month' }
                         ] as { key: DateRangePreset; label: string }[]
-                      ).map(preset => (
+                      ).map(p => (
                         <button
-                          key={preset.key}
-                          className={`admin-range-btn ${selectedReportPreset === preset.key ? 'active' : ''}`}
-                          onClick={() => setSelectedReportPreset(preset.key)}
+                          key={p.key}
+                          className={`admin-report-pill-btn ${selectedReportPreset === p.key ? 'active' : ''}`}
+                          onClick={() => setSelectedReportPreset(p.key)}
                         >
-                          {preset.label}
+                          {p.label}
                         </button>
                       ))}
                     </div>
 
-                    <div className="admin-range-meta-row">
-                      <div className="admin-range-badge">
-                        <AdminIcon name="calendar" size={14} />
-                        <span>{activeReport.periodLabel}</span>
-                      </div>
-
-                      <label className="admin-compare-toggle">
+                    <div className="admin-reports-filter-meta">
+                      <span className="admin-report-range-text">{activeReport.periodLabel}</span>
+                      <label className="admin-report-compare-toggle">
                         <input
                           type="checkbox"
                           checked={comparePreviousPeriod}
                           onChange={e => setComparePreviousPeriod(e.target.checked)}
                         />
-                        <span>Compare to previous equivalent period</span>
+                        <span>Compare with previous period</span>
                       </label>
                     </div>
-
-                    {/* Custom Range Date Pickers */}
-                    {selectedReportPreset === 'custom' && (
-                      <div className="admin-custom-date-row">
-                        <div className="admin-form-group" style={{ margin: 0 }}>
-                          <label style={{ fontSize: '11px' }}>Start Date</label>
-                          <input
-                            type="date"
-                            value={customStartDate}
-                            onChange={e => setCustomStartDate(e.target.value)}
-                            style={{ padding: '6px 10px', fontSize: '12px' }}
-                          />
-                        </div>
-                        <div className="admin-form-group" style={{ margin: 0 }}>
-                          <label style={{ fontSize: '11px' }}>End Date</label>
-                          <input
-                            type="date"
-                            value={customEndDate}
-                            onChange={e => setCustomEndDate(e.target.value)}
-                            style={{ padding: '6px 10px', fontSize: '12px' }}
-                          />
-                        </div>
-                        <button
-                          className="admin-action-btn secondary sm"
-                          style={{ alignSelf: 'flex-end', height: '36px' }}
-                          onClick={() => showToast('Custom date filter applied')}
-                        >
-                          Apply Range
-                        </button>
-                      </div>
-                    )}
                   </div>
 
-                  {/* 4 Summary Metric Cards */}
-                  <div className="admin-reports-kpi-grid">
-                    {/* 1. Gross Sales */}
-                    <div className="admin-report-kpi-card highlight">
-                      <div className="kpi-top">
-                        <span className="kpi-label">GROSS SALES</span>
-                        <span className="kpi-tooltip-hint" title="Total eligible sales before discounts and tax. Not profit.">
-                          <AdminIcon name="info" size={14} />
-                        </span>
+                  {/* 4 Clean Spacious KPI Cards */}
+                  <div className="admin-reports-kpis-grid">
+                    {/* Gross Sales */}
+                    <div className="admin-report-kpi-box highlight">
+                      <div className="admin-kpi-head">
+                        <span className="admin-kpi-label">Gross Sales</span>
+                        <div className="admin-kpi-icon-wrap brand">
+                          <AdminIcon name="trendingUp" size={16} />
+                        </div>
                       </div>
-                      <div className="kpi-main-val">
+                      <div className="admin-kpi-number-row">
                         <strong>{money(activeReport.grossSales)}</strong>
                         {comparePreviousPeriod && (
-                          <span className={`kpi-change-pill ${activeReport.grossSalesChange >= 0 ? 'pos' : 'neg'}`}>
-                            <AdminIcon name={activeReport.grossSalesChange >= 0 ? 'trendingUp' : 'trendingDown'} size={12} />
-                            <span>{activeReport.grossSalesChange >= 0 ? `+${activeReport.grossSalesChange}%` : `${activeReport.grossSalesChange}%`}</span>
+                          <span className={`admin-kpi-badge ${activeReport.grossSalesChange >= 0 ? 'positive' : 'negative'}`}>
+                            {activeReport.grossSalesChange >= 0 ? `+${activeReport.grossSalesChange}%` : `${activeReport.grossSalesChange}%`}
                           </span>
                         )}
                       </div>
-                      <div className="kpi-subtext">Total recorded order value · Excludes cancelled orders</div>
+                      <span className="admin-kpi-hint">Total revenue from completed orders</span>
                     </div>
 
-                    {/* 2. Completed Orders */}
-                    <div className="admin-report-kpi-card">
-                      <div className="kpi-top">
-                        <span className="kpi-label">COMPLETED ORDERS</span>
-                        <span className="kpi-tooltip-hint" title="Number of fulfilled dining room and takeout orders.">
-                          <AdminIcon name="orders" size={14} />
-                        </span>
+                    {/* Total Orders */}
+                    <div className="admin-report-kpi-box">
+                      <div className="admin-kpi-head">
+                        <span className="admin-kpi-label">Completed Orders</span>
+                        <div className="admin-kpi-icon-wrap">
+                          <AdminIcon name="orders" size={16} />
+                        </div>
                       </div>
-                      <div className="kpi-main-val">
+                      <div className="admin-kpi-number-row">
                         <strong>{activeReport.completedOrders}</strong>
                         {comparePreviousPeriod && (
-                          <span className={`kpi-change-pill ${activeReport.completedOrdersChange >= 0 ? 'pos' : 'neg'}`}>
-                            <AdminIcon name={activeReport.completedOrdersChange >= 0 ? 'trendingUp' : 'trendingDown'} size={12} />
-                            <span>{activeReport.completedOrdersChange >= 0 ? `+${activeReport.completedOrdersChange}%` : `${activeReport.completedOrdersChange}%`}</span>
+                          <span className={`admin-kpi-badge ${activeReport.completedOrdersChange >= 0 ? 'positive' : 'negative'}`}>
+                            {activeReport.completedOrdersChange >= 0 ? `+${activeReport.completedOrdersChange}%` : `${activeReport.completedOrdersChange}%`}
                           </span>
                         )}
                       </div>
-                      <div className="kpi-subtext">Successfully fulfilled & marked completed</div>
+                      <span className="admin-kpi-hint">Fulfilled dine-in & takeaway orders</span>
                     </div>
 
-                    {/* 3. Average Order Value */}
-                    <div className="admin-report-kpi-card">
-                      <div className="kpi-top">
-                        <span className="kpi-label">AVERAGE ORDER VALUE</span>
-                        <span className="kpi-tooltip-hint" title="Gross sales divided by count of completed orders.">
-                          <AdminIcon name="info" size={14} />
-                        </span>
+                    {/* Average Order Value */}
+                    <div className="admin-report-kpi-box">
+                      <div className="admin-kpi-head">
+                        <span className="admin-kpi-label">Average Order</span>
+                        <div className="admin-kpi-icon-wrap">
+                          <AdminIcon name="check" size={16} />
+                        </div>
                       </div>
-                      <div className="kpi-main-val">
+                      <div className="admin-kpi-number-row">
                         <strong>{money(activeReport.averageOrderValue)}</strong>
                         {comparePreviousPeriod && (
-                          <span className={`kpi-change-pill ${activeReport.averageOrderValueChange >= 0 ? 'pos' : 'neg'}`}>
-                            <AdminIcon name={activeReport.averageOrderValueChange >= 0 ? 'trendingUp' : 'trendingDown'} size={12} />
-                            <span>{activeReport.averageOrderValueChange >= 0 ? `+${activeReport.averageOrderValueChange}%` : `${activeReport.averageOrderValueChange}%`}</span>
+                          <span className={`admin-kpi-badge ${activeReport.averageOrderValueChange >= 0 ? 'positive' : 'negative'}`}>
+                            {activeReport.averageOrderValueChange >= 0 ? `+${activeReport.averageOrderValueChange}%` : `${activeReport.averageOrderValueChange}%`}
                           </span>
                         )}
                       </div>
-                      <div className="kpi-subtext">Gross sales ÷ completed orders</div>
+                      <span className="admin-kpi-hint">Average spent per dining order</span>
                     </div>
 
-                    {/* 4. Cancelled Orders */}
-                    <div className="admin-report-kpi-card">
-                      <div className="kpi-top">
-                        <span className="kpi-label">CANCELLED ORDERS</span>
-                        <span className="kpi-tooltip-hint" title="Orders voided before kitchen prep. Excluded from sales.">
-                          <AdminIcon name="alertTriangle" size={14} />
-                        </span>
+                    {/* Cancelled Orders */}
+                    <div className="admin-report-kpi-box">
+                      <div className="admin-kpi-head">
+                        <span className="admin-kpi-label">Cancelled Orders</span>
+                        <div className="admin-kpi-icon-wrap danger">
+                          <AdminIcon name="alertTriangle" size={16} />
+                        </div>
                       </div>
-                      <div className="kpi-main-val">
+                      <div className="admin-kpi-number-row">
                         <strong style={{ color: activeReport.cancelledOrders > 5 ? '#c53939' : 'inherit' }}>
                           {activeReport.cancelledOrders}
                         </strong>
-                        <span className="admin-cancelled-rate-badge">{activeReport.cancelledRate}% rate</span>
+                        <span className="admin-kpi-badge neutral">{activeReport.cancelledRate}% rate</span>
                       </div>
-                      <div className="kpi-subtext">Voided orders · Not included in gross revenue</div>
+                      <span className="admin-kpi-hint">Voided before kitchen preparation</span>
                     </div>
                   </div>
 
-                  {/* Sales Trend Chart (Pure Responsive SVG) */}
-                  <div className="admin-chart-card">
-                    <div className="admin-chart-header">
+                  {/* Clean Spacious Sales Trend Chart Card */}
+                  <div className="admin-report-card">
+                    <div className="admin-card-header">
                       <div>
-                        <h3>Sales Overview Trend</h3>
-                        <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                          Revenue distribution across {activeReport.periodLabel}
-                        </span>
+                        <h3 className="admin-card-title">Sales Overview</h3>
+                        <p className="admin-card-sub">Daily revenue trend for {activeReport.periodLabel}</p>
                       </div>
 
                       <div className="admin-chart-legends">
-                        <div className="chart-legend-item">
-                          <span className="legend-line current" />
+                        <div className="admin-legend-item">
+                          <span className="admin-legend-dot current" />
                           <span>Current Period ({money(activeReport.grossSales)})</span>
                         </div>
                         {comparePreviousPeriod && (
-                          <div className="chart-legend-item">
-                            <span className="legend-line previous" />
+                          <div className="admin-legend-item">
+                            <span className="admin-legend-dot previous" />
                             <span>Previous Period</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* SVG Chart Engine */}
+                    {/* SVG Chart */}
                     <div className="admin-svg-chart-wrapper">
                       {(() => {
                         const points = activeReport.chartPoints;
                         const maxSales = Math.max(...points.map(p => Math.max(p.sales, p.previousSales))) * 1.15 || 5000;
                         const w = 760;
-                        const h = 200;
+                        const h = 220;
                         const padL = 60;
                         const padR = 25;
                         const padT = 20;
@@ -2042,14 +1986,12 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                         const chartW = w - padL - padR;
                         const chartH = h - padT - padB;
 
-                        // Coordinate calculator
                         const getCoords = (index: number, val: number) => {
                           const x = padL + (index / (points.length - 1)) * chartW;
                           const y = padT + chartH - (val / maxSales) * chartH;
                           return { x, y };
                         };
 
-                        // Build SVG paths
                         const currentPath = points
                           .map((p, i) => {
                             const { x, y } = getCoords(i, p.sales);
@@ -2075,7 +2017,7 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                           <svg viewBox={`0 0 ${w} ${h}`} className="admin-sales-svg-chart" aria-label="Sales Trend Chart">
                             <defs>
                               <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#143D2B" stopOpacity="0.28" />
+                                <stop offset="0%" stopColor="#143D2B" stopOpacity="0.20" />
                                 <stop offset="100%" stopColor="#143D2B" stopOpacity="0.0" />
                               </linearGradient>
                             </defs>
@@ -2083,8 +2025,8 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                             {/* Horizontal Grid lines */}
                             {yGrid.map((g, idx) => (
                               <g key={idx}>
-                                <line x1={padL} y1={g.y} x2={padL + chartW} y2={g.y} stroke="#e4e8e0" strokeDasharray="3 3" />
-                                <text x={padL - 10} y={g.y + 4} fill="#889288" fontSize="10" textAnchor="end" fontFamily="sans-serif">
+                                <line x1={padL} y1={g.y} x2={padL + chartW} y2={g.y} stroke="#edf1ea" strokeDasharray="3 3" />
+                                <text x={padL - 10} y={g.y + 4} fill="#8da08e" fontSize="10" textAnchor="end" fontFamily="inherit">
                                   {g.val >= 1000 ? `${(g.val / 1000).toFixed(0)}k` : g.val}
                                 </text>
                               </g>
@@ -2092,7 +2034,7 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
 
                             {/* Previous Period Trend Line */}
                             {comparePreviousPeriod && (
-                              <path d={prevPath} fill="none" stroke="#C69234" strokeWidth="2" strokeDasharray="4 4" opacity="0.8" />
+                              <path d={prevPath} fill="none" stroke="#C69234" strokeWidth="2" strokeDasharray="4 4" opacity="0.75" />
                             )}
 
                             {/* Current Period Area Fill */}
@@ -2107,15 +2049,10 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                               const isHovered = hoveredPointIndex === i;
                               return (
                                 <g key={i}>
-                                  {/* X-axis label */}
-                                  <text x={x} y={padT + chartH + 20} fill="#6e7870" fontSize="10" textAnchor="middle" fontFamily="sans-serif">
+                                  <text x={x} y={padT + chartH + 20} fill="#6e7f70" fontSize="11" textAnchor="middle" fontFamily="inherit">
                                     {p.label}
                                   </text>
-
-                                  {/* Outer pulse when hovered */}
                                   {isHovered && <circle cx={x} y={y} r="8" fill="#143D2B" opacity="0.2" />}
-
-                                  {/* Interactive Point */}
                                   <circle
                                     cx={x}
                                     y={y}
@@ -2134,12 +2071,12 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                         );
                       })()}
 
-                      {/* Floating Chart Tooltip */}
+                      {/* Tooltip */}
                       {hoveredPointIndex !== null && activeReport.chartPoints[hoveredPointIndex] && (
                         <div className="admin-chart-tooltip-box">
                           <strong>{activeReport.chartPoints[hoveredPointIndex].label}</strong>
                           <div>Sales: <strong>{money(activeReport.chartPoints[hoveredPointIndex].sales)}</strong></div>
-                          <div>Volume: {activeReport.chartPoints[hoveredPointIndex].orders} orders</div>
+                          <div>Orders: {activeReport.chartPoints[hoveredPointIndex].orders}</div>
                           {comparePreviousPeriod && (
                             <div style={{ color: '#C69234', marginTop: '2px', fontSize: '11px' }}>
                               Prev: {money(activeReport.chartPoints[hoveredPointIndex].previousSales)}
@@ -2148,258 +2085,94 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                         </div>
                       )}
                     </div>
-
-                    <div className="admin-chart-footer-note">
-                      <span className="sample-badge">Sample Data</span>
-                      <span>Illustrative metrics for Abay Kitchen · Server-calculated against local timezone (Africa/Addis_Ababa)</span>
-                    </div>
                   </div>
-
-                  {/* 2-Column Section: Order Performance & Category Performance */}
+                  {/* 2-Column Section: Top Dishes & Category Breakdown */}
                   <div className="admin-reports-two-col">
-                    {/* Left: Order Performance & Status Breakdown */}
+                    {/* Left: Top Dishes */}
                     <div className="admin-report-card">
-                      <div className="card-header-row">
+                      <div className="admin-card-header">
                         <div>
-                          <h3>Order Performance</h3>
-                          <span className="card-sub">Fulfillment efficiency and operational flow</span>
-                        </div>
-                        <span className="admin-completion-pill">
-                          {((activeReport.completedOrders / (activeReport.completedOrders + activeReport.cancelledOrders)) * 100).toFixed(1)}% Completed
-                        </span>
-                      </div>
-
-                      {/* Progress bar */}
-                      <div className="admin-order-progress-track">
-                        <div
-                          className="admin-order-progress-fill completed"
-                          style={{
-                            width: `${(activeReport.completedOrders / (activeReport.completedOrders + activeReport.cancelledOrders + 4)) * 100}%`
-                          }}
-                          title="Completed Orders"
-                        />
-                        <div className="admin-order-progress-fill preparing" style={{ width: '4%' }} title="In Preparation" />
-                        <div
-                          className="admin-order-progress-fill cancelled"
-                          style={{
-                            width: `${(activeReport.cancelledOrders / (activeReport.completedOrders + activeReport.cancelledOrders + 4)) * 100}%`
-                          }}
-                          title="Cancelled Orders"
-                        />
-                      </div>
-
-                      {/* Status Breakdown Pills */}
-                      <div className="admin-order-status-stats">
-                        <div className="status-stat-item">
-                          <span className="stat-dot completed" />
-                          <div>
-                            <strong>{activeReport.completedOrders}</strong>
-                            <span className="stat-lbl">Completed</span>
-                          </div>
+                          <h3 className="admin-card-title">Top Selling Dishes</h3>
+                          <p className="admin-card-sub">Most popular items in your menu</p>
                         </div>
 
-                        <div className="status-stat-item">
-                          <span className="stat-dot preparing" />
-                          <div>
-                            <strong>4</strong>
-                            <span className="stat-lbl">In Kitchen</span>
-                          </div>
-                        </div>
-
-                        <div className="status-stat-item">
-                          <span className="stat-dot cancelled" />
-                          <div>
-                            <strong>{activeReport.cancelledOrders}</strong>
-                            <span className="stat-lbl">Cancelled</span>
-                          </div>
+                        <div className="admin-ranking-toggle">
+                          <button
+                            className={`admin-rank-toggle-btn ${rankingMetric === 'quantity' ? 'active' : ''}`}
+                            onClick={() => setRankingMetric('quantity')}
+                          >
+                            By Quantity
+                          </button>
+                          <button
+                            className={`admin-rank-toggle-btn ${rankingMetric === 'sales' ? 'active' : ''}`}
+                            onClick={() => setRankingMetric('sales')}
+                          >
+                            By Revenue
+                          </button>
                         </div>
                       </div>
 
-                      {/* Operational Timing Metrics */}
-                      <div className="admin-ops-timing-row">
-                        <div className="timing-box">
-                          <span className="t-lbl">Avg Kitchen Velocity</span>
-                          <strong>18 mins</strong>
-                          <span className="t-sub">QR Order to Ready</span>
-                        </div>
-                        <div className="timing-box">
-                          <span className="t-lbl">Cancellation Rate</span>
-                          <strong>{activeReport.cancelledRate}%</strong>
-                          <span className="t-sub">Voided before cook</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right: Menu Category Breakdown */}
-                    <div className="admin-report-card">
-                      <div className="card-header-row">
-                        <div>
-                          <h3>Category Breakdown</h3>
-                          <span className="card-sub">Recorded sales volume across menu sections</span>
-                        </div>
-                      </div>
-
-                      <div className="admin-category-bars-list">
-                        {activeReport.categories.map(cat => (
-                          <div key={cat.category} className="admin-category-bar-item">
-                            <div className="cat-bar-header">
-                              <strong>{cat.category}</strong>
-                              <div className="cat-bar-numbers">
-                                <span>{cat.quantity} items</span>
-                                <strong>{money(cat.salesAmount)}</strong>
-                                <span className="cat-share">({cat.sharePercent}%)</span>
-                              </div>
+                      <div className="admin-top-dishes-list">
+                        {sortedTopItems.slice(0, 5).map((item, index) => (
+                          <div key={item.id} className="admin-top-dish-row">
+                            <span className={`admin-rank-circle rank-${index + 1}`}>{index + 1}</span>
+                            <div className="admin-top-dish-info">
+                              <strong className="admin-top-dish-name">{item.name}</strong>
+                              <span className="admin-top-dish-cat">{item.category}</span>
                             </div>
-                            <div className="cat-bar-track">
-                              <div className="cat-bar-fill" style={{ width: `${cat.sharePercent}%` }} />
+                            <div className="admin-top-dish-stats">
+                              <span className="admin-top-dish-qty">{item.quantity} sold</span>
+                              <strong className="admin-top-dish-amount">{money(item.salesAmount)}</strong>
                             </div>
                           </div>
                         ))}
                       </div>
-
-                      <div className="admin-report-card-foot">
-                        <AdminIcon name="info" size={13} />
-                        <span>Figures represent recorded order transactions, not gross product margins.</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Best-Selling Menu Items */}
-                  <div className="admin-report-card" style={{ marginTop: '20px' }}>
-                    <div className="card-header-row" style={{ flexWrap: 'wrap', gap: '12px' }}>
-                      <div>
-                        <h3>Top-Selling Menu Items</h3>
-                        <span className="card-sub">Items driving highest restaurant volume during {activeReport.periodLabel}</span>
-                      </div>
-
-                      {/* Ranking Switcher */}
-                      <div className="admin-ranking-switcher">
-                        <button
-                          className={`rank-switch-btn ${rankingMetric === 'quantity' ? 'active' : ''}`}
-                          onClick={() => setRankingMetric('quantity')}
-                        >
-                          Rank by Quantity Sold
-                        </button>
-                        <button
-                          className={`rank-switch-btn ${rankingMetric === 'sales' ? 'active' : ''}`}
-                          onClick={() => setRankingMetric('sales')}
-                        >
-                          Rank by Sales Amount (ETB)
-                        </button>
-                      </div>
                     </div>
 
-                    {/* Top Items Table */}
-                    <div className="admin-table-container">
-                      <table className="admin-table">
-                        <thead>
-                          <tr>
-                            <th style={{ width: '60px' }}>Rank</th>
-                            <th>Dish Name</th>
-                            <th>Category</th>
-                            <th style={{ textAlign: 'right' }}>Quantity Sold</th>
-                            <th style={{ textAlign: 'right' }}>Recorded Sales</th>
-                            <th style={{ width: '180px' }}>Sales Share</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sortedTopItems.map((item, index) => (
-                            <tr key={item.id} className="admin-staff-table-row">
-                              <td>
-                                <span className={`admin-rank-badge ${index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : ''}`}>
-                                  #{index + 1}
-                                </span>
-                              </td>
-                              <td>
-                                <strong style={{ color: 'var(--ink)' }}>{item.name}</strong>
-                              </td>
-                              <td>
-                                <span className="admin-category-tag">{item.category}</span>
-                              </td>
-                              <td style={{ textAlign: 'right', fontWeight: 600 }}>
-                                {item.quantity} orders
-                              </td>
-                              <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--brand)' }}>
-                                {money(item.salesAmount)}
-                              </td>
-                              <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <div className="cat-bar-track" style={{ height: '6px', flex: 1 }}>
-                                    <div className="cat-bar-fill" style={{ width: `${item.sharePercent * 2.5}%` }} />
-                                  </div>
-                                  <span style={{ fontSize: '11px', color: 'var(--muted)', width: '38px', textAlign: 'right' }}>
-                                    {item.sharePercent}%
-                                  </span>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div className="admin-report-card-foot">
-                      <AdminIcon name="info" size={13} />
-                      <span>Sales volume rankings do not incorporate food ingredient costings or net profit margins.</span>
-                    </div>
-                  </div>
-
-                  {/* Operational Time Insights */}
-                  <div className="admin-report-card" style={{ marginTop: '20px' }}>
-                    <div className="card-header-row">
-                      <div>
-                        <h3>Order Activity & Hourly Distribution</h3>
-                        <span className="card-sub">Identify peak demand periods to optimize kitchen prep and floor staffing</span>
-                      </div>
-                    </div>
-
-                    <div className="admin-ops-insights-grid">
-                      <div className="admin-ops-insight-box">
-                        <strong className="insight-title">Lunch Rush (12:30 – 14:30)</strong>
-                        <p>Accounts for <strong>41%</strong> of total daily volume. Peak orders concentrate on quick tibs and combo platters.</p>
-                      </div>
-
-                      <div className="admin-ops-insight-box">
-                        <strong className="insight-title">Dinner Peak (19:00 – 21:30)</strong>
-                        <p>Accounts for <strong>46%</strong> of total daily volume. Highest average basket sizes and beverage attach rates.</p>
-                      </div>
-
-                      <div className="admin-ops-insight-box">
-                        <strong className="insight-title">Peak Service Days</strong>
-                        <p><strong>Friday & Saturday</strong> evenings generate 38% higher recorded orders than weekday lunches.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Filterable Historical Orders Table */}
-                  <div className="admin-report-card" style={{ marginTop: '20px' }}>
-                    <div className="card-header-row" style={{ flexWrap: 'wrap', gap: '12px' }}>
-                      <div>
-                        <h3>Recorded Orders for Period</h3>
-                        <span className="card-sub">Inspect individual dining room transactions for {activeReport.periodLabel}</span>
-                      </div>
-
-                      {/* Search and Status Filters */}
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <div className="admin-search-input" style={{ width: '220px' }}>
-                          <AdminIcon name="search" size={15} />
-                          <input
-                            type="text"
-                            placeholder="Search ref or table…"
-                            value={reportOrderSearch}
-                            onChange={e => setReportOrderSearch(e.target.value)}
-                          />
+                    {/* Right: Category Breakdown */}
+                    <div className="admin-report-card">
+                      <div className="admin-card-header">
+                        <div>
+                          <h3 className="admin-card-title">Sales by Category</h3>
+                          <p className="admin-card-sub">Revenue distribution across menu sections</p>
                         </div>
+                      </div>
 
-                        <select
-                          className="admin-select"
-                          value={reportOrderStatusFilter}
-                          onChange={e => setReportOrderStatusFilter(e.target.value)}
-                        >
-                          <option value="all">All Statuses</option>
-                          <option value="Completed">Completed</option>
-                          <option value="Cancelled">Cancelled</option>
-                        </select>
+                      <div className="admin-category-bars-container">
+                        {activeReport.categories.map(cat => (
+                          <div key={cat.category} className="admin-cat-bar-box">
+                            <div className="admin-cat-bar-labels">
+                              <span className="admin-cat-name">{cat.category}</span>
+                              <div className="admin-cat-val">
+                                <strong>{money(cat.salesAmount)}</strong>
+                                <span className="admin-cat-pct">({cat.sharePercent}%)</span>
+                              </div>
+                            </div>
+                            <div className="admin-cat-track">
+                              <div className="admin-cat-fill" style={{ width: `${cat.sharePercent}%` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Clean Spacious Recent Orders Table */}
+                  <div className="admin-report-card">
+                    <div className="admin-card-header">
+                      <div>
+                        <h3 className="admin-card-title">Recent Orders</h3>
+                        <p className="admin-card-sub">Recorded customer transactions from QR menu for {activeReport.periodLabel}</p>
+                      </div>
+
+                      <div className="admin-orders-search-box">
+                        <AdminIcon name="search" size={14} />
+                        <input
+                          type="text"
+                          placeholder="Search orders, table..."
+                          value={reportOrderSearch}
+                          onChange={e => setReportOrderSearch(e.target.value)}
+                        />
                       </div>
                     </div>
 
@@ -2407,50 +2180,38 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                       <table className="admin-table">
                         <thead>
                           <tr>
-                            <th>Order Reference</th>
-                            <th>Date & Time</th>
+                            <th>Order</th>
+                            <th>Time</th>
                             <th>Table</th>
-                            <th>Items Summary</th>
-                            <th style={{ textAlign: 'right' }}>Total Amount</th>
-                            <th>Status</th>
+                            <th>Items</th>
                             <th>Payment</th>
-                            <th style={{ textAlign: 'right' }}>Action</th>
+                            <th style={{ textAlign: 'right' }}>Total</th>
+                            <th>Status</th>
+                            <th style={{ width: '80px', textAlign: 'center' }}>Details</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredReportOrders.map(ord => (
-                            <tr key={ord.id} className="admin-staff-table-row">
-                              <td>
-                                <strong style={{ color: 'var(--brand)' }}>{ord.reference}</strong>
-                              </td>
-                              <td style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                                {ord.time} · {ord.date}
-                              </td>
-                              <td>
-                                <span className="admin-table-tag">{ord.table}</span>
-                              </td>
-                              <td style={{ fontSize: '13px' }}>{ord.itemsSummary}</td>
-                              <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--ink)' }}>
-                                {money(ord.total)}
+                          {filteredReportOrders.map(order => (
+                            <tr key={order.id} className="admin-staff-table-row">
+                              <td><strong style={{ color: 'var(--brand)' }}>{order.reference}</strong></td>
+                              <td style={{ color: 'var(--muted)', fontSize: '12px' }}>{order.time}</td>
+                              <td><span className="admin-table-pill">{order.table}</span></td>
+                              <td style={{ color: 'var(--ink)' }}>{order.itemsSummary}</td>
+                              <td style={{ fontSize: '12px', color: 'var(--muted)' }}>{order.paymentMethod}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--brand)' }}>
+                                {money(order.total)}
                               </td>
                               <td>
-                                <span
-                                  className={`admin-status-badge ${
-                                    ord.status === 'Completed' ? 'completed' : 'cancelled'
-                                  }`}
-                                >
-                                  {ord.status}
+                                <span className={`admin-order-status-badge ${order.status === 'Completed' ? 'delivered' : 'cancelled'}`}>
+                                  {order.status}
                                 </span>
                               </td>
-                              <td style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                                {ord.paymentMethod}
-                              </td>
-                              <td style={{ textAlign: 'right' }}>
+                              <td style={{ textAlign: 'center' }}>
                                 <button
                                   className="admin-action-btn secondary sm"
-                                  onClick={() => setSelectedHistoricalOrder(ord)}
+                                  onClick={() => setSelectedHistoricalOrder(order)}
                                 >
-                                  <AdminIcon name="eye" size={13} /> Details
+                                  View
                                 </button>
                               </td>
                             </tr>
@@ -2462,69 +2223,8 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                     {filteredReportOrders.length === 0 && (
                       <div className="admin-empty-state" style={{ padding: '30px 10px' }}>
                         <AdminIcon name="orders" size={36} />
-                        <h3>No orders match your filter</h3>
-                        <p>Try clearing your search query or switching your status filter.</p>
-                        <button
-                          className="admin-action-btn secondary"
-                          onClick={() => {
-                            setReportOrderSearch('');
-                            setReportOrderStatusFilter('all');
-                          }}
-                        >
-                          Clear Filters
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Developer Calculation Standards & MERN Architecture Accordion */}
-                  <div className="admin-backend-spec-card" style={{ marginTop: '20px' }}>
-                    <div
-                      className="admin-backend-spec-header"
-                      onClick={() => setShowCalculationRules(!showCalculationRules)}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <AdminIcon name="lock" size={18} />
-                        <div>
-                          <strong>Developer Calculation Specifications & Architectural Rules (MERN)</strong>
-                          <span style={{ display: 'block', fontSize: '11px', color: 'var(--muted)' }}>
-                            Financial data consistency, timezone aggregation, and price freeze rules
-                          </span>
-                        </div>
-                      </div>
-                      <span style={{ fontSize: '12px', color: 'var(--brand)', fontWeight: 600 }}>
-                        {showCalculationRules ? 'Hide Calculation Rules ▲' : 'Show Calculation Rules ▼'}
-                      </span>
-                    </div>
-
-                    {showCalculationRules && (
-                      <div className="admin-backend-spec-body">
-                        <div className="admin-spec-grid">
-                          <div className="admin-spec-item">
-                            <strong>1. Gross Sales Definition</strong>
-                            <p>Calculated strictly from eligible, non-cancelled order line items. Cancelled orders are never counted in revenue totals.</p>
-                          </div>
-                          <div className="admin-spec-item">
-                            <strong>2. Historical Price Immutability</strong>
-                            <p>Order totals capture unit prices at the time of transaction. Subsequent edits to dish prices in Menu Management do not alter historical reports.</p>
-                          </div>
-                          <div className="admin-spec-item">
-                            <strong>3. Standardized Timezone Aggregation</strong>
-                            <p>All date ranges and hourly buckets are aggregated in restaurant-local timezone (`Africa/Addis_Ababa`, UTC+3) using MongoDB `$dateTrunc`.</p>
-                          </div>
-                          <div className="admin-spec-item">
-                            <strong>4. AOV Denominator Standards</strong>
-                            <p>Average Order Value strictly uses count of fulfilled, completed orders as the denominator, excluding voided orders.</p>
-                          </div>
-                          <div className="admin-spec-item">
-                            <strong>5. Multi-Tenant Scoping</strong>
-                            <p>Every analytics aggregation query must enforce `{'{ restaurantId: req.user.restaurantId }'}` before match pipelines.</p>
-                          </div>
-                          <div className="admin-spec-item">
-                            <strong>6. Server-Side Export Verification</strong>
-                            <p>Exports are compiled on the server with user RBAC validation, ensuring staff cannot export unauthorized financial periods.</p>
-                          </div>
-                        </div>
+                        <h3>No orders match your search</h3>
+                        <p>Try clearing your search query.</p>
                       </div>
                     )}
                   </div>
