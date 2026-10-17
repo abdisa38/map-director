@@ -2061,39 +2061,60 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
 
                 {/* Right Column: Live Table Status & Quick Operations */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                  {/* Dining Floor Status Grid */}
+                  {/* Universal Restaurant QR Code Card */}
                   <div className="admin-overview-card">
                     <div className="admin-overview-card-header">
                       <h3>
-                        <AdminIcon name="tables" size={18} />
-                        Floor Table Occupancy
+                        <AdminIcon name="qr" size={18} />
+                        Universal Restaurant QR Menu
                       </h3>
                       <button className="admin-action-btn secondary sm" onClick={() => setActiveTab('tables')}>
-                        View All
+                        Open QR Studio
                       </button>
                     </div>
 
-                    <div className="admin-floor-tables-grid">
-                      {tables.slice(0, 8).map(tbl => {
-                        const isOcc = tbl.number === 'Table 08' || tbl.number === 'Table 02' || tbl.number === 'Table 04';
-                        return (
-                          <div
-                            key={tbl.id}
-                            className={`admin-floor-table-tile ${isOcc ? 'occupied' : 'available'}`}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '18px', padding: '12px 6px' }}>
+                      <div
+                        style={{
+                          background: '#FAF8F5',
+                          border: '1px solid #dcded1',
+                          borderRadius: '10px',
+                          padding: '8px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setActiveTab('tables')}
+                        title="Click to open Universal QR Code studio"
+                      >
+                        <TableQRCodeSVG size={90} tableNumber="Universal" color="#143D2B" />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: '11px', color: '#C69234', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                          One QR For All Tables
+                        </span>
+                        <h4 style={{ margin: '2px 0 4px', fontSize: '15px', color: '#143D2B' }}>
+                          Abay Kitchen Digital Menu
+                        </h4>
+                        <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)', lineHeight: 1.4 }}>
+                          Set this single QR code on every dining table. Guests scan to order with instant kitchen delivery.
+                        </p>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                          <button
+                            className="admin-action-btn secondary sm"
                             onClick={() => {
-                              setSelectedQRTable(tbl);
+                              navigator.clipboard.writeText(window.location.origin);
+                              showToast('Menu URL copied!');
                             }}
                           >
-                            <div className="admin-floor-table-top">
-                              <strong>{tbl.number}</strong>
-                              <span className={`admin-floor-table-status ${isOcc ? 'occ' : 'avail'}`}>
-                                {isOcc ? 'Occ' : 'Free'}
-                              </span>
-                            </div>
-                            <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{tbl.area}</span>
-                          </div>
-                        );
-                      })}
+                            <AdminIcon name="copy" size={13} /> Copy Link
+                          </button>
+                          <button
+                            className="admin-action-btn primary sm"
+                            onClick={() => setActiveTab('tables')}
+                          >
+                            <AdminIcon name="printer" size={13} /> Print Stand
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
