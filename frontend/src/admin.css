@@ -1678,3 +1678,297 @@
   justify-content: space-between;
 }
 
+/* ========================================================
+   03C — Table Management & QR Code Generation Styles
+   Spacious, clear, high-contrast, ready for physical printing
+   ======================================================== */
+
+.admin-tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.admin-table-box {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.admin-table-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5c5;
+}
+
+.admin-table-box.inactive {
+  opacity: 0.75;
+  border-color: #e4e6de;
+  background: #fbfbf9;
+}
+
+.admin-table-box-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.admin-table-title h3 {
+  font-size: 18px;
+  font-weight: 650;
+  color: var(--brand);
+  margin: 0 0 4px;
+}
+
+.admin-table-area-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #eef3e8;
+  color: #2b593b;
+}
+
+.admin-table-qr-mini {
+  width: 58px;
+  height: 58px;
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.admin-table-qr-mini:hover {
+  border-color: var(--brand);
+}
+
+.admin-table-qr-mini svg {
+  width: 100%;
+  height: 100%;
+}
+
+.admin-table-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0 16px;
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid #f2f4ec;
+  padding-top: 12px;
+}
+
+.admin-table-order-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.admin-table-order-pill.active {
+  background: #edf6ec;
+  color: #23734b;
+  border: 1px solid #c9e4c3;
+}
+
+.admin-table-order-pill.idle {
+  background: #f2f3ed;
+  color: #798074;
+}
+
+.admin-table-card-actions {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid #f2f4ec;
+  padding-top: 14px;
+}
+
+/* Big QR Code Detail Modal */
+.admin-qr-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 10px 0 20px;
+}
+
+.admin-qr-code-frame {
+  background: #fff;
+  border: 2px solid var(--brand);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(20, 61, 43, 0.12);
+  margin: 16px 0;
+  display: inline-block;
+  position: relative;
+}
+
+.admin-qr-code-frame svg {
+  display: block;
+}
+
+.admin-qr-url-box {
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--brand);
+  font-weight: 550;
+  margin-bottom: 20px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.admin-qr-url-box span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Printable Physical Materials Preview (Table Card & Table Tent) */
+.admin-print-switcher {
+  display: flex;
+  gap: 8px;
+  background: #f0f2ea;
+  padding: 4px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* 1. Compact Tabletop Card */
+.admin-print-card-preview {
+  width: 280px;
+  background: #FAF8F5;
+  border: 2px solid #C69234;
+  border-radius: 14px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  color: #143D2B;
+  margin: 0 auto;
+}
+
+.admin-print-card-brand {
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: 1.2px;
+  margin-bottom: 2px;
+}
+
+.admin-print-card-sub {
+  font-size: 9px;
+  color: #65705e;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.admin-print-card-table {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #143D2B;
+  margin-bottom: 12px;
+}
+
+.admin-print-card-qr {
+  background: #fff;
+  border: 1px solid #e2e4dc;
+  border-radius: 10px;
+  padding: 12px;
+  display: inline-block;
+  margin-bottom: 14px;
+}
+
+.admin-print-card-instruction {
+  font-size: 11px;
+  font-weight: 600;
+  color: #143D2B;
+  margin-bottom: 4px;
+}
+
+.admin-print-card-footer {
+  font-size: 8px;
+  color: #8c9387;
+  letter-spacing: 0.5px;
+  margin-top: 10px;
+}
+
+/* 2. Standing Tabletop Tent Card (Folded Front & Back) */
+.admin-tent-card-preview {
+  display: flex;
+  gap: 16px;
+  background: #f4f5f0;
+  border: 1px dashed #c8d0c2;
+  border-radius: 12px;
+  padding: 20px;
+  justify-content: center;
+}
+
+.admin-tent-panel {
+  width: 220px;
+  background: #FAF8F5;
+  border: 1px solid #d5dbcf;
+  border-radius: 10px;
+  padding: 20px 16px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.admin-tent-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: #889282;
+  writing-mode: vertical-rl;
+  letter-spacing: 2px;
+}
+
+/* 3. Bulk Print Sheet (A4 Sheet Layout Preview) */
+.admin-bulk-sheet {
+  background: #fff;
+  border: 1px solid #dcdfd6;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  width: 540px;
+  max-width: 100%;
+  padding: 24px;
+  margin: 0 auto;
+  border-radius: 4px;
+}
+
+.admin-bulk-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.admin-bulk-cell {
+  border: 1px dashed #c0c6b8;
+  padding: 14px;
+  text-align: center;
+  background: #FAF8F5;
+  border-radius: 6px;
+}
+
+

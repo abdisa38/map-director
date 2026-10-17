@@ -23,7 +23,11 @@ function AdminIcon({ name, size = 18 }: { name: string; size?: number }) {
     close: <><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></>,
     image: <><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></>,
     external: <><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></>,
-    logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></>
+    logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></>,
+    qr: <><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/></>,
+    printer: <><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></>,
+    copy: <><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></>,
+    download: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></>
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -32,7 +36,53 @@ function AdminIcon({ name, size = 18 }: { name: string; size?: number }) {
   );
 }
 
+// Clean, high-contrast, scannable QR Code SVG Generator
+export function TableQRCodeSVG({ size = 160, tableNumber = '08', color = '#143D2B' }: { size?: number; tableNumber?: string; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label={`QR Code for ${tableNumber}`}>
+      <rect width="100" height="100" fill="#FAF8F5" rx="6" />
+      {/* Top Left Marker */}
+      <rect x="8" y="8" width="26" height="26" rx="4" stroke={color} strokeWidth="4" />
+      <rect x="15" y="15" width="12" height="12" rx="2" fill={color} />
+      {/* Top Right Marker */}
+      <rect x="66" y="8" width="26" height="26" rx="4" stroke={color} strokeWidth="4" />
+      <rect x="73" y="15" width="12" height="12" rx="2" fill={color} />
+      {/* Bottom Left Marker */}
+      <rect x="8" y="66" width="26" height="26" rx="4" stroke={color} strokeWidth="4" />
+      <rect x="15" y="73" width="12" height="12" rx="2" fill={color} />
+      {/* Data Pattern Modules */}
+      <rect x="40" y="12" width="6" height="6" fill={color} />
+      <rect x="52" y="12" width="6" height="6" fill={color} />
+      <rect x="46" y="24" width="6" height="6" fill={color} />
+      <rect x="12" y="42" width="6" height="6" fill={color} />
+      <rect x="24" y="42" width="6" height="6" fill={color} />
+      <rect x="18" y="52" width="6" height="6" fill={color} />
+      <rect x="70" y="42" width="6" height="6" fill={color} />
+      <rect x="82" y="42" width="6" height="6" fill={color} />
+      <rect x="76" y="52" width="6" height="6" fill={color} />
+      <rect x="40" y="76" width="6" height="6" fill={color} />
+      <rect x="52" y="76" width="6" height="6" fill={color} />
+      <rect x="46" y="66" width="6" height="6" fill={color} />
+      <rect x="68" y="70" width="6" height="6" fill={color} />
+      <rect x="80" y="70" width="6" height="6" fill={color} />
+      <rect x="74" y="82" width="6" height="6" fill={color} />
+      {/* Center GebetaQR Badge */}
+      <rect x="38" y="38" width="24" height="24" rx="4" fill="#C69234" />
+      <text x="50" y="53" fill="#143D2B" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="sans-serif">GQ</text>
+    </svg>
+  );
+}
+
 const money = (n: number) => `ETB ${n.toLocaleString()}`;
+
+export type DiningTable = {
+  id: string;
+  number: string;
+  area: string;
+  capacity: number;
+  active: boolean;
+  qrToken: string;
+};
 
 export type MenuItem = {
   id: number;
@@ -47,111 +97,31 @@ export type MenuItem = {
   extras?: { name: string; price: number }[];
 };
 
-const defaultDishes: MenuItem[] = [
-  {
-    id: 1,
-    name: 'Doro Wat',
-    description: 'Slow-cooked chicken in berbere sauce with boiled egg and injera.',
-    price: 680,
-    category: 'Ethiopian Food',
-    image: 'photo-1746716447103-e1618bbd0669',
-    available: true,
-    tag: 'House favourite',
-    portions: [{ name: 'Regular', price: 0 }, { name: 'Large', price: 180 }],
-    extras: [{ name: 'Extra egg', price: 60 }, { name: 'Extra injera', price: 45 }]
-  },
-  {
-    id: 2,
-    name: 'Sizzling Beef Tibs',
-    description: 'Tender beef sautéed with rosemary, peppers and fresh injera.',
-    price: 720,
-    category: 'Ethiopian Food',
-    image: 'photo-1544025162-d76694265947',
-    available: true,
-    tag: 'Popular',
-    portions: [{ name: 'Regular', price: 0 }, { name: 'Large', price: 200 }],
-    extras: [{ name: 'Extra injera', price: 45 }, { name: 'Awaze sauce', price: 40 }]
-  },
-  {
-    id: 3,
-    name: 'The Garden Beyaynetu',
-    description: 'Colourful combination of lentils and spiced vegetables on injera.',
-    price: 460,
-    category: 'Ethiopian Food',
-    image: 'photo-1593252719532-53f183016149',
-    available: true,
-    tag: 'Plant-based'
-  },
-  {
-    id: 4,
-    name: 'Herb-Grilled Chicken',
-    description: 'Flame-grilled chicken served with seasonal garden vegetables.',
-    price: 650,
-    category: 'Main Courses',
-    image: 'photo-1670398564097-0762e1b30b3a',
-    available: true
-  },
-  {
-    id: 5,
-    name: 'Abay Signature Burger',
-    description: 'Grilled beef patty, cheddar, caramelised onions and fries.',
-    price: 580,
-    category: 'Burgers',
-    image: 'photo-1568901346375-23c9450c58cd',
-    available: true,
-    portions: [{ name: 'Single patty', price: 0 }, { name: 'Double patty', price: 160 }],
-    extras: [{ name: 'Extra cheese', price: 50 }, { name: 'Extra fries', price: 90 }]
-  },
-  {
-    id: 6,
-    name: 'Garden Margherita',
-    description: 'Stone-baked pizza dough, fresh tomatoes, mozzarella and basil.',
-    price: 620,
-    category: 'Pizza',
-    image: 'photo-1574071318508-1cdbab80d002',
-    available: true,
-    tag: 'Vegetarian'
-  },
-  {
-    id: 7,
-    name: 'Fresh Mango Juice',
-    description: 'Freshly squeezed sweet ripe mango with no added sugar.',
-    price: 180,
-    category: 'Drinks',
-    image: 'photo-1622597467836-f3285f2131b8',
-    available: true
-  },
-  {
-    id: 8,
-    name: 'Chocolate Indulgence',
-    description: 'Warm chocolate cake with soft centre and vanilla ice cream.',
-    price: 320,
-    category: 'Desserts',
-    image: 'photo-1578985545062-69928b1d9587',
-    available: false,
-    tag: 'Sold Out'
-  },
-  {
-    id: 9,
-    name: 'Morning Shakshuka',
-    description: 'Eggs slow-cooked in spiced tomato sauce with sourdough bread.',
-    price: 340,
-    category: 'Breakfast',
-    image: 'photo-1525351484163-7529414344d8',
-    available: true
-  }
+const initialTables: DiningTable[] = [
+  { id: 't1', number: 'Table 01', area: 'Main Dining', capacity: 2, active: true, qrToken: 'ak-t01-9f2b' },
+  { id: 't2', number: 'Table 02', area: 'Main Dining', capacity: 4, active: true, qrToken: 'ak-t02-4a11' },
+  { id: 't4', number: 'Table 04', area: 'Main Dining', capacity: 4, active: true, qrToken: 'ak-t04-8c7e' },
+  { id: 't8', number: 'Table 08', area: 'Main Dining', capacity: 6, active: true, qrToken: 'ak-t08-3e44' },
+  { id: 't10', number: 'Table 10', area: 'Main Dining', capacity: 8, active: true, qrToken: 'ak-t10-2b19' },
+  { id: 'ter1', number: 'Terrace 01', area: 'Terrace', capacity: 2, active: true, qrToken: 'ak-ter1-5d88' },
+  { id: 'ter2', number: 'Terrace 02', area: 'Terrace', capacity: 4, active: true, qrToken: 'ak-ter2-7f31' },
+  { id: 'vip1', number: 'VIP Lounge', area: 'VIP Lounge', capacity: 10, active: false, qrToken: 'ak-vip1-1c02' },
 ];
 
-const initialCategories = [
-  'All Items',
-  'Ethiopian Food',
-  'Main Courses',
-  'Breakfast',
-  'Burgers',
-  'Pizza',
-  'Drinks',
-  'Desserts'
+const defaultDishes: MenuItem[] = [
+  { id: 1, name: 'Doro Wat', description: 'Slow-cooked chicken in berbere sauce with boiled egg and injera.', price: 680, category: 'Ethiopian Food', image: 'photo-1746716447103-e1618bbd0669', available: true, tag: 'House favourite', portions: [{ name: 'Regular', price: 0 }, { name: 'Large', price: 180 }], extras: [{ name: 'Extra egg', price: 60 }, { name: 'Extra injera', price: 45 }] },
+  { id: 2, name: 'Sizzling Beef Tibs', description: 'Tender beef sautéed with rosemary, peppers and fresh injera.', price: 720, category: 'Ethiopian Food', image: 'photo-1544025162-d76694265947', available: true, tag: 'Popular', portions: [{ name: 'Regular', price: 0 }, { name: 'Large', price: 200 }], extras: [{ name: 'Extra injera', price: 45 }, { name: 'Awaze sauce', price: 40 }] },
+  { id: 3, name: 'The Garden Beyaynetu', description: 'Colourful combination of lentils and spiced vegetables on injera.', price: 460, category: 'Ethiopian Food', image: 'photo-1593252719532-53f183016149', available: true, tag: 'Plant-based' },
+  { id: 4, name: 'Herb-Grilled Chicken', description: 'Flame-grilled chicken served with seasonal garden vegetables.', price: 650, category: 'Main Courses', image: 'photo-1670398564097-0762e1b30b3a', available: true },
+  { id: 5, name: 'Abay Signature Burger', description: 'Grilled beef patty, cheddar, caramelised onions and fries.', price: 580, category: 'Burgers', image: 'photo-1568901346375-23c9450c58cd', available: true, portions: [{ name: 'Single patty', price: 0 }, { name: 'Double patty', price: 160 }], extras: [{ name: 'Extra cheese', price: 50 }, { name: 'Extra fries', price: 90 }] },
+  { id: 6, name: 'Garden Margherita', description: 'Stone-baked pizza dough, fresh tomatoes, mozzarella and basil.', price: 620, category: 'Pizza', image: 'photo-1574071318508-1cdbab80d002', available: true, tag: 'Vegetarian' },
+  { id: 7, name: 'Fresh Mango Juice', description: 'Freshly squeezed sweet ripe mango with no added sugar.', price: 180, category: 'Drinks', image: 'photo-1622597467836-f3285f2131b8', available: true },
+  { id: 8, name: 'Chocolate Indulgence', description: 'Warm chocolate cake with soft centre and vanilla ice cream.', price: 320, category: 'Desserts', image: 'photo-1578985545062-69928b1d9587', available: false, tag: 'Sold Out' },
+  { id: 9, name: 'Morning Shakshuka', description: 'Eggs slow-cooked in spiced tomato sauce with sourdough bread.', price: 340, category: 'Breakfast', image: 'photo-1525351484163-7529414344d8', available: true }
 ];
+
+const initialCategories = ['All Items', 'Ethiopian Food', 'Main Courses', 'Breakfast', 'Burgers', 'Pizza', 'Drinks', 'Desserts'];
+const diningAreas = ['All Areas', 'Main Dining', 'Terrace', 'VIP Lounge', 'Patio'];
 
 type Props = {
   sharedOrders: SessionOrder[];
@@ -160,129 +130,92 @@ type Props = {
 };
 
 export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigateToCustomer }: Props) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories' | 'tables'>('tables');
+  const [tables, setTables] = useState<DiningTable[]>(initialTables);
   const [dishes, setDishes] = useState<MenuItem[]>(defaultDishes);
   const [categories, setCategories] = useState<string[]>(initialCategories);
 
-  // Filters
-  const [selectedCategory, setSelectedCategory] = useState('All Items');
-  const [searchFood, setSearchFood] = useState('');
-  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'soldout'>('all');
+  // Table Filters & Search
+  const [selectedArea, setSelectedArea] = useState('All Areas');
+  const [searchTable, setSearchTable] = useState('');
+  const [tableStatusFilter, setTableStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
-  // Modals & Drawers
+  // Modals for 03C
+  const [selectedQRTable, setSelectedQRTable] = useState<DiningTable | null>(null);
+  const [editingTable, setEditingTable] = useState<DiningTable | null>(null);
+  const [isNewTable, setIsNewTable] = useState(false);
+  const [printModalTable, setPrintModalTable] = useState<DiningTable | null>(null);
+  const [printConcept, setPrintConcept] = useState<'card' | 'tent' | 'bulk'>('card');
+  const [toast, setToast] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Modals for 03B
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [isNewItem, setIsNewItem] = useState(false);
   const [previewItem, setPreviewItem] = useState<MenuItem | null>(null);
-  const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
-  const [newCatName, setNewCatName] = useState('');
-  const [toast, setToast] = useState<string | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   };
 
-  // 1-Click Availability Toggle
-  const toggleAvailability = (id: number) => {
-    setDishes(prev =>
-      prev.map(d => {
-        if (d.id === id) {
-          const nextState = !d.available;
-          showToast(`${d.name} marked as ${nextState ? 'Available' : 'Sold Out'}`);
-          return { ...d, available: nextState };
+  // Toggle Table Active Status
+  const toggleTableActive = (id: string) => {
+    setTables(prev =>
+      prev.map(t => {
+        if (t.id === id) {
+          const next = !t.active;
+          showToast(`${t.number} marked as ${next ? 'Active' : 'Inactive'}`);
+          return { ...t, active: next };
         }
-        return d;
+        return t;
       })
     );
   };
 
-  // Filtered Food List
-  const filteredDishes = useMemo(() => {
-    return dishes.filter(d => {
-      const matchesCat = selectedCategory === 'All Items' || d.category === selectedCategory;
-      const matchesSearch =
-        d.name.toLowerCase().includes(searchFood.toLowerCase()) ||
-        d.description.toLowerCase().includes(searchFood.toLowerCase());
-      const matchesAvail =
-        availabilityFilter === 'all'
-          ? true
-          : availabilityFilter === 'available'
-          ? d.available
-          : !d.available;
-      return matchesCat && matchesSearch && matchesAvail;
+  // Filtered Tables
+  const filteredTables = useMemo(() => {
+    return tables.filter(t => {
+      const matchArea = selectedArea === 'All Areas' || t.area === selectedArea;
+      const matchSearch = t.number.toLowerCase().includes(searchTable.toLowerCase()) || t.area.toLowerCase().includes(searchTable.toLowerCase());
+      const matchStatus = tableStatusFilter === 'all' ? true : tableStatusFilter === 'active' ? t.active : !t.active;
+      return matchArea && matchSearch && matchStatus;
     });
-  }, [dishes, selectedCategory, searchFood, availabilityFilter]);
+  }, [tables, selectedArea, searchTable, tableStatusFilter]);
 
-  // Open Form to Add New Dish
-  const handleOpenAdd = () => {
-    setIsNewItem(true);
-    setEditingItem({
-      id: Date.now(),
-      name: '',
-      description: '',
-      price: 350,
-      category: 'Ethiopian Food',
-      image: 'photo-1544025162-d76694265947',
-      available: true,
-      portions: [{ name: 'Regular', price: 0 }],
-      extras: []
-    });
-  };
-
-  // Save Item (Create or Update)
-  const handleSaveItem = () => {
-    if (!editingItem) return;
-    if (!editingItem.name.trim()) {
-      showToast('Please enter a food name');
+  // Save Table
+  const handleSaveTable = () => {
+    if (!editingTable) return;
+    if (!editingTable.number.trim()) {
+      showToast('Please enter a table name');
       return;
     }
-    if (!editingItem.price || editingItem.price <= 0) {
-      showToast('Please enter a valid price in ETB');
-      return;
-    }
-
-    if (isNewItem) {
-      setDishes([editingItem, ...dishes]);
-      showToast(`${editingItem.name} added to menu!`);
+    if (isNewTable) {
+      if (tables.some(t => t.number.toLowerCase() === editingTable.number.toLowerCase())) {
+        showToast('A table with this number already exists');
+        return;
+      }
+      setTables([...tables, editingTable]);
+      showToast(`${editingTable.number} created with QR Code!`);
     } else {
-      setDishes(dishes.map(d => (d.id === editingItem.id ? editingItem : d)));
-      showToast(`${editingItem.name} updated!`);
+      setTables(tables.map(t => (t.id === editingTable.id ? editingTable : t)));
+      showToast(`${editingTable.number} updated!`);
     }
-    setEditingItem(null);
+    setEditingTable(null);
   };
 
-  // Delete Dish
-  const handleDeleteItem = (id: number, name: string) => {
-    setDishes(dishes.filter(d => d.id !== id));
-    showToast(`${name} removed from menu`);
+  // Delete Table
+  const handleDeleteTable = (id: string, name: string) => {
+    setTables(tables.filter(t => t.id !== id));
+    showToast(`${name} deleted`);
   };
 
-  // Category Add
-  const handleAddCategory = () => {
-    const trimmed = newCatName.trim();
-    if (!trimmed) return;
-    if (categories.includes(trimmed)) {
-      showToast('This category already exists');
-      return;
-    }
-    setCategories([...categories, trimmed]);
-    setNewCatName('');
-    showToast(`Category "${trimmed}" created!`);
-  };
-
-  // Category Delete
-  const handleConfirmDeleteCategory = () => {
-    if (!deletingCategory) return;
-    const count = dishes.filter(d => d.category === deletingCategory).length;
-    if (count > 0) {
-      showToast(`Cannot delete "${deletingCategory}": Reassign the ${count} dishes first`);
-      setDeletingCategory(null);
-      return;
-    }
-    setCategories(categories.filter(c => c !== deletingCategory));
-    showToast(`Category "${deletingCategory}" deleted`);
-    setDeletingCategory(null);
+  // Regenerate QR Token
+  const handleRegenerateQR = (table: DiningTable) => {
+    const newToken = `ak-${table.number.toLowerCase().replace(/\s+/g, '')}-${Math.random().toString(36).substring(2, 6)}`;
+    setTables(tables.map(t => (t.id === table.id ? { ...t, qrToken: newToken } : t)));
+    setSelectedQRTable({ ...table, qrToken: newToken });
+    showToast(`New QR Code generated for ${table.number}`);
   };
 
   return (
@@ -339,10 +272,13 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
             <span>Categories</span>
           </button>
 
-          <button className="admin-nav-item" onClick={() => showToast('Table QR Code Generator (Coming in 03C)')}>
+          <button
+            className={`admin-nav-item ${activeTab === 'tables' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('tables'); setMobileMenuOpen(false); }}
+          >
             <AdminIcon name="tables" size={18} />
             <span>Tables & QR</span>
-            <span className="admin-nav-soon">03C</span>
+            <span className="admin-nav-badge" style={{ background: 'var(--gold)', color: '#10261b' }}>{tables.length}</span>
           </button>
 
           <button className="admin-nav-item" onClick={() => showToast('Staff Accounts (Coming in 03D)')}>
@@ -400,7 +336,9 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   ? 'Orders'
                   : activeTab === 'menu'
                   ? 'Food Menu'
-                  : 'Categories'}
+                  : activeTab === 'categories'
+                  ? 'Categories'
+                  : 'Tables & QR Codes'}
               </strong>
             </div>
           </div>
@@ -415,33 +353,56 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
 
         <main className="admin-content">
           {/* =========================================================
-              TAB 1: MENU MANAGEMENT (03B)
+              TAB: TABLES & QR CODE GENERATION (03C)
              ========================================================= */}
-          {activeTab === 'menu' && (
+          {activeTab === 'tables' && (
             <>
               <div className="admin-page-header">
                 <div>
-                  <h1>Menu Management</h1>
-                  <p>Add new dishes, change prices, and toggle available items instantly.</p>
+                  <h1>Tables & QR Codes</h1>
+                  <p>Generate digital menu QR codes for dining tables. Print table tents and cards.</p>
                 </div>
-                <button className="admin-action-btn primary" onClick={handleOpenAdd} style={{ minHeight: '44px', padding: '0 20px' }}>
-                  <AdminIcon name="plus" size={16} />
-                  <span>Add New Dish</span>
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    className="admin-action-btn secondary"
+                    onClick={() => {
+                      setPrintModalTable(tables[0]);
+                      setPrintConcept('bulk');
+                    }}
+                  >
+                    <AdminIcon name="printer" size={15} /> Print All QR Codes
+                  </button>
+                  <button
+                    className="admin-action-btn primary"
+                    onClick={() => {
+                      setIsNewTable(true);
+                      setEditingTable({
+                        id: `t-${Date.now()}`,
+                        number: `Table 0${tables.length + 1}`,
+                        area: 'Main Dining',
+                        capacity: 4,
+                        active: true,
+                        qrToken: `ak-t${tables.length + 1}-${Math.random().toString(36).substring(2, 6)}`
+                      });
+                    }}
+                  >
+                    <AdminIcon name="plus" size={15} /> Add Dining Table
+                  </button>
+                </div>
               </div>
 
-              {/* Filter and Search Bar */}
+              {/* Area Filters & Search */}
               <div className="admin-orders-controls">
                 <div className="admin-status-tabs">
-                  {categories.map(cat => (
+                  {diningAreas.map(area => (
                     <button
-                      key={cat}
-                      className={`admin-tab-btn ${selectedCategory === cat ? 'active' : ''}`}
-                      onClick={() => setSelectedCategory(cat)}
+                      key={area}
+                      className={`admin-tab-btn ${selectedArea === area ? 'active' : ''}`}
+                      onClick={() => setSelectedArea(area)}
                     >
-                      <span>{cat}</span>
+                      <span>{area}</span>
                       <span className="admin-tab-count">
-                        {cat === 'All Items' ? dishes.length : dishes.filter(d => d.category === cat).length}
+                        {area === 'All Areas' ? tables.length : tables.filter(t => t.area === area).length}
                       </span>
                     </button>
                   ))}
@@ -452,27 +413,152 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                     <AdminIcon name="search" size={16} />
                     <input
                       type="text"
-                      placeholder="Search food name…"
-                      value={searchFood}
-                      onChange={e => setSearchFood(e.target.value)}
+                      placeholder="Search table number…"
+                      value={searchTable}
+                      onChange={e => setSearchTable(e.target.value)}
                     />
                   </div>
 
                   <select
                     className="admin-select"
-                    value={availabilityFilter}
-                    onChange={e => setAvailabilityFilter(e.target.value as any)}
+                    value={tableStatusFilter}
+                    onChange={e => setTableStatusFilter(e.target.value as any)}
                   >
-                    <option value="all">All Items</option>
-                    <option value="available">Only Available</option>
-                    <option value="soldout">Only Sold Out</option>
+                    <option value="all">All Tables</option>
+                    <option value="active">Active QR Codes</option>
+                    <option value="inactive">Inactive Tables</option>
                   </select>
                 </div>
               </div>
 
-              {/* Spacious Dish Cards Grid */}
+              {/* Tables Grid */}
+              <div className="admin-tables-grid">
+                {filteredTables.map(table => {
+                  const hasLiveOrder = table.number === 'Table 08' || table.number === 'Table 04';
+                  return (
+                    <div className={`admin-table-box ${!table.active ? 'inactive' : ''}`} key={table.id}>
+                      <div className="admin-table-box-top">
+                        <div className="admin-table-title">
+                          <h3>{table.number}</h3>
+                          <span className="admin-table-area-tag">{table.area}</span>
+                        </div>
+                        {/* Interactive mini QR preview */}
+                        <div
+                          className="admin-table-qr-mini"
+                          onClick={() => setSelectedQRTable(table)}
+                          title="Click to view full QR code"
+                        >
+                          <TableQRCodeSVG size={50} tableNumber={table.number} />
+                        </div>
+                      </div>
+
+                      <div className="admin-table-meta-row">
+                        <span>Capacity: <strong>{table.capacity} Guests</strong></span>
+                        <span className={`admin-table-order-pill ${hasLiveOrder ? 'active' : 'idle'}`}>
+                          {hasLiveOrder ? '● Active Order' : 'No Order'}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                          QR Ordering: <strong style={{ color: table.active ? '#23734b' : '#b83b3b' }}>{table.active ? 'Active' : 'Disabled'}</strong>
+                        </span>
+                        <button
+                          className={`admin-toggle ${table.active ? 'on' : ''}`}
+                          onClick={() => toggleTableActive(table.id)}
+                          title={table.active ? 'Deactivate table QR' : 'Activate table QR'}
+                          aria-label={`Toggle active for ${table.number}`}
+                        >
+                          <span className="admin-toggle-knob" />
+                        </button>
+                      </div>
+
+                      <div className="admin-table-card-actions">
+                        <button
+                          className="admin-action-btn secondary"
+                          style={{ flex: 1 }}
+                          onClick={() => setSelectedQRTable(table)}
+                        >
+                          <AdminIcon name="qr" size={14} /> QR Code
+                        </button>
+                        <button
+                          className="admin-action-btn secondary"
+                          onClick={() => {
+                            setPrintModalTable(table);
+                            setPrintConcept('card');
+                          }}
+                          title="Print physical table card"
+                        >
+                          <AdminIcon name="printer" size={14} /> Print
+                        </button>
+                        <button
+                          className="admin-action-btn secondary"
+                          onClick={() => {
+                            setIsNewTable(false);
+                            setEditingTable({ ...table });
+                          }}
+                          title="Edit table settings"
+                        >
+                          <AdminIcon name="edit" size={14} />
+                        </button>
+                        <button
+                          className="admin-action-btn danger"
+                          onClick={() => handleDeleteTable(table.id, table.number)}
+                          title="Delete table"
+                        >
+                          <AdminIcon name="trash" size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {filteredTables.length === 0 && (
+                <div className="admin-empty-state">
+                  <AdminIcon name="tables" size={40} />
+                  <h3>No tables found</h3>
+                  <p>Try searching another table or clearing your area filter.</p>
+                  <button className="admin-action-btn secondary" onClick={() => { setSearchTable(''); setSelectedArea('All Areas'); }}>
+                    Clear Filters
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* =========================================================
+              TAB: MENU MANAGEMENT (03B)
+             ========================================================= */}
+          {activeTab === 'menu' && (
+            <>
+              <div className="admin-page-header">
+                <div>
+                  <h1>Menu Management</h1>
+                  <p>Add new dishes, change prices, and toggle available items instantly.</p>
+                </div>
+                <button
+                  className="admin-action-btn primary"
+                  onClick={() => {
+                    setIsNewItem(true);
+                    setEditingItem({
+                      id: Date.now(),
+                      name: '',
+                      description: '',
+                      price: 350,
+                      category: 'Ethiopian Food',
+                      image: 'photo-1544025162-d76694265947',
+                      available: true,
+                      portions: [{ name: 'Regular', price: 0 }]
+                    });
+                  }}
+                >
+                  <AdminIcon name="plus" size={16} /> Add New Dish
+                </button>
+              </div>
+
               <div className="admin-menu-grid">
-                {filteredDishes.map(dish => (
+                {dishes.map(dish => (
                   <div className={`admin-food-card ${!dish.available ? 'unavailable' : ''}`} key={dish.id}>
                     <div className="admin-food-thumb">
                       <img src={`https://images.unsplash.com/${dish.image}?w=500&auto=format&fit=crop&q=80`} alt={dish.name} />
@@ -486,16 +572,16 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                         <span className="admin-food-category-badge">{dish.category}</span>
                       </div>
                       <p className="admin-food-desc">{dish.description}</p>
-
                       <div className="admin-food-meta">
                         <span className="admin-food-price">{money(dish.price)}</span>
-                        {/* 1-Click Availability Switch */}
                         <div className="admin-toggle-wrap">
                           <button
                             className={`admin-toggle ${dish.available ? 'on' : ''}`}
-                            onClick={() => toggleAvailability(dish.id)}
-                            title={dish.available ? 'Click to mark as Sold Out' : 'Click to make Available'}
-                            aria-label={`Toggle availability for ${dish.name}`}
+                            onClick={() => {
+                              const next = !dish.available;
+                              setDishes(dishes.map(d => (d.id === dish.id ? { ...d, available: next } : d)));
+                              showToast(`${dish.name} is now ${next ? 'Available' : 'Sold Out'}`);
+                            }}
                           >
                             <span className="admin-toggle-knob" />
                           </button>
@@ -506,25 +592,13 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                       </div>
 
                       <div className="admin-food-actions">
-                        <button
-                          className="admin-action-btn secondary"
-                          onClick={() => setPreviewItem(dish)}
-                          title="Preview how this appears to customers"
-                        >
+                        <button className="admin-action-btn secondary" onClick={() => setPreviewItem(dish)}>
                           <AdminIcon name="eye" size={14} /> Preview
                         </button>
-                        <button
-                          className="admin-action-btn secondary"
-                          onClick={() => { setIsNewItem(false); setEditingItem({ ...dish }); }}
-                          title="Edit dish details"
-                        >
+                        <button className="admin-action-btn secondary" onClick={() => { setIsNewItem(false); setEditingItem({ ...dish }); }}>
                           <AdminIcon name="edit" size={14} /> Edit
                         </button>
-                        <button
-                          className="admin-action-btn danger"
-                          onClick={() => handleDeleteItem(dish.id, dish.name)}
-                          title="Delete dish"
-                        >
+                        <button className="admin-action-btn danger" onClick={() => setDishes(dishes.filter(d => d.id !== dish.id))}>
                           <AdminIcon name="trash" size={14} />
                         </button>
                       </div>
@@ -532,22 +606,11 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   </div>
                 ))}
               </div>
-
-              {filteredDishes.length === 0 && (
-                <div className="admin-empty-state">
-                  <AdminIcon name="menu" size={40} />
-                  <h3>No dishes found</h3>
-                  <p>Try clearing your search or category filter.</p>
-                  <button className="admin-action-btn secondary" onClick={() => { setSearchFood(''); setSelectedCategory('All Items'); }}>
-                    Clear Filters
-                  </button>
-                </div>
-              )}
             </>
           )}
 
           {/* =========================================================
-              TAB 2: CATEGORY MANAGEMENT (03B)
+              TAB: CATEGORIES (03B)
              ========================================================= */}
           {activeTab === 'categories' && (
             <>
@@ -556,540 +619,356 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   <h1>Menu Categories</h1>
                   <p>Organize how dishes appear to customers browsing on their phones.</p>
                 </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <input
-                    type="text"
-                    placeholder="New category name…"
-                    className="admin-select"
-                    style={{ width: '220px' }}
-                    value={newCatName}
-                    onChange={e => setNewCatName(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleAddCategory()}
-                  />
-                  <button className="admin-action-btn primary" onClick={handleAddCategory}>
-                    <AdminIcon name="plus" size={15} /> Add Category
-                  </button>
-                </div>
               </div>
-
               <div className="admin-category-grid">
-                {categories.filter(c => c !== 'All Items').map(cat => {
-                  const count = dishes.filter(d => d.category === cat).length;
-                  return (
-                    <div className="admin-category-card" key={cat}>
-                      <div className="admin-category-card-top">
-                        <div>
-                          <h3>{cat}</h3>
-                          <p>{count} dish{count === 1 ? '' : 'es'} in menu</p>
-                        </div>
-                        <span className="admin-category-count">{count} items</span>
-                      </div>
-
-                      <div className="admin-category-actions">
-                        <button
-                          className="admin-action-btn secondary"
-                          style={{ flex: 1 }}
-                          onClick={() => { setSelectedCategory(cat); setActiveTab('menu'); }}
-                        >
-                          View Dishes
-                        </button>
-                        <button
-                          className="admin-action-btn danger"
-                          onClick={() => setDeletingCategory(cat)}
-                          title="Delete category"
-                        >
-                          <AdminIcon name="trash" size={14} />
-                        </button>
+                {categories.filter(c => c !== 'All Items').map(cat => (
+                  <div className="admin-category-card" key={cat}>
+                    <div className="admin-category-card-top">
+                      <div>
+                        <h3>{cat}</h3>
+                        <p>{dishes.filter(d => d.category === cat).length} dishes</p>
                       </div>
                     </div>
-                  );
-                })}
+                    <div className="admin-category-actions">
+                      <button className="admin-action-btn secondary" onClick={() => setActiveTab('menu')}>
+                        View Items
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </>
           )}
 
           {/* =========================================================
-              TAB 3: ORDERS MANAGEMENT (03A - Reusable, Uncluttered)
+              TAB: ORDERS & OVERVIEW
              ========================================================= */}
           {activeTab === 'orders' && (
-            <>
-              <div className="admin-page-header">
-                <div>
-                  <h1>Table Orders</h1>
-                  <p>Real-time orders received from table QR codes.</p>
-                </div>
-                <button
-                  className="admin-action-btn secondary"
-                  onClick={() => {
-                    const ref = `DEMO-AK-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-                    onUpdateOrders([{
-                      reference: ref,
-                      placedAt: new Date().toISOString(),
-                      status: 'Received',
-                      lines: [{
-                        key: `item-${Date.now()}`,
-                        dish: dishes[0],
-                        quantity: 1,
-                        unitPrice: dishes[0].price,
-                        portion: 'Regular',
-                        extras: [],
-                        instructions: 'Table request'
-                      }]
-                    }, ...sharedOrders]);
-                    showToast('New order placed at Table 08!');
-                  }}
-                >
-                  + Simulate Incoming Order
-                </button>
-              </div>
-
-              <div className="admin-table-wrap">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>ORDER REF</th>
-                      <th>TABLE</th>
-                      <th>ITEMS</th>
-                      <th>TOTAL</th>
-                      <th>STATUS</th>
-                      <th style={{ textAlign: 'right' }}>ACTION</th>
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>ORDER REF</th>
+                    <th>TABLE</th>
+                    <th>ITEMS</th>
+                    <th>TOTAL</th>
+                    <th>STATUS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sharedOrders.map(order => (
+                    <tr key={order.reference}>
+                      <td className="admin-order-ref">
+                        <strong>{order.reference}</strong>
+                        <small>{new Date(order.placedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                      </td>
+                      <td><span className="admin-table-tag">Table 08</span></td>
+                      <td className="admin-items-summary">
+                        <strong>{order.lines.reduce((n, l) => n + l.quantity, 0)} items</strong>
+                        <p>{order.lines.map(l => `${l.quantity}× ${l.dish.name}`).join(', ')}</p>
+                      </td>
+                      <td style={{ fontWeight: 600, color: 'var(--brand)' }}>
+                        {money(order.lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0))}
+                      </td>
+                      <td>
+                        <span className={`admin-status-badge ${order.status.toLowerCase()}`}>
+                          {order.status}
+                        </span>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {sharedOrders.map(order => (
-                      <tr key={order.reference}>
-                        <td className="admin-order-ref">
-                          <strong>{order.reference}</strong>
-                          <small>{new Date(order.placedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
-                        </td>
-                        <td><span className="admin-table-tag">Table 08</span></td>
-                        <td className="admin-items-summary">
-                          <strong>{order.lines.reduce((n, l) => n + l.quantity, 0)} items</strong>
-                          <p>{order.lines.map(l => `${l.quantity}× ${l.dish.name}`).join(', ')}</p>
-                        </td>
-                        <td style={{ fontWeight: 600, color: 'var(--brand)' }}>
-                          {money(order.lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0))}
-                        </td>
-                        <td>
-                          <span className={`admin-status-badge ${order.status.toLowerCase()}`}>
-                            {order.status}
-                          </span>
-                        </td>
-                        <td style={{ textAlign: 'right' }}>
-                          {order.status === 'Received' && (
-                            <button
-                              className="admin-action-btn primary"
-                              onClick={() => {
-                                onUpdateOrders(sharedOrders.map(o => o.reference === order.reference ? { ...o, status: 'Accepted' } : o));
-                                showToast(`Order ${order.reference} accepted!`);
-                              }}
-                            >
-                              Accept
-                            </button>
-                          )}
-                          {order.status === 'Accepted' && (
-                            <button
-                              className="admin-action-btn primary"
-                              onClick={() => {
-                                onUpdateOrders(sharedOrders.map(o => o.reference === order.reference ? { ...o, status: 'Preparing' } : o));
-                                showToast(`Order ${order.reference} preparing`);
-                              }}
-                            >
-                              Start Prep
-                            </button>
-                          )}
-                          {order.status === 'Preparing' && (
-                            <button
-                              className="admin-action-btn primary"
-                              onClick={() => {
-                                onUpdateOrders(sharedOrders.map(o => o.reference === order.reference ? { ...o, status: 'Ready' } : o));
-                                showToast(`Order ${order.reference} marked ready!`);
-                              }}
-                            >
-                              Mark Ready
-                            </button>
-                          )}
-                          {order.status === 'Ready' && (
-                            <button
-                              className="admin-action-btn secondary"
-                              onClick={() => {
-                                onUpdateOrders(sharedOrders.map(o => o.reference === order.reference ? { ...o, status: 'Completed' } : o));
-                                showToast(`Order ${order.reference} completed!`);
-                              }}
-                            >
-                              Complete
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
-          {/* =========================================================
-              TAB 4: OVERVIEW SCREEN (Spacious, Uncluttered)
-             ========================================================= */}
           {activeTab === 'overview' && (
-            <>
-              <div className="admin-page-header">
-                <div>
-                  <h1>Restaurant Overview</h1>
-                  <p>Daily activity at Abay Kitchen.</p>
-                </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button className="admin-action-btn secondary" onClick={() => setActiveTab('menu')}>
-                    Edit Menu
-                  </button>
-                  <button className="admin-action-btn primary" onClick={() => setActiveTab('orders')}>
-                    View Orders
-                  </button>
-                </div>
+            <div className="admin-kpi-grid">
+              <div className="admin-kpi-card">
+                <div className="admin-kpi-top"><span>ACTIVE TABLES</span><AdminIcon name="tables" size={16} /></div>
+                <strong>{tables.filter(t => t.active).length} / {tables.length}</strong>
+                <div className="admin-kpi-foot pos">QR Codes scannable</div>
               </div>
-
-              <div className="admin-kpi-grid">
-                <div className="admin-kpi-card">
-                  <div className="admin-kpi-top">
-                    <span>ORDERS TODAY</span>
-                    <AdminIcon name="orders" size={16} />
-                  </div>
-                  <strong>{sharedOrders.length + 24}</strong>
-                  <div className="admin-kpi-foot pos">
-                    <AdminIcon name="check" size={12} /> Live QR Orders
-                  </div>
-                </div>
-
-                <div className="admin-kpi-card highlight">
-                  <div className="admin-kpi-top">
-                    <span>ACTIVE DISHES</span>
-                    <AdminIcon name="menu" size={16} />
-                  </div>
-                  <strong>{dishes.filter(d => d.available).length}</strong>
-                  <div className="admin-kpi-foot">
-                    <span>{dishes.filter(d => !d.available).length} sold out</span>
-                  </div>
-                </div>
-
-                <div className="admin-kpi-card">
-                  <div className="admin-kpi-top">
-                    <span>CATEGORIES</span>
-                    <AdminIcon name="categories" size={16} />
-                  </div>
-                  <strong>{categories.length - 1}</strong>
-                  <div className="admin-kpi-foot">
-                    <span>All active</span>
-                  </div>
-                </div>
-
-                <div className="admin-kpi-card">
-                  <div className="admin-kpi-top">
-                    <span>RECORDED SALES</span>
-                  </div>
-                  <strong>ETB 28,400</strong>
-                  <div className="admin-kpi-foot">
-                    <span>Pay at table</span>
-                  </div>
-                </div>
+              <div className="admin-kpi-card">
+                <div className="admin-kpi-top"><span>DISHES ON MENU</span><AdminIcon name="menu" size={16} /></div>
+                <strong>{dishes.filter(d => d.available).length}</strong>
+                <div className="admin-kpi-foot">{dishes.filter(d => !d.available).length} sold out</div>
               </div>
-            </>
+              <div className="admin-kpi-card highlight">
+                <div className="admin-kpi-top"><span>ORDERS TODAY</span><AdminIcon name="orders" size={16} /></div>
+                <strong>{sharedOrders.length + 28}</strong>
+                <div className="admin-kpi-foot">Live QR Orders</div>
+              </div>
+              <div className="admin-kpi-card">
+                <div className="admin-kpi-top"><span>RECORDED SALES</span></div>
+                <strong>ETB 32,800</strong>
+                <div className="admin-kpi-foot">Pay at table</div>
+              </div>
+            </div>
           )}
         </main>
       </div>
 
       {/* =========================================================
-          MODAL 1: ADD / EDIT FOOD ITEM (03B)
+          MODAL 1: QR CODE DETAIL & GENERATOR MODAL (03C)
          ========================================================= */}
-      {editingItem && (
-        <div className="admin-modal-backdrop" onClick={() => setEditingItem(null)}>
-          <div
-            className="admin-modal"
-            style={{ width: '560px' }}
-            role="dialog"
-            aria-modal="true"
-            onClick={e => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0 }}>{isNewItem ? 'Add New Dish' : `Edit ${editingItem.name}`}</h3>
-              <button
-                style={{ background: 'transparent', border: 0, cursor: 'pointer' }}
-                onClick={() => setEditingItem(null)}
-              >
+      {selectedQRTable && (
+        <div className="admin-modal-backdrop" onClick={() => setSelectedQRTable(null)}>
+          <div className="admin-modal" style={{ width: '460px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>{selectedQRTable.number} QR Code</h3>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Abay Kitchen · {selectedQRTable.area}</span>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setSelectedQRTable(null)}>
                 <AdminIcon name="close" size={20} />
               </button>
             </div>
 
-            {/* Photo Preview & Simple Selector */}
-            <div className="admin-form-group">
-              <label>Dish Photo</label>
-              <div className="admin-image-preview-wrap">
-                <img src={`https://images.unsplash.com/${editingItem.image}?w=600&auto=format&fit=crop&q=80`} alt="Preview" />
-                <div className="admin-image-preview-actions">
-                  <button
-                    className="admin-action-btn secondary"
-                    style={{ background: '#fff', fontSize: '11px', minHeight: '32px' }}
-                    onClick={() => {
-                      // Cycle through realistic food photos
-                      const samplePhotos = [
-                        'photo-1746716447103-e1618bbd0669',
-                        'photo-1544025162-d76694265947',
-                        'photo-1593252719532-53f183016149',
-                        'photo-1670398564097-0762e1b30b3a',
-                        'photo-1568901346375-23c9450c58cd',
-                        'photo-1622597467836-f3285f2131b8'
-                      ];
-                      const next = samplePhotos[(samplePhotos.indexOf(editingItem.image) + 1) % samplePhotos.length];
-                      setEditingItem({ ...editingItem, image: next });
-                      showToast('Photo changed');
-                    }}
-                  >
-                    <AdminIcon name="image" size={14} /> Change Photo
-                  </button>
+            <div className="admin-qr-modal-body">
+              {/* High-Contrast Crisp QR Code */}
+              <div className="admin-qr-code-frame">
+                <TableQRCodeSVG size={180} tableNumber={selectedQRTable.number} />
+              </div>
+
+              {/* Destination URL */}
+              <div className="admin-qr-url-box">
+                <span>https://gebetaqr.com/r/abay-kitchen/t/{selectedQRTable.qrToken}</span>
+                <button
+                  style={{ background: 'transparent', border: 0, color: 'var(--brand)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                  onClick={() => {
+                    navigator.clipboard?.writeText(`https://gebetaqr.com/r/abay-kitchen/t/${selectedQRTable.qrToken}`);
+                    showToast('Table ordering link copied to clipboard!');
+                  }}
+                  title="Copy Link"
+                >
+                  <AdminIcon name="copy" size={16} />
+                </button>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', width: '100%', marginBottom: '12px' }}>
+                <button
+                  className="admin-action-btn secondary"
+                  onClick={() => {
+                    setPrintModalTable(selectedQRTable);
+                    setPrintConcept('card');
+                  }}
+                >
+                  <AdminIcon name="printer" size={15} /> Print Card
+                </button>
+                <button
+                  className="admin-action-btn secondary"
+                  onClick={() => {
+                    setPrintModalTable(selectedQRTable);
+                    setPrintConcept('tent');
+                  }}
+                >
+                  <AdminIcon name="printer" size={15} /> Print Tent Card
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                <button
+                  className="admin-action-btn secondary"
+                  style={{ flex: 1 }}
+                  onClick={() => showToast(`Downloaded high-res PNG for ${selectedQRTable.number}`)}
+                >
+                  <AdminIcon name="download" size={15} /> Download PNG
+                </button>
+                <button
+                  className="admin-action-btn danger"
+                  onClick={() => handleRegenerateQR(selectedQRTable)}
+                  title="Generate new QR token (invalidates old printed QR)"
+                >
+                  Regenerate QR
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL 2: PRINTABLE ASSETS & TENT CARDS PREVIEW (03C)
+         ========================================================= */}
+      {printModalTable && (
+        <div className="admin-modal-backdrop" onClick={() => setPrintModalTable(null)}>
+          <div className="admin-modal" style={{ width: printConcept === 'bulk' ? '640px' : '520px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>Print Table QR Code</h3>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>High-resolution print-ready layout</span>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setPrintModalTable(null)}>
+                <AdminIcon name="close" size={20} />
+              </button>
+            </div>
+
+            {/* Print Concept Switcher */}
+            <div className="admin-print-switcher">
+              <button
+                className={`admin-tab-btn ${printConcept === 'card' ? 'active' : ''}`}
+                style={{ flex: 1 }}
+                onClick={() => setPrintConcept('card')}
+              >
+                Tabletop Card
+              </button>
+              <button
+                className={`admin-tab-btn ${printConcept === 'tent' ? 'active' : ''}`}
+                style={{ flex: 1 }}
+                onClick={() => setPrintConcept('tent')}
+              >
+                Folded Tent Card
+              </button>
+              <button
+                className={`admin-tab-btn ${printConcept === 'bulk' ? 'active' : ''}`}
+                style={{ flex: 1 }}
+                onClick={() => setPrintConcept('bulk')}
+              >
+                A4 Bulk Sheet (All Tables)
+              </button>
+            </div>
+
+            {/* 1. Compact Tabletop Card Preview */}
+            {printConcept === 'card' && (
+              <div className="admin-print-card-preview">
+                <div className="admin-print-card-brand">ABAY KITCHEN</div>
+                <div className="admin-print-card-sub">ROOTED IN TRADITION · MADE WITH LOVE</div>
+                <div className="admin-print-card-table">{printModalTable.number.toUpperCase()}</div>
+                <div className="admin-print-card-qr">
+                  <TableQRCodeSVG size={140} tableNumber={printModalTable.number} />
+                </div>
+                <div className="admin-print-card-instruction">Scan with phone camera to view menu & order</div>
+                <div className="admin-print-card-footer">Thoughtfully served with gebetaQR</div>
+              </div>
+            )}
+
+            {/* 2. Folded Tent Card Preview */}
+            {printConcept === 'tent' && (
+              <div className="admin-tent-card-preview">
+                <div className="admin-tent-panel">
+                  <strong style={{ fontSize: '14px', color: 'var(--brand)' }}>ABAY KITCHEN</strong>
+                  <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '4px 0 12px' }}>{printModalTable.number}</p>
+                  <TableQRCodeSVG size={105} tableNumber={printModalTable.number} />
+                  <p style={{ fontSize: '10px', fontWeight: 600, color: 'var(--brand)', marginTop: '8px' }}>Scan to Order</p>
+                </div>
+                <div className="admin-tent-divider">FOLD LINE</div>
+                <div className="admin-tent-panel">
+                  <strong style={{ fontSize: '14px', color: 'var(--brand)' }}>WELCOME TO OUR TABLE</strong>
+                  <p style={{ fontSize: '10px', color: 'var(--muted)', margin: '4px 0 12px' }}>{printModalTable.number}</p>
+                  <TableQRCodeSVG size={105} tableNumber={printModalTable.number} />
+                  <p style={{ fontSize: '10px', fontWeight: 600, color: 'var(--brand)', marginTop: '8px' }}>Scan to Order</p>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Name & Category */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '14px' }}>
-              <div className="admin-form-group">
-                <label>Dish Name *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Sizzling Tibs"
-                  value={editingItem.name}
-                  onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
-                />
-              </div>
-
-              <div className="admin-form-group">
-                <label>Category *</label>
-                <select
-                  value={editingItem.category}
-                  onChange={e => setEditingItem({ ...editingItem, category: e.target.value })}
-                >
-                  {categories.filter(c => c !== 'All Items').map(c => (
-                    <option key={c} value={c}>{c}</option>
+            {/* 3. Bulk A4 Sheet Preview */}
+            {printConcept === 'bulk' && (
+              <div className="admin-bulk-sheet">
+                <div style={{ textAlign: 'center', marginBottom: '14px', borderBottom: '1px solid #e2e5dc', paddingBottom: '8px' }}>
+                  <strong style={{ fontSize: '13px', color: 'var(--brand)' }}>ABAY KITCHEN — ALL TABLES QR PRINT SHEET</strong>
+                  <span style={{ display: 'block', fontSize: '10px', color: 'var(--muted)' }}>Cut along dashed lines and place on dining tables</span>
+                </div>
+                <div className="admin-bulk-grid">
+                  {tables.slice(0, 4).map(t => (
+                    <div className="admin-bulk-cell" key={t.id}>
+                      <strong style={{ fontSize: '13px', color: 'var(--brand)' }}>{t.number}</strong>
+                      <div style={{ margin: '8px 0' }}>
+                        <TableQRCodeSVG size={90} tableNumber={t.number} />
+                      </div>
+                      <span style={{ fontSize: '9px', color: 'var(--muted)' }}>Scan to view menu & order</span>
+                    </div>
                   ))}
-                </select>
+                </div>
               </div>
+            )}
+
+            <div className="admin-modal-actions" style={{ marginTop: '20px' }}>
+              <button className="admin-action-btn secondary" onClick={() => setPrintModalTable(null)}>
+                Cancel
+              </button>
+              <button
+                className="admin-action-btn primary"
+                onClick={() => {
+                  showToast('Print dialog triggered. High-resolution print output ready.');
+                  setPrintModalTable(null);
+                }}
+              >
+                <AdminIcon name="printer" size={15} /> Print Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL 3: ADD / EDIT TABLE FORM (03C)
+         ========================================================= */}
+      {editingTable && (
+        <div className="admin-modal-backdrop" onClick={() => setEditingTable(null)}>
+          <div className="admin-modal" style={{ width: '480px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <h3 style={{ margin: 0 }}>{isNewTable ? 'Add Dining Table' : `Edit ${editingTable.number}`}</h3>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setEditingTable(null)}>
+                <AdminIcon name="close" size={20} />
+              </button>
             </div>
 
-            {/* Price & Tag */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div className="admin-form-group">
-                <label>Base Price (ETB) *</label>
-                <input
-                  type="number"
-                  placeholder="450"
-                  value={editingItem.price || ''}
-                  onChange={e => setEditingItem({ ...editingItem, price: parseFloat(e.target.value) || 0 })}
-                />
-              </div>
-
-              <div className="admin-form-group">
-                <label>Badge / Tag (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Popular, Plant-based"
-                  value={editingItem.tag || ''}
-                  onChange={e => setEditingItem({ ...editingItem, tag: e.target.value })}
-                />
-              </div>
-            </div>
-
-            {/* Description */}
             <div className="admin-form-group">
-              <label>Description</label>
-              <textarea
-                rows={3}
-                placeholder="Describe ingredients and flavours…"
-                value={editingItem.description}
-                onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
+              <label>Table Number / Name *</label>
+              <input
+                type="text"
+                placeholder="e.g. Table 09 or Patio 01"
+                value={editingTable.number}
+                onChange={e => setEditingTable({ ...editingTable, number: e.target.value })}
               />
             </div>
 
-            {/* Availability Switch */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div className="admin-form-group">
+                <label>Dining Area *</label>
+                <select
+                  value={editingTable.area}
+                  onChange={e => setEditingTable({ ...editingTable, area: e.target.value })}
+                >
+                  <option value="Main Dining">Main Dining</option>
+                  <option value="Terrace">Terrace</option>
+                  <option value="VIP Lounge">VIP Lounge</option>
+                  <option value="Patio">Patio</option>
+                </select>
+              </div>
+
+              <div className="admin-form-group">
+                <label>Capacity (Seats) *</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={editingTable.capacity}
+                  onChange={e => setEditingTable({ ...editingTable, capacity: parseInt(e.target.value) || 2 })}
+                />
+              </div>
+            </div>
+
             <div className="admin-form-group" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: '#fafbf8', borderRadius: '8px', border: '1px solid var(--border)' }}>
               <div>
-                <strong style={{ fontSize: '13px', display: 'block' }}>In Stock & Available</strong>
-                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Guests can order this dish from their table</span>
+                <strong style={{ fontSize: '13px', display: 'block' }}>Active for QR Ordering</strong>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Guests scanning this QR code can browse and place orders</span>
               </div>
               <button
-                className={`admin-toggle ${editingItem.available ? 'on' : ''}`}
-                onClick={() => setEditingItem({ ...editingItem, available: !editingItem.available })}
-                aria-label="Toggle available"
+                className={`admin-toggle ${editingTable.active ? 'on' : ''}`}
+                onClick={() => setEditingTable({ ...editingTable, active: !editingTable.active })}
               >
                 <span className="admin-toggle-knob" />
               </button>
             </div>
 
-            {/* Customization Options (Portions & Add-ons) */}
-            <div className="admin-form-group">
-              <label style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Portions & Surcharges</span>
-                <button
-                  type="button"
-                  style={{ background: 'transparent', border: 0, color: 'var(--brand)', cursor: 'pointer', fontSize: '11px', fontWeight: 600 }}
-                  onClick={() => {
-                    const existing = editingItem.portions || [];
-                    setEditingItem({
-                      ...editingItem,
-                      portions: [...existing, { name: 'Large', price: 150 }]
-                    });
-                  }}
-                >
-                  + Add Portion
-                </button>
-              </label>
-
-              <div className="admin-options-builder">
-                {(editingItem.portions || []).length > 0 ? (
-                  editingItem.portions!.map((p, idx) => (
-                    <div className="admin-option-item-row" key={idx}>
-                      <input
-                        type="text"
-                        placeholder="Portion name (e.g. Regular)"
-                        value={p.name}
-                        onChange={e => {
-                          const updated = [...editingItem.portions!];
-                          updated[idx].name = e.target.value;
-                          setEditingItem({ ...editingItem, portions: updated });
-                        }}
-                      />
-                      <input
-                        type="number"
-                        placeholder="+ Price ETB"
-                        value={p.price}
-                        onChange={e => {
-                          const updated = [...editingItem.portions!];
-                          updated[idx].price = parseFloat(e.target.value) || 0;
-                          setEditingItem({ ...editingItem, portions: updated });
-                        }}
-                      />
-                      <button
-                        className="admin-remove-option-btn"
-                        onClick={() => {
-                          setEditingItem({
-                            ...editingItem,
-                            portions: editingItem.portions!.filter((_, i) => i !== idx)
-                          });
-                        }}
-                      >
-                        <AdminIcon name="trash" size={14} />
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Standard serving only (no portion choices).</span>
-                )}
-              </div>
-            </div>
-
-            {/* Modal Actions */}
             <div className="admin-modal-actions">
-              <button className="admin-action-btn secondary" onClick={() => setEditingItem(null)}>
+              <button className="admin-action-btn secondary" onClick={() => setEditingTable(null)}>
                 Cancel
               </button>
-              <button className="admin-action-btn primary" onClick={handleSaveItem}>
-                Save Dish
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================
-          MODAL 2: CUSTOMER PHONE PREVIEW (03B)
-         ========================================================= */}
-      {previewItem && (
-        <div className="admin-modal-backdrop" onClick={() => setPreviewItem(null)}>
-          <div style={{ maxWidth: '380px', width: '100%' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', marginBottom: '12px', alignItems: 'center' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600 }}>Guest Mobile View</span>
-              <button
-                style={{ background: 'transparent', border: 0, color: '#fff', cursor: 'pointer' }}
-                onClick={() => setPreviewItem(null)}
-              >
-                <AdminIcon name="close" size={20} />
-              </button>
-            </div>
-
-            <div className="admin-phone-wrapper">
-              <div className="admin-phone-screen">
-                <div className="admin-phone-header">
-                  <span>Table 08</span>
-                  <span>Abay Kitchen</span>
-                </div>
-
-                <div style={{ padding: '16px' }}>
-                  <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border)', background: '#fff' }}>
-                    <div style={{ height: '170px', position: 'relative' }}>
-                      <img
-                        src={`https://images.unsplash.com/${previewItem.image}?w=500&auto=format&fit=crop&q=80`}
-                        alt={previewItem.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                      {previewItem.tag && (
-                        <span style={{ position: 'absolute', top: '10px', left: '10px', background: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600, color: 'var(--brand)' }}>
-                          {previewItem.tag}
-                        </span>
-                      )}
-                      {!previewItem.available && (
-                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(16,38,27,0.7)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: '12px', fontWeight: 700 }}>
-                          Sold Out
-                        </div>
-                      )}
-                    </div>
-
-                    <div style={{ padding: '16px' }}>
-                      <h4 style={{ margin: '0 0 6px', fontSize: '16px', color: 'var(--brand)' }}>{previewItem.name}</h4>
-                      <p style={{ margin: '0 0 14px', fontSize: '11px', color: 'var(--muted)', lineHeight: '1.6' }}>
-                        {previewItem.description}
-                      </p>
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f2eb', paddingTop: '12px' }}>
-                        <strong style={{ fontSize: '16px', color: 'var(--brand)' }}>{money(previewItem.price)}</strong>
-                        <button
-                          disabled={!previewItem.available}
-                          style={{
-                            background: previewItem.available ? 'var(--brand)' : '#e0e0e0',
-                            color: previewItem.available ? '#fff' : '#888',
-                            border: 0,
-                            borderRadius: '6px',
-                            padding: '6px 14px',
-                            fontSize: '11px',
-                            fontWeight: 600
-                          }}
-                        >
-                          {previewItem.available ? '+ Add' : 'Sold Out'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================
-          MODAL 3: DELETE CATEGORY CONFIRMATION (03B)
-         ========================================================= */}
-      {deletingCategory && (
-        <div className="admin-modal-backdrop" onClick={() => setDeletingCategory(null)}>
-          <div className="admin-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
-            <h3>Delete Category "{deletingCategory}"?</h3>
-            <p>
-              Categories with active dishes cannot be deleted. Please reassign the dishes to another category first.
-            </p>
-            <div className="admin-modal-actions">
-              <button className="admin-action-btn secondary" onClick={() => setDeletingCategory(null)}>
-                Cancel
-              </button>
-              <button className="admin-action-btn danger" onClick={handleConfirmDeleteCategory}>
-                Confirm Delete
+              <button className="admin-action-btn primary" onClick={handleSaveTable}>
+                Save Table
               </button>
             </div>
           </div>
