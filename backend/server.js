@@ -71,3 +71,5 @@ app.listen(PORT, () => {
   console.log(`🚀 GebetaQR Backend Server running on port ${PORT}`);
 });
 
+module.exports = app;
+
