@@ -5,10 +5,11 @@ import Checkout from './Checkout';
 import OrderTracking, { type SessionOrder } from './OrderTracking';
 import { FoodDetails, type CartLine } from './FoodDetails';
 import AdminDashboard from './AdminDashboard';
+import { api } from './api';
 const photo=(id:string,w=700)=>`https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=85`;
-const categories=['All Items','Breakfast','Ethiopian Food','Main Courses','Burgers','Pizza','Drinks','Desserts'];
-type Dish={id:number;name:string;description:string;price:number;category:string;image:string;tag?:string;custom?:boolean;unavailable?:boolean};
-const dishes:Dish[]=[
+const defaultCategories=['All Items','Breakfast','Ethiopian Food','Main Courses','Burgers','Pizza','Drinks','Desserts'];
+type Dish={id:number|string;name:string;description:string;price:number;category:string;image:string;tag?:string;custom?:boolean;unavailable?:boolean};
+const defaultDishes:Dish[]=[
 {id:1,name:'Doro Wat',description:'Slow-simmered chicken in a rich berbere sauce, with a boiled egg and soft injera.',price:680,category:'Ethiopian Food',image:'photo-1746716447103-e1618bbd0669',tag:'House favourite',custom:true},
 {id:2,name:'Sizzling Beef Tibs',description:'Tender beef, rosemary, peppers and onions. Served sizzling, with fresh injera.',price:720,category:'Ethiopian Food',image:'photo-1544025162-d76694265947',custom:true,tag:'Popular'},
 {id:3,name:'The Garden Beyaynetu',description:'A colourful spread of lentils, seasonal greens and spiced vegetables on injera.',price:460,category:'Ethiopian Food',image:'photo-1593252719532-53f183016149',tag:'Plant-based'},
@@ -26,8 +27,8 @@ const defaultSampleOrders: SessionOrder[] = [
     placedAt: new Date(Date.now() - 14 * 60 * 1000).toISOString(),
     status: 'Preparing',
     lines: [
-      { key: 'sample-doro', dish: dishes[0], portion: 'Regular', extras: ['Extra egg'], instructions: 'Less spicy, please.', unitPrice: 740, quantity: 1 },
-      { key: 'sample-tibs', dish: dishes[1], portion: 'Regular', extras: ['Extra injera'], instructions: '', unitPrice: 765, quantity: 1 }
+      { key: 'sample-doro', dish: defaultDishes[0], portion: 'Regular', extras: ['Extra egg'], instructions: 'Less spicy, please.', unitPrice: 740, quantity: 1 },
+      { key: 'sample-tibs', dish: defaultDishes[1], portion: 'Regular', extras: ['Extra injera'], instructions: '', unitPrice: 765, quantity: 1 }
     ]
   },
   {
@@ -36,15 +37,90 @@ const defaultSampleOrders: SessionOrder[] = [
     status: 'Completed',
     feedback: true,
     lines: [
-      { key: 'sample-drinks', dish: dishes[6], portion: '', extras: [], instructions: 'With ice', unitPrice: 180, quantity: 2 }
+      { key: 'sample-drinks', dish: defaultDishes[6], portion: '', extras: [], instructions: 'With ice', unitPrice: 180, quantity: 2 }
     ]
   }
 ];
-export default function App(){const [orders,setOrders]=useState<SessionOrder[]>(defaultSampleOrders);const [tracking,setTracking]=useState<string|null>(location.hash==='#tracking'?defaultSampleOrders[0].reference:null);const [foundation,setFoundation]=useState(location.hash==='#foundation');const [admin,setAdmin]=useState(location.hash==='#admin'||location.hash==='#orders');const [category,setCategory]=useState('All Items');const [search,setSearch]=useState('');const [cart,setCart]=useState<CartLine[]>([]);const [panel,setPanel]=useState<'info'|'cart'|null>(null);const [custom,setCustom]=useState<Dish|null>(null);const [toast,setToast]=useState('');const [loading,setLoading]=useState(true);const searchRef=useRef<HTMLInputElement>(null);const closeRef=useRef<HTMLButtonElement>(null);useEffect(()=>{const t=setTimeout(()=>setLoading(false),600);return()=>clearTimeout(t)},[]);useEffect(()=>{const handleHash=()=>{if(location.hash==='#foundation'){setFoundation(true);setTracking(null);setPanel(null);setAdmin(false)}else if(location.hash==='#tracking'){setFoundation(false);setTracking(orders[0]?.reference||defaultSampleOrders[0].reference);setPanel(null);setAdmin(false)}else if(location.hash==='#admin'||location.hash==='#orders'){setFoundation(false);setTracking(null);setPanel(null);setAdmin(true)}else{setFoundation(false);setTracking(null);setAdmin(false)}};window.addEventListener('hashchange',handleHash);return()=>window.removeEventListener('hashchange',handleHash)},[orders]);useEffect(()=>{if(panel!=='info')return;const prev=document.activeElement as HTMLElement;closeRef.current?.focus();const listener=(e:KeyboardEvent)=>{if(e.key==='Escape'){setPanel(null);setCustom(null)}if(e.key==='Tab'){const els=Array.from(document.querySelectorAll<HTMLElement>('.menu-modal button:not(:disabled),.menu-modal input'));const first=els[0],last=els[els.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}};document.addEventListener('keydown',listener);return()=>{document.removeEventListener('keydown',listener);prev?.focus()}},[panel,custom]);useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(''),2800);return()=>clearTimeout(t)},[toast]);
-const count=cart.reduce((a,l)=>a+l.quantity,0),total=cart.reduce((a,l)=>a+l.unitPrice*l.quantity,0);const addConfigured=(line:CartLine)=>{setCart(c=>{const exists=c.some(l=>l.key===line.key);return exists?c.map(l=>l.key===line.key?{...l,quantity:l.quantity+line.quantity}:l):[...c,line]});setToast(`${line.quantity} × ${line.dish.name} added · ETB ${(total+line.unitPrice*line.quantity).toLocaleString()} subtotal`)};const filtered=dishes.filter(d=>(category==='All Items'||d.category===category)&&`${d.name} ${d.description}`.toLowerCase().includes(search.toLowerCase()));if(foundation)return <><button className="return-menu" onClick={()=>{setFoundation(false);location.hash=''}}>← Back to Abay Kitchen</button><Foundation/></>;
-if(admin)return <AdminDashboard sharedOrders={orders} onUpdateOrders={setOrders} onNavigateToCustomer={()=>{setAdmin(false);location.hash=''}}/>;
-if(tracking&&orders.some(o=>o.reference===tracking))return <OrderTracking order={orders.find(o=>o.reference===tracking)!} orders={orders} onBack={()=>{setTracking(null);setPanel(null);if(location.hash==='#tracking')location.hash=''}} onSelect={setTracking} onUpdate={order=>setOrders(c=>c.map(o=>o.reference===order.reference?order:o))}/>;
-if(panel==='cart')return <Checkout onRecord={order=>setOrders(c=>[order,...c])} onTrack={ref=>{setTracking(ref);location.hash='tracking'}} cart={cart} setCart={setCart} onBack={()=>setPanel(null)} samples={[{key:'sample-doro',dish:dishes[0],portion:'Regular',extras:['Extra egg'],instructions:'Less spicy, please.',unitPrice:740,quantity:1},{key:'sample-tibs',dish:dishes[1],portion:'Regular',extras:[],instructions:'',unitPrice:720,quantity:1}]}/>;
+export default function App(){
+  const [orders,setOrders]=useState<SessionOrder[]>(defaultSampleOrders);
+  const [dishes,setDishes]=useState<Dish[]>(defaultDishes);
+  const [categories,setCategories]=useState<string[]>(defaultCategories);
+  const [tracking,setTracking]=useState<string|null>(location.hash==='#tracking'?defaultSampleOrders[0].reference:null);
+  const [foundation,setFoundation]=useState(location.hash==='#foundation');
+  const [admin,setAdmin]=useState(location.hash==='#admin'||location.hash==='#orders');
+  const [category,setCategory]=useState('All Items');
+  const [search,setSearch]=useState('');
+  const [cart,setCart]=useState<CartLine[]>([]);
+  const [panel,setPanel]=useState<'info'|'cart'|null>(null);
+  const [custom,setCustom]=useState<Dish|null>(null);
+  const [toast,setToast]=useState('');
+  const [loading,setLoading]=useState(true);
+  const searchRef=useRef<HTMLInputElement>(null);
+  const closeRef=useRef<HTMLButtonElement>(null);
+
+  // Fetch real data from MongoDB backend
+  useEffect(() => {
+    api.getCategories().then(cats => {
+      if (cats && cats.length) {
+        setCategories(['All Items', ...cats.filter(c => c.isActive !== false).map(c => c.name)]);
+      }
+    }).catch(() => {});
+
+    api.getMenuItems().then(items => {
+      if (items && items.length) {
+        setDishes(items.map((it: any) => ({
+          id: it._id || it.id,
+          name: it.name,
+          description: it.description,
+          price: it.price,
+          category: it.category,
+          image: it.image,
+          tag: it.tag,
+          custom: it.isCustomizable,
+          unavailable: it.isAvailable === false
+        })));
+      }
+    }).catch(() => {});
+
+    api.getOrders().then(ords => {
+      if (ords && ords.length) {
+        setOrders(ords.map((o: any) => ({
+          reference: o.reference,
+          placedAt: o.placedAt || new Date().toISOString(),
+          status: o.status === 'New' ? 'Received' : o.status,
+          customerName: o.customerName,
+          lines: (o.lines || []).map((l: any) => ({
+            key: l.key || l.name,
+            dish: {
+              id: l.dishId || 1,
+              name: l.name,
+              description: '',
+              price: l.unitPrice,
+              category: 'Ethiopian Food',
+              image: 'photo-1746716447103-e1618bbd0669'
+            },
+            portion: l.portion || 'Regular',
+            extras: l.extras || [],
+            instructions: l.instructions || '',
+            unitPrice: l.unitPrice,
+            quantity: l.quantity
+          }))
+        })));
+      }
+    }).catch(() => {});
+  }, []);
+
+  useEffect(()=>{const t=setTimeout(()=>setLoading(false),600);return()=>clearTimeout(t)},[]);
+  useEffect(()=>{const handleHash=()=>{if(location.hash==='#foundation'){setFoundation(true);setTracking(null);setPanel(null);setAdmin(false)}else if(location.hash==='#tracking'){setFoundation(false);setTracking(orders[0]?.reference||defaultSampleOrders[0].reference);setPanel(null);setAdmin(false)}else if(location.hash==='#admin'||location.hash==='#orders'){setFoundation(false);setTracking(null);setPanel(null);setAdmin(true)}else{setFoundation(false);setTracking(null);setAdmin(false)}};window.addEventListener('hashchange',handleHash);return()=>window.removeEventListener('hashchange',handleHash)},[orders]);
+  useEffect(()=>{if(panel!=='info')return;const prev=document.activeElement as HTMLElement;closeRef.current?.focus();const listener=(e:KeyboardEvent)=>{if(e.key==='Escape'){setPanel(null);setCustom(null)}if(e.key==='Tab'){const els=Array.from(document.querySelectorAll<HTMLElement>('.menu-modal button:not(:disabled),.menu-modal input'));const first=els[0],last=els[els.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}};document.addEventListener('keydown',listener);return()=>{document.removeEventListener('keydown',listener);prev?.focus()}},[panel,custom]);
+  useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(''),2800);return()=>clearTimeout(t)},[toast]);
+  const count=cart.reduce((a,l)=>a+l.quantity,0),total=cart.reduce((a,l)=>a+l.unitPrice*l.quantity,0);
+  const addConfigured=(line:CartLine)=>{setCart(c=>{const exists=c.some(l=>l.key===line.key);return exists?c.map(l=>l.key===line.key?{...l,quantity:l.quantity+line.quantity}:l):[...c,line]});setToast(`${line.quantity} × ${line.dish.name} added · ETB ${(total+line.unitPrice*line.quantity).toLocaleString()} subtotal`)};
+  const filtered=dishes.filter(d=>(category==='All Items'||d.category===category)&&`${d.name} ${d.description}`.toLowerCase().includes(search.toLowerCase()));
+  if(foundation)return <><button className="return-menu" onClick={()=>{setFoundation(false);location.hash=''}}>← Back to Abay Kitchen</button><Foundation/></>;
+  if(admin)return <AdminDashboard sharedOrders={orders} onUpdateOrders={setOrders} onNavigateToCustomer={()=>{setAdmin(false);location.hash=''}}/>;
+  if(tracking&&orders.some(o=>o.reference===tracking))return <OrderTracking order={orders.find(o=>o.reference===tracking)!} orders={orders} onBack={()=>{setTracking(null);setPanel(null);if(location.hash==='#tracking')location.hash=''}} onSelect={setTracking} onUpdate={order=>setOrders(c=>c.map(o=>o.reference===order.reference?order:o))}/>;
+  if(panel==='cart')return <Checkout onRecord={order=>setOrders(c=>[order,...c])} onTrack={ref=>{setTracking(ref);location.hash='tracking'}} cart={cart} setCart={setCart} onBack={()=>setPanel(null)} samples={[{key:'sample-doro',dish:dishes[0],portion:'Regular',extras:['Extra egg'],instructions:'Less spicy, please.',unitPrice:740,quantity:1},{key:'sample-tibs',dish:dishes[1],portion:'Regular',extras:[],instructions:'',unitPrice:720,quantity:1}]}/>;
 return <div className="customer-menu"><header className="restaurant-header"><div className="header-inner"><a className="restaurant-logo" href="#" aria-label="Abay Kitchen home"><span className="abay-symbol">a<span>k</span></span><span>ABAY KITCHEN<small>ROOTED IN TRADITION. MADE WITH LOVE.</small></span></a><div className="header-actions"><button className="icon-action staff-portal-action" onClick={()=>{setAdmin(true);location.hash='admin'}} title="Staff & Kitchen Management Portal (03A)"><span style={{fontSize:'10px',background:'#eef3e8',color:'var(--brand)',border:'1px solid #d4e0ce',padding:'5px 9px',borderRadius:'5px',fontWeight:600}}>Staff Portal</span></button>{orders.length>0&&<button className="session-history-action" onClick={()=>{setTracking(orders[0].reference);location.hash='tracking'}}><Icon name="clock" size={16}/><span>Your orders</span><b>{orders.length}</b></button>}<span className="header-table"><Icon size={15}/> Table 08</span><button className="icon-action search-action" aria-label="Search menu" onClick={()=>searchRef.current?.focus()}><Icon name="search"/></button><button className="icon-action info-action" onClick={()=>setPanel('info')} aria-label="Restaurant information"><MenuIcon name="info"/><span>Restaurant info</span></button><button className="cart-action" onClick={()=>setPanel('cart')} aria-label={`View order, ${count} items`}><MenuIcon name="bag"/><span>Your order</span><b>{count}</b></button></div></div></header>
 <div className="restaurant-cover"><img src={photo('photo-1508424757105-b6d5ad9329d0',2000)} alt="Warm, light-filled restaurant with wooden tables and hanging plants"/><div className="cover-shade"/><div className="cover-content"><span className="cover-eyebrow">A TASTE OF HOME. A LITTLE DISCOVERY.</span><h1>Good food.<br/>Great company.</h1><p>Ethiopian soul. A world of flavour.<br className="mobile-break"/> Made fresh, shared generously.</p><span className="cover-location"><MenuIcon name="pin"/> Bole, Addis Ababa <i/> <span className="open-dot"/> Open until 10:00 PM</span></div><span className="cover-note">PULL UP A CHAIR. STAY A LITTLE LONGER.</span></div>
 <div className="menu-content"><div className="restaurant-welcome"><div><span className="menu-eyebrow">WELCOME TO OUR TABLE</span><h2>What sounds good today?</h2><p>Old favourites, new discoveries. Always made with care.</p></div><div className="table-welcome"><span className="table-welcome-icon"><Icon size={23}/></span><div>You're at <strong>Table 08</strong><small>Settle in. We'll take it from here.</small></div></div></div>

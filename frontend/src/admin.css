@@ -3605,3 +3605,381 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   OVERVIEW ENHANCEMENTS, RICH ORDERS, CATEGORIES CRUD & STAFF LOGIN
+   ========================================================= */
+
+/* Overview Grid & Live Dashboard */
+.admin-overview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  animation: adminFadeInUp 0.3s ease;
+}
+
+@keyframes adminFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-overview-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .admin-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-overview-card {
+  background: #ffffff;
+  border: 1px solid #e5e9e2;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-overview-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-overview-card-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: #edf7ee;
+  color: #23734b;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid #c8e6c9;
+}
+
+.admin-pulse-dot {
+  width: 7px;
+  height: 7px;
+  background: #23734b;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(35, 115, 75, 0.7);
+  animation: adminPulse 1.8s infinite;
+}
+
+@keyframes adminPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(35, 115, 75, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(35, 115, 75, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(35, 115, 75, 0);
+  }
+}
+
+/* Live Kitchen Order Cards on Overview */
+.admin-live-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-live-order-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #faf9f6;
+  border: 1px solid #eaefe7;
+  border-radius: 10px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-live-order-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd8c7;
+}
+
+.admin-live-order-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-live-order-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #143d2b;
+  color: #faf8f5;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-live-order-meta strong {
+  font-size: 14px;
+  color: var(--ink);
+  display: block;
+}
+
+.admin-live-order-meta span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.admin-live-order-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Floor Tables Mini Grid on Overview */
+.admin-floor-tables-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .admin-floor-tables-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.admin-floor-table-tile {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e6dd;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-floor-table-tile.occupied {
+  border-color: #f0c987;
+  background: #fffcf5;
+}
+
+.admin-floor-table-tile.available {
+  border-color: #c9e4c3;
+  background: #f7fbf6;
+}
+
+.admin-floor-table-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.admin-floor-table-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-floor-table-top strong {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.admin-floor-table-status {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-floor-table-status.occ {
+  color: #a06e12;
+}
+
+.admin-floor-table-status.avail {
+  color: #23734b;
+}
+
+/* Quick Operations Bar */
+.admin-quick-ops-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.admin-quick-op-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #e0e5dd;
+  background: #faf8f5;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-quick-op-btn:hover {
+  background: #143d2b;
+  color: #ffffff;
+  border-color: #143d2b;
+}
+
+/* Rich Orders Table Styles */
+.admin-order-customer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-order-customer-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f0f4ee;
+  color: #143d2b;
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dbe4d8;
+}
+
+.admin-order-advance-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.admin-order-advance-btn.cook {
+  background: #fdf3e2;
+  color: #9b6b15;
+  border: 1px solid #f8e1b8;
+}
+
+.admin-order-advance-btn.cook:hover {
+  background: #fae8ca;
+}
+
+.admin-order-advance-btn.ready {
+  background: #edf7ee;
+  color: #23734b;
+  border: 1px solid #c8e6c9;
+}
+
+.admin-order-advance-btn.ready:hover {
+  background: #dcf1de;
+}
+
+.admin-order-advance-btn.complete {
+  background: #143d2b;
+  color: #ffffff;
+}
+
+.admin-order-advance-btn.complete:hover {
+  background: #1e593f;
+}
+
+/* Staff Login Gate Modal */
+.admin-staff-login-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(20, 61, 43, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.admin-staff-login-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  padding: 32px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: adminFadeInUp 0.25s ease;
+}
+
+.admin-staff-role-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.admin-staff-role-choice {
+  padding: 14px;
+  border-radius: 10px;
+  border: 2px solid #e5e9e2;
+  background: #faf8f5;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.admin-staff-role-choice:hover {
+  border-color: #b5c7b3;
+}
+
+.admin-staff-role-choice.selected {
+  border-color: var(--brand);
+  background: #f3f8f2;
+}
+
+.admin-staff-role-choice strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.admin-staff-role-choice span {
+  font-size: 11px;
+  color: var(--muted);
+}
+

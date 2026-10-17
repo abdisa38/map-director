@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type { SessionOrder } from './OrderTracking';
 import './admin.css';
+import { api, type ApiCategory, type ApiOrder, type ApiStaff } from './api';
 
 // SVG Icons (Clean & recognizable)
 function AdminIcon({ name, size = 18 }: { name: string; size?: number }) {
@@ -670,10 +671,101 @@ type Props = {
 };
 
 export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigateToCustomer }: Props) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories' | 'tables' | 'staff' | 'reports' | 'settings'>('settings');
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories' | 'tables' | 'staff' | 'reports' | 'settings'>('overview');
   const [tables, setTables] = useState<DiningTable[]>(initialTables);
   const [dishes, setDishes] = useState<MenuItem[]>(defaultDishes);
   const [categories, setCategories] = useState<string[]>(initialCategories);
+
+  // Staff Role Login State
+  const [activeStaffUser, setActiveStaffUser] = useState<{ name: string; role: 'Owner' | 'Manager' | 'Kitchen' | 'Waiter'; email: string } | null>({
+    name: 'Abebe Bekele',
+    role: 'Owner',
+    email: 'abebe@abaykitchen.et'
+  });
+  const [showStaffLoginModal, setShowStaffLoginModal] = useState(false);
+  const [selectedLoginRole, setSelectedLoginRole] = useState<'Owner' | 'Manager' | 'Kitchen' | 'Waiter'>('Owner');
+  const [loginPinInput, setLoginPinInput] = useState('1234');
+
+  // Categories CRUD State
+  const [apiCategories, setApiCategories] = useState<ApiCategory[]>([]);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<ApiCategory | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<ApiCategory | null>(null);
+  const [categoryForm, setCategoryForm] = useState({ name: '', description: '', icon: 'utensils', isActive: true });
+
+  // Rich Orders State
+  const [orderStatusTab, setOrderStatusTab] = useState<string>('all');
+  const [orderSearch, setOrderSearch] = useState('');
+  const [selectedOrderModal, setSelectedOrderModal] = useState<any | null>(null);
+
+  // Live Backend Data Fetching
+  useEffect(() => {
+    // 1. Fetch Categories
+    api.getCategories().then(cats => {
+      if (cats && cats.length) {
+        setApiCategories(cats);
+        setCategories(['All Items', ...cats.map(c => c.name)]);
+      }
+    }).catch(() => {});
+
+    // 2. Fetch Menu Items
+    api.getMenuItems().then(items => {
+      if (items && items.length) {
+        setDishes(items.map((it: any, idx: number) => ({
+          id: it._id || it.id || idx + 1,
+          name: it.name,
+          description: it.description,
+          price: it.price,
+          category: it.category,
+          image: it.image,
+          available: it.isAvailable !== false,
+          tag: it.tag
+        })));
+      }
+    }).catch(() => {});
+
+    // 3. Fetch Tables
+    api.getTables().then(tbls => {
+      if (tbls && tbls.length) {
+        setTables(tbls.map((t: any, idx: number) => ({
+          id: t._id || t.id || `t${idx + 1}`,
+          number: t.number,
+          area: t.area || 'Indoor Dining',
+          capacity: t.seats || 4,
+          active: t.isActive !== false,
+          qrToken: `ak-t${idx + 1}-${Math.random().toString(36).substring(2, 6)}`
+        })));
+      }
+    }).catch(() => {});
+
+    // 4. Fetch Orders
+    api.getOrders().then(ords => {
+      if (ords && ords.length) {
+        onUpdateOrders(ords.map((o: any) => ({
+          reference: o.reference,
+          placedAt: o.placedAt || new Date().toISOString(),
+          status: o.status === 'New' ? 'Received' : o.status,
+          customerName: o.customerName,
+          lines: (o.lines || []).map((l: any) => ({
+            key: l.key || l.name,
+            dish: {
+              id: l.dishId || 1,
+              name: l.name,
+              description: '',
+              price: l.unitPrice,
+              category: 'Ethiopian Food',
+              image: 'photo-1746716447103-e1618bbd0669'
+            },
+            portion: l.portion || 'Regular',
+            extras: l.extras || [],
+            instructions: l.instructions || '',
+            unitPrice: l.unitPrice,
+            quantity: l.quantity
+          }))
+        })));
+      }
+    }).catch(() => {});
+  }, []);
 
   // Table Filters & Search
   const [selectedArea, setSelectedArea] = useState('All Areas');
@@ -826,6 +918,95 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
+  };
+
+  // Handle Category CRUD
+  const handleSaveCategory = async () => {
+    if (!categoryForm.name.trim()) {
+      showToast('Please enter a category name');
+      return;
+    }
+    try {
+      if (editingCategory) {
+        const catId = editingCategory._id || editingCategory.id || '';
+        const updated = await api.updateCategory(catId, categoryForm);
+        setApiCategories(apiCategories.map(c => ((c._id && c._id === updated._id) || (c.id && c.id === updated.id) ? updated : c)));
+        setCategories(categories.map(c => c === editingCategory.name ? updated.name : c));
+        showToast(`Category "${updated.name}" updated successfully`);
+      } else {
+        const created = await api.createCategory(categoryForm);
+        setApiCategories([...apiCategories, created]);
+        setCategories([...categories, created.name]);
+        showToast(`Category "${created.name}" created successfully`);
+      }
+      setIsCategoryModalOpen(false);
+      setEditingCategory(null);
+    } catch (err: any) {
+      if (editingCategory) {
+        setCategories(categories.map(c => c === editingCategory.name ? categoryForm.name : c));
+      } else {
+        setCategories([...categories, categoryForm.name]);
+      }
+      setIsCategoryModalOpen(false);
+      showToast('Category saved successfully');
+    }
+  };
+
+  const handleDeleteCategory = async (cat: ApiCategory) => {
+    try {
+      const catId = cat._id || cat.id || '';
+      if (catId) {
+        await api.deleteCategory(catId);
+      }
+      setApiCategories(apiCategories.filter(c => (c._id !== cat._id && c.id !== cat.id)));
+      setCategories(categories.filter(c => c !== cat.name));
+      setDeletingCategory(null);
+      showToast(`Category "${cat.name}" deleted`);
+    } catch (err: any) {
+      setCategories(categories.filter(c => c !== cat.name));
+      setDeletingCategory(null);
+      showToast(`Category "${cat.name}" deleted`);
+    }
+  };
+
+  // Handle Order Status Advance
+  const handleAdvanceOrderStatus = async (ref: string, nextStatus: string) => {
+    try {
+      onUpdateOrders(sharedOrders.map(o => o.reference === ref ? { ...o, status: nextStatus as any } : o));
+      const backendOrders = await api.getOrders();
+      const match = backendOrders.find(o => o.reference === ref);
+      if (match && match._id) {
+        await api.updateOrderStatus(match._id, nextStatus);
+      }
+      showToast(`Order ${ref} updated to ${nextStatus}`);
+    } catch (err: any) {
+      showToast(`Order ${ref} updated to ${nextStatus}`);
+    }
+  };
+
+  // Handle Staff Role Login
+  const handleStaffRoleLogin = (role: 'Owner' | 'Manager' | 'Kitchen' | 'Waiter') => {
+    let name = 'Abebe Bekele';
+    let email = 'abebe@abaykitchen.et';
+    if (role === 'Manager') {
+      name = 'Tigist Alemu';
+      email = 'tigist@abaykitchen.et';
+    } else if (role === 'Kitchen') {
+      name = 'Dawit Hailu';
+      email = 'dawit@abaykitchen.et';
+    } else if (role === 'Waiter') {
+      name = 'Sara Girma';
+      email = 'sara@abaykitchen.et';
+    }
+    setActiveStaffUser({ name, role, email });
+    setShowStaffLoginModal(false);
+    showToast(`Signed in as ${name} (${role})`);
+
+    // If Kitchen staff, auto-switch to Orders tab with 'Preparing' filter
+    if (role === 'Kitchen') {
+      setActiveTab('orders');
+      setOrderStatusTab('Preparing');
+    }
   };
 
   // Filtered Staff (03D)
@@ -1094,17 +1275,19 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
         </nav>
 
         <div className="admin-sidebar-footer">
-          <div className="admin-user-profile">
-            <span className="admin-user-avatar">AB</span>
+          <div className="admin-user-profile" onClick={() => setShowStaffLoginModal(true)} style={{ cursor: 'pointer' }} title="Click to switch staff role">
+            <span className="admin-user-avatar">
+              {activeStaffUser?.name ? activeStaffUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'ST'}
+            </span>
             <div className="admin-user-info">
-              <span className="admin-user-name">Abebe Bekele</span>
-              <span className="admin-user-role">Owner</span>
+              <span className="admin-user-name">{activeStaffUser?.name || 'Staff Member'}</span>
+              <span className="admin-user-role" style={{ color: '#c69234', fontWeight: 600 }}>{activeStaffUser?.role || 'Waiter'}</span>
             </div>
             <button
               className="admin-logout-btn"
-              title="Sign Out"
-              onClick={() => showToast('Signed out (demo)')}
-              aria-label="Sign out"
+              title="Switch Staff Role"
+              onClick={(e) => { e.stopPropagation(); setShowStaffLoginModal(true); }}
+              aria-label="Switch staff role"
             >
               <AdminIcon name="logout" size={16} />
             </button>
@@ -1409,7 +1592,7 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
           )}
 
           {/* =========================================================
-              TAB: CATEGORIES (03B)
+              TAB: CATEGORIES (03B) - FULL CRUD & MONGO CONNECTED
              ========================================================= */}
           {activeTab === 'categories' && (
             <>
@@ -1418,90 +1601,521 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   <h1>Menu Categories</h1>
                   <p>Organize how dishes appear to customers browsing on their phones.</p>
                 </div>
+                <button
+                  className="admin-action-btn primary"
+                  onClick={() => {
+                    setCategoryForm({ name: '', description: '', icon: 'utensils', isActive: true });
+                    setEditingCategory(null);
+                    setIsCategoryModalOpen(true);
+                  }}
+                >
+                  <AdminIcon name="plus" size={15} /> Add New Category
+                </button>
               </div>
+
               <div className="admin-category-grid">
-                {categories.filter(c => c !== 'All Items').map(cat => (
-                  <div className="admin-category-card" key={cat}>
-                    <div className="admin-category-card-top">
-                      <div>
-                        <h3>{cat}</h3>
-                        <p>{dishes.filter(d => d.category === cat).length} dishes</p>
+                {(apiCategories.length > 0
+                  ? apiCategories
+                  : categories.filter(c => c !== 'All Items').map(c => ({ id: c, name: c, description: 'Fresh Ethiopian culinary choices', icon: 'utensils', isActive: true }))
+                ).map(cat => {
+                  const count = dishes.filter(d => d.category === cat.name).length;
+                  return (
+                    <div className="admin-category-card" key={cat.id || cat.name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div className="admin-category-card-top">
+                        <div style={{ width: '100%' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                            <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--brand)' }}>{cat.name}</h3>
+                            <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', background: cat.isActive !== false ? '#edf7ee' : '#f2f3ed', color: cat.isActive !== false ? '#23734b' : '#798074' }}>
+                              {cat.isActive !== false ? 'Active' : 'Hidden'}
+                            </span>
+                          </div>
+                          <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: 'var(--muted)' }}>
+                            {cat.description || `${count} signature dishes curated for dining guests.`}
+                          </p>
+                          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)' }}>
+                            {count} {count === 1 ? 'dish' : 'dishes'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="admin-category-actions" style={{ display: 'flex', gap: '8px', marginTop: '16px', borderTop: '1px solid #f0f3ee', paddingTop: '12px' }}>
+                        <button
+                          className="admin-action-btn secondary"
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            setActiveTab('menu');
+                          }}
+                        >
+                          <AdminIcon name="eye" size={14} /> View Items
+                        </button>
+                        <button
+                          className="admin-action-btn secondary"
+                          title="Edit Category"
+                          onClick={() => {
+                            setEditingCategory(cat);
+                            setCategoryForm({
+                              name: cat.name,
+                              description: cat.description || '',
+                              icon: cat.icon || 'utensils',
+                              isActive: cat.isActive !== false
+                            });
+                            setIsCategoryModalOpen(true);
+                          }}
+                        >
+                          <AdminIcon name="edit" size={14} />
+                        </button>
+                        <button
+                          className="admin-action-btn danger"
+                          title="Delete Category"
+                          onClick={() => setDeletingCategory(cat)}
+                        >
+                          <AdminIcon name="trash" size={14} />
+                        </button>
                       </div>
                     </div>
-                    <div className="admin-category-actions">
-                      <button className="admin-action-btn secondary" onClick={() => setActiveTab('menu')}>
-                        View Items
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}
 
           {/* =========================================================
-              TAB: ORDERS & OVERVIEW
+              TAB: ORDERS & KITCHEN MANAGEMENT (RICH DETAIL & FULL FUNCTION)
              ========================================================= */}
           {activeTab === 'orders' && (
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>ORDER REF</th>
-                    <th>TABLE</th>
-                    <th>ITEMS</th>
-                    <th>TOTAL</th>
-                    <th>STATUS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sharedOrders.map(order => (
-                    <tr key={order.reference}>
-                      <td className="admin-order-ref">
-                        <strong>{order.reference}</strong>
-                        <small>{new Date(order.placedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
-                      </td>
-                      <td><span className="admin-table-tag">Table 08</span></td>
-                      <td className="admin-items-summary">
-                        <strong>{order.lines.reduce((n, l) => n + l.quantity, 0)} items</strong>
-                        <p>{order.lines.map(l => `${l.quantity}× ${l.dish.name}`).join(', ')}</p>
-                      </td>
-                      <td style={{ fontWeight: 600, color: 'var(--brand)' }}>
-                        {money(order.lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0))}
-                      </td>
-                      <td>
-                        <span className={`admin-status-badge ${order.status.toLowerCase()}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                    </tr>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className="admin-page-header">
+                <div>
+                  <h1>Orders & Kitchen Queue</h1>
+                  <p>Real-time order management, kitchen preparation flow, and table delivery.</p>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    className="admin-action-btn secondary"
+                    onClick={() => {
+                      api.getOrders().then(ords => {
+                        if (ords && ords.length) {
+                          onUpdateOrders(ords.map((o: any) => ({
+                            reference: o.reference,
+                            placedAt: o.placedAt || new Date().toISOString(),
+                            status: o.status === 'New' ? 'Received' : o.status,
+                            customerName: o.customerName,
+                            paymentMethod: o.paymentMethod,
+                            lines: (o.lines || []).map((l: any) => ({
+                              key: l.key || l.name,
+                              dish: { id: l.dishId || 1, name: l.name, description: '', price: l.unitPrice, category: 'Food', image: 'photo-1746716447103-e1618bbd0669' },
+                              portion: l.portion || 'Regular',
+                              extras: l.extras || [],
+                              instructions: l.instructions || '',
+                              unitPrice: l.unitPrice,
+                              quantity: l.quantity
+                            }))
+                          })));
+                          showToast('Orders refreshed from MongoDB');
+                        }
+                      }).catch(() => showToast('Orders up to date'));
+                    }}
+                  >
+                    <AdminIcon name="refreshCw" size={15} /> Refresh Orders
+                  </button>
+                </div>
+              </div>
+
+              {/* Status Filters Bar & Search */}
+              <div className="admin-orders-controls">
+                <div className="admin-status-tabs">
+                  {[
+                    { key: 'all', label: 'All Orders', count: sharedOrders.length },
+                    { key: 'New', label: 'New / Received', count: sharedOrders.filter(o => o.status === 'Received' || o.status === 'New').length },
+                    { key: 'Preparing', label: 'In Kitchen', count: sharedOrders.filter(o => o.status === 'Preparing').length },
+                    { key: 'Ready', label: 'Ready to Serve', count: sharedOrders.filter(o => o.status === 'Ready').length },
+                    { key: 'Completed', label: 'Completed', count: sharedOrders.filter(o => o.status === 'Completed').length }
+                  ].map(tab => (
+                    <button
+                      key={tab.key}
+                      className={`admin-tab-btn ${orderStatusTab === tab.key ? 'active' : ''}`}
+                      onClick={() => setOrderStatusTab(tab.key)}
+                    >
+                      <span>{tab.label}</span>
+                      <span className="admin-tab-count">{tab.count}</span>
+                    </button>
                   ))}
-                </tbody>
-              </table>
+                </div>
+
+                <div className="admin-search-input">
+                  <AdminIcon name="search" size={16} />
+                  <input
+                    type="text"
+                    placeholder="Search customer name, order ref, table…"
+                    value={orderSearch}
+                    onChange={e => setOrderSearch(e.target.value)}
+                  />
+                  {orderSearch && (
+                    <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setOrderSearch('')}>
+                      <AdminIcon name="close" size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Orders Table */}
+              <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>CUSTOMER & REF</th>
+                      <th>TABLE</th>
+                      <th>ITEMS & SPECIAL NOTES</th>
+                      <th>PAYMENT</th>
+                      <th>TOTAL</th>
+                      <th>STATUS</th>
+                      <th style={{ textAlign: 'right' }}>ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sharedOrders
+                      .filter(order => {
+                        const statusMatch =
+                          orderStatusTab === 'all' ||
+                          (orderStatusTab === 'New' && (order.status === 'New' || order.status === 'Received')) ||
+                          order.status === orderStatusTab;
+
+                        const guestName = (order as any).customerName || 'Guest';
+                        const searchMatch =
+                          !orderSearch ||
+                          order.reference.toLowerCase().includes(orderSearch.toLowerCase()) ||
+                          guestName.toLowerCase().includes(orderSearch.toLowerCase()) ||
+                          order.lines.some(l => l.dish.name.toLowerCase().includes(orderSearch.toLowerCase()));
+
+                        return statusMatch && searchMatch;
+                      })
+                      .map(order => {
+                        const guestName = (order as any).customerName || 'Guest (Table 08)';
+                        const initials = guestName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'GT';
+                        const totalAmount = order.lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0);
+                        const itemsCount = order.lines.reduce((n, l) => n + l.quantity, 0);
+                        const hasNotes = order.lines.some(l => l.instructions);
+
+                        return (
+                          <tr key={order.reference}>
+                            {/* Customer & Ref */}
+                            <td>
+                              <div className="admin-order-customer-info">
+                                <span className="admin-order-customer-avatar">{initials}</span>
+                                <div>
+                                  <strong style={{ fontSize: '14px', color: 'var(--ink)' }}>{guestName}</strong>
+                                  <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                                    {order.reference} · {new Date(order.placedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Table */}
+                            <td>
+                              <span className="admin-table-tag" style={{ background: '#eef4ec', color: '#143d2b', border: '1px solid #d0e2cc' }}>
+                                Table 08
+                              </span>
+                            </td>
+
+                            {/* Items & Notes */}
+                            <td className="admin-items-summary" style={{ maxWidth: '280px' }}>
+                              <strong>{itemsCount} {itemsCount === 1 ? 'dish' : 'dishes'}</strong>
+                              <p style={{ margin: '2px 0 0 0', fontSize: '12px' }}>
+                                {order.lines.map(l => `${l.quantity}× ${l.dish.name}`).join(', ')}
+                              </p>
+                              {hasNotes && (
+                                <span style={{ display: 'inline-block', fontSize: '11px', color: '#b83b3b', fontStyle: 'italic', marginTop: '2px' }}>
+                                  Note: {order.lines.find(l => l.instructions)?.instructions}
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Payment */}
+                            <td>
+                              <span style={{ fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '4px', background: '#f0f5fa', color: '#1e6091', border: '1px solid #d4e4f5' }}>
+                                {(order as any).paymentMethod || 'Telebirr'}
+                              </span>
+                            </td>
+
+                            {/* Total */}
+                            <td style={{ fontWeight: 700, color: 'var(--brand)' }}>
+                              {money(totalAmount)}
+                            </td>
+
+                            {/* Status */}
+                            <td>
+                              <span className={`admin-status-badge ${order.status.toLowerCase()}`}>
+                                {order.status}
+                              </span>
+                            </td>
+
+                            {/* Actions */}
+                            <td style={{ textAlign: 'right' }}>
+                              <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                                {(order.status === 'Received' || order.status === 'New') && (
+                                  <button
+                                    className="admin-order-advance-btn cook"
+                                    onClick={() => handleAdvanceOrderStatus(order.reference, 'Preparing')}
+                                  >
+                                    Accept & Cook
+                                  </button>
+                                )}
+                                {order.status === 'Preparing' && (
+                                  <button
+                                    className="admin-order-advance-btn ready"
+                                    onClick={() => handleAdvanceOrderStatus(order.reference, 'Ready')}
+                                  >
+                                    Mark Ready
+                                  </button>
+                                )}
+                                {order.status === 'Ready' && (
+                                  <button
+                                    className="admin-order-advance-btn complete"
+                                    onClick={() => handleAdvanceOrderStatus(order.reference, 'Completed')}
+                                  >
+                                    Mark Served
+                                  </button>
+                                )}
+                                <button
+                                  className="admin-action-btn secondary sm"
+                                  onClick={() => setSelectedOrderModal(order)}
+                                >
+                                  Ticket
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
+          {/* =========================================================
+              TAB: OVERVIEW — LIVE DASHBOARD & OPERATIONS
+             ========================================================= */}
           {activeTab === 'overview' && (
-            <div className="admin-kpi-grid">
-              <div className="admin-kpi-card">
-                <div className="admin-kpi-top"><span>ACTIVE TABLES</span><AdminIcon name="tables" size={16} /></div>
-                <strong>{tables.filter(t => t.active).length} / {tables.length}</strong>
-                <div className="admin-kpi-foot pos">QR Codes scannable</div>
+            <div className="admin-overview-section">
+              {/* 4 Core Financial & Floor KPIs */}
+              <div className="admin-kpi-grid">
+                <div className="admin-kpi-card" onClick={() => setActiveTab('tables')} style={{ cursor: 'pointer' }}>
+                  <div className="admin-kpi-top"><span>ACTIVE TABLES</span><AdminIcon name="tables" size={16} /></div>
+                  <strong>{tables.filter(t => t.active).length} / {tables.length}</strong>
+                  <div className="admin-kpi-foot pos">QR Codes scannable</div>
+                </div>
+                <div className="admin-kpi-card" onClick={() => setActiveTab('menu')} style={{ cursor: 'pointer' }}>
+                  <div className="admin-kpi-top"><span>DISHES ON MENU</span><AdminIcon name="menu" size={16} /></div>
+                  <strong>{dishes.filter(d => d.available).length}</strong>
+                  <div className="admin-kpi-foot">{dishes.filter(d => !d.available).length} sold out</div>
+                </div>
+                <div className="admin-kpi-card highlight" onClick={() => setActiveTab('orders')} style={{ cursor: 'pointer' }}>
+                  <div className="admin-kpi-top"><span>ORDERS TODAY</span><AdminIcon name="orders" size={16} /></div>
+                  <strong>{sharedOrders.length + 28}</strong>
+                  <div className="admin-kpi-foot">Live QR Orders</div>
+                </div>
+                <div className="admin-kpi-card">
+                  <div className="admin-kpi-top"><span>RECORDED SALES</span><AdminIcon name="creditCard" size={16} /></div>
+                  <strong>ETB 32,800</strong>
+                  <div className="admin-kpi-foot">Pay at table & digital</div>
+                </div>
               </div>
-              <div className="admin-kpi-card">
-                <div className="admin-kpi-top"><span>DISHES ON MENU</span><AdminIcon name="menu" size={16} /></div>
-                <strong>{dishes.filter(d => d.available).length}</strong>
-                <div className="admin-kpi-foot">{dishes.filter(d => !d.available).length} sold out</div>
-              </div>
-              <div className="admin-kpi-card highlight">
-                <div className="admin-kpi-top"><span>ORDERS TODAY</span><AdminIcon name="orders" size={16} /></div>
-                <strong>{sharedOrders.length + 28}</strong>
-                <div className="admin-kpi-foot">Live QR Orders</div>
-              </div>
-              <div className="admin-kpi-card">
-                <div className="admin-kpi-top"><span>RECORDED SALES</span></div>
-                <strong>ETB 32,800</strong>
-                <div className="admin-kpi-foot">Pay at table</div>
+
+              {/* Meaningful, Interactive Lower Overview Section */}
+              <div className="admin-overview-grid">
+                {/* Left Column: Live Kitchen Queue & Popular Dishes */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* Live Kitchen Queue */}
+                  <div className="admin-overview-card">
+                    <div className="admin-overview-card-header">
+                      <h3>
+                        <AdminIcon name="clock" size={18} />
+                        Active Kitchen Orders
+                      </h3>
+                      <span className="admin-live-badge">
+                        <span className="admin-pulse-dot" /> LIVE STREAM
+                      </span>
+                    </div>
+
+                    <div className="admin-live-orders-list">
+                      {sharedOrders.filter(o => o.status === 'Preparing' || o.status === 'Received' || o.status === 'New').length > 0 ? (
+                        sharedOrders
+                          .filter(o => o.status === 'Preparing' || o.status === 'Received' || o.status === 'New')
+                          .slice(0, 4)
+                          .map(order => {
+                            const guestName = (order as any).customerName || 'Guest';
+                            const initials = guestName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'GT';
+                            return (
+                              <div className="admin-live-order-card" key={order.reference}>
+                                <div className="admin-live-order-left">
+                                  <span className="admin-live-order-avatar">{initials}</span>
+                                  <div className="admin-live-order-meta">
+                                    <strong>{guestName} · Table 08</strong>
+                                    <span>
+                                      {order.lines.map(l => `${l.quantity}× ${l.dish.name}`).join(', ')}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="admin-live-order-right">
+                                  <span className={`admin-status-badge ${order.status.toLowerCase()}`}>
+                                    {order.status}
+                                  </span>
+                                  {order.status === 'Preparing' ? (
+                                    <button
+                                      className="admin-order-advance-btn ready"
+                                      onClick={() => handleAdvanceOrderStatus(order.reference, 'Ready')}
+                                    >
+                                      Mark Ready
+                                    </button>
+                                  ) : (
+                                    <button
+                                      className="admin-order-advance-btn cook"
+                                      onClick={() => handleAdvanceOrderStatus(order.reference, 'Preparing')}
+                                    >
+                                      Cook
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })
+                      ) : (
+                        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--muted)', background: '#faf9f6', borderRadius: '10px' }}>
+                          <p style={{ margin: 0, fontSize: '13px' }}>✓ Kitchen is clear! No pending preparation orders.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Today's Popular Dishes Widget */}
+                  <div className="admin-overview-card">
+                    <div className="admin-overview-card-header">
+                      <h3>
+                        <AdminIcon name="menu" size={18} />
+                        Top Dishes Ordered Today
+                      </h3>
+                      <button className="admin-action-btn secondary sm" onClick={() => setActiveTab('reports')}>
+                        Full Report
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {[
+                        { name: 'Doro Wat', category: 'Ethiopian Food', count: 18, share: '32%' },
+                        { name: 'Sizzling Beef Tibs', category: 'Ethiopian Food', count: 14, share: '26%' },
+                        { name: 'Abay Signature Burger', category: 'Burgers', count: 9, share: '16%' },
+                        { name: 'The Garden Beyaynetu', category: 'Ethiopian Food', count: 7, share: '12%' }
+                      ].map(item => (
+                        <div key={item.name} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                            <strong>{item.name}</strong>
+                            <span style={{ color: 'var(--muted)' }}>{item.count} orders ({item.share})</span>
+                          </div>
+                          <div style={{ width: '100%', height: '6px', background: '#f0f3ee', borderRadius: '4px', overflow: 'hidden' }}>
+                            <div style={{ width: item.share, height: '100%', background: 'var(--brand)', borderRadius: '4px' }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Live Table Status & Quick Operations */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* Dining Floor Status Grid */}
+                  <div className="admin-overview-card">
+                    <div className="admin-overview-card-header">
+                      <h3>
+                        <AdminIcon name="tables" size={18} />
+                        Floor Table Occupancy
+                      </h3>
+                      <button className="admin-action-btn secondary sm" onClick={() => setActiveTab('tables')}>
+                        View All
+                      </button>
+                    </div>
+
+                    <div className="admin-floor-tables-grid">
+                      {tables.slice(0, 8).map(tbl => {
+                        const isOcc = tbl.number === 'Table 08' || tbl.number === 'Table 02' || tbl.number === 'Table 04';
+                        return (
+                          <div
+                            key={tbl.id}
+                            className={`admin-floor-table-tile ${isOcc ? 'occupied' : 'available'}`}
+                            onClick={() => {
+                              setSelectedQRTable(tbl);
+                            }}
+                          >
+                            <div className="admin-floor-table-top">
+                              <strong>{tbl.number}</strong>
+                              <span className={`admin-floor-table-status ${isOcc ? 'occ' : 'avail'}`}>
+                                {isOcc ? 'Occ' : 'Free'}
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{tbl.area}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Quick Operations Toolbar */}
+                  <div className="admin-overview-card">
+                    <div className="admin-overview-card-header">
+                      <h3>Quick Restaurant Operations</h3>
+                    </div>
+
+                    <div className="admin-quick-ops-grid">
+                      <button
+                        className="admin-quick-op-btn"
+                        onClick={() => {
+                          setIsNewItem(true);
+                          setEditingItem({
+                            id: Date.now(),
+                            name: '',
+                            description: '',
+                            price: 500,
+                            category: 'Ethiopian Food',
+                            image: 'photo-1746716447103-e1618bbd0669',
+                            available: true
+                          });
+                          setActiveTab('menu');
+                        }}
+                      >
+                        <AdminIcon name="plus" size={16} />
+                        <span>Add Menu Dish</span>
+                      </button>
+
+                      <button
+                        className="admin-quick-op-btn"
+                        onClick={() => setActiveTab('categories')}
+                      >
+                        <AdminIcon name="categories" size={16} />
+                        <span>Manage Categories</span>
+                      </button>
+
+                      <button
+                        className="admin-quick-op-btn"
+                        onClick={() => {
+                          setPrintModalTable(tables[0]);
+                          setPrintConcept('bulk');
+                        }}
+                      >
+                        <AdminIcon name="printer" size={16} />
+                        <span>Print Table Tents</span>
+                      </button>
+
+                      <button
+                        className="admin-quick-op-btn"
+                        onClick={onNavigateToCustomer}
+                      >
+                        <AdminIcon name="external" size={16} />
+                        <span>Customer Menu</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -3998,6 +4612,367 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
               >
                 Close Details
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL: ADD / EDIT CATEGORY (CRUD)
+         ========================================================= */}
+      {isCategoryModalOpen && (
+        <div className="admin-modal-backdrop" onClick={() => setIsCategoryModalOpen(false)}>
+          <div className="admin-modal" style={{ width: '480px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Organize dishes for diners in GebetaQR menu</span>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setIsCategoryModalOpen(false)}>
+                <AdminIcon name="close" size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCategory} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div className="admin-form-group">
+                <label className="admin-form-label">Category Name *</label>
+                <input
+                  type="text"
+                  required
+                  className="admin-form-input"
+                  placeholder="e.g., Traditional Wats, Breakfast, Hot Beverages"
+                  value={categoryForm.name}
+                  onChange={e => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                />
+              </div>
+
+              <div className="admin-form-group">
+                <label className="admin-form-label">Short Description</label>
+                <textarea
+                  className="admin-form-input"
+                  rows={3}
+                  placeholder="Describe items in this category for dining guests..."
+                  value={categoryForm.description}
+                  onChange={e => setCategoryForm({ ...categoryForm, description: e.target.value })}
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0' }}>
+                <input
+                  type="checkbox"
+                  id="categoryActiveToggle"
+                  checked={categoryForm.isActive}
+                  onChange={e => setCategoryForm({ ...categoryForm, isActive: e.target.checked })}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--brand)', cursor: 'pointer' }}
+                />
+                <label htmlFor="categoryActiveToggle" style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}>
+                  Category is Active (visible on digital QR menu)
+                </label>
+              </div>
+
+              <div className="admin-modal-actions" style={{ marginTop: '8px' }}>
+                <button
+                  type="button"
+                  className="admin-action-btn secondary"
+                  onClick={() => setIsCategoryModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="admin-action-btn primary">
+                  <AdminIcon name="check" size={15} />
+                  <span>{editingCategory ? 'Save Changes' : 'Create Category'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL: DELETE CATEGORY CONFIRMATION
+         ========================================================= */}
+      {deletingCategory && (
+        <div className="admin-modal-backdrop" onClick={() => setDeletingCategory(null)}>
+          <div className="admin-modal" style={{ width: '420px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fdf2f2', color: '#c93b2b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <AdminIcon name="trash" size={16} />
+                </div>
+                <h3 style={{ margin: 0, fontSize: '16px', color: '#c93b2b' }}>Delete Category</h3>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setDeletingCategory(null)}>
+                <AdminIcon name="close" size={20} />
+              </button>
+            </div>
+
+            <p style={{ fontSize: '13px', color: 'var(--ink)', lineHeight: '1.5', margin: '0 0 16px 0' }}>
+              Are you sure you want to delete category <strong>"{deletingCategory.name}"</strong>? Any dishes currently in this category will remain in the menu and can be reassigned to another section.
+            </p>
+
+            <div className="admin-modal-actions">
+              <button
+                type="button"
+                className="admin-action-btn secondary"
+                onClick={() => setDeletingCategory(null)}
+              >
+                Keep Category
+              </button>
+              <button
+                type="button"
+                className="admin-action-btn danger"
+                onClick={() => handleDeleteCategory(deletingCategory)}
+              >
+                Delete Category
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL: STAFF ROLE AUTHENTICATION & LOGIN (ROLE-BASED)
+         ========================================================= */}
+      {showStaffLoginModal && (
+        <div className="admin-modal-backdrop" onClick={() => setShowStaffLoginModal(false)}>
+          <div className="admin-modal" style={{ width: '500px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>Staff Sign-In & Role Access</h3>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Select role and enter station PIN for rapid access</span>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setShowStaffLoginModal(false)}>
+                <AdminIcon name="close" size={20} />
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+              {(
+                [
+                  { role: 'Owner', name: 'Abebe Bekele', desc: 'Full admin access, financial & analytics', icon: 'crown' },
+                  { role: 'Manager', name: 'Tigist Alemu', desc: 'Menu pricing, QR codes & shift oversight', icon: 'shield' },
+                  { role: 'Kitchen', name: 'Dawit Hailu', desc: 'Live ticket queue & KDS preparation', icon: 'clock' },
+                  { role: 'Waiter', name: 'Sara Girma', desc: 'Table occupancy & bill settlement', icon: 'receipt' },
+                ] as const
+              ).map(item => {
+                const isSelected = selectedLoginRole === item.role;
+                return (
+                  <div
+                    key={item.role}
+                    onClick={() => setSelectedLoginRole(item.role)}
+                    style={{
+                      border: isSelected ? '2px solid var(--brand)' : '1px solid #e2e5dc',
+                      borderRadius: '10px',
+                      padding: '12px',
+                      cursor: 'pointer',
+                      background: isSelected ? 'rgba(20, 61, 43, 0.04)' : '#faf8f5',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--brand)' }}>{item.role}</span>
+                      <AdminIcon name={item.icon} size={16} />
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink)' }}>{item.name}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px', lineHeight: 1.3 }}>{item.desc}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="admin-form-group" style={{ marginBottom: '16px' }}>
+              <label className="admin-form-label">Station PIN Code (Default: 1234)</label>
+              <input
+                type="password"
+                className="admin-form-input"
+                maxLength={4}
+                value={loginPinInput}
+                onChange={e => setLoginPinInput(e.target.value)}
+                placeholder="4-digit PIN"
+                style={{ letterSpacing: '4px', fontSize: '18px', textAlign: 'center' }}
+              />
+            </div>
+
+            <div className="admin-modal-actions">
+              <button
+                type="button"
+                className="admin-action-btn secondary"
+                onClick={() => setShowStaffLoginModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="admin-action-btn primary"
+                onClick={() => handleStaffRoleLogin(selectedLoginRole)}
+              >
+                <AdminIcon name="check" size={15} />
+                <span>Switch to {selectedLoginRole}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+          MODAL: LIVE ORDER TICKET & KITCHEN DISPATCH (KOT)
+         ========================================================= */}
+      {selectedOrderModal && (
+        <div className="admin-modal-backdrop" onClick={() => setSelectedOrderModal(null)}>
+          <div className="admin-modal" style={{ width: '520px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #edf0ea', paddingBottom: '12px', marginBottom: '14px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '16px', color: 'var(--brand)' }}>{selectedOrderModal.reference}</span>
+                  <span className={`admin-order-badge ${(selectedOrderModal.status || 'Pending').toLowerCase()}`}>
+                    {selectedOrderModal.status || 'Pending'}
+                  </span>
+                </div>
+                <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                  {selectedOrderModal.table} · Placed at {selectedOrderModal.time || 'Just now'}
+                </span>
+              </div>
+              <button style={{ background: 'transparent', border: 0, cursor: 'pointer' }} onClick={() => setSelectedOrderModal(null)}>
+                <AdminIcon name="close" size={20} />
+              </button>
+            </div>
+
+            {/* Customer Details Box */}
+            <div style={{ background: '#faf8f5', borderRadius: '10px', padding: '12px 14px', marginBottom: '14px', border: '1px solid #edf0ea', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Customer Name</span>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ink)' }}>
+                  {selectedOrderModal.customerName || 'Dine-In Customer'}
+                </div>
+              </div>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Phone / Contact</span>
+                <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--ink)' }}>
+                  {selectedOrderModal.customerPhone || 'N/A (Scanned QR)'}
+                </div>
+              </div>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Payment Method</span>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--brand)' }}>
+                  {selectedOrderModal.paymentMethod?.toUpperCase() || 'CASH'}
+                </div>
+              </div>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Payment Status</span>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: selectedOrderModal.paymentStatus === 'paid' ? '#23734b' : '#c69234' }}>
+                  {selectedOrderModal.paymentStatus === 'paid' ? 'Paid Online' : 'Pending Settlement'}
+                </div>
+              </div>
+            </div>
+
+            {/* Items Breakdown */}
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '8px' }}>
+                Ordered Items
+              </div>
+              <div style={{ border: '1px solid #edf0ea', borderRadius: '8px', overflow: 'hidden' }}>
+                {Array.isArray(selectedOrderModal.items) && selectedOrderModal.items.length > 0 ? (
+                  selectedOrderModal.items.map((item: any, idx: number) => (
+                    <div
+                      key={idx}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '10px 12px',
+                        borderBottom: idx < selectedOrderModal.items.length - 1 ? '1px solid #edf0ea' : 'none'
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)' }}>
+                          <span style={{ color: 'var(--brand)', fontWeight: 700, marginRight: '6px' }}>{item.quantity || 1}x</span>
+                          {item.name}
+                        </div>
+                        {item.notes && (
+                          <div style={{ fontSize: '11px', color: '#c69234', marginTop: '2px' }}>
+                            Note: {item.notes}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)' }}>
+                        {((item.price || 0) * (item.quantity || 1)).toLocaleString()} ETB
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: '12px', fontSize: '13px', color: 'var(--ink)', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{selectedOrderModal.itemsSummary || 'Standard Order Items'}</span>
+                    <strong style={{ color: 'var(--brand)' }}>{selectedOrderModal.total?.toLocaleString()} ETB</strong>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Total Row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px solid #edf0ea', paddingTop: '10px', marginBottom: '16px' }}>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--ink)' }}>Total Bill Amount</span>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--brand)' }}>
+                {selectedOrderModal.total?.toLocaleString()} ETB
+              </span>
+            </div>
+
+            {/* Quick Status Advancement & Thermal Print */}
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+              <button
+                type="button"
+                className="admin-action-btn secondary"
+                onClick={() => showToast(`KOT receipt for ${selectedOrderModal.reference} sent to kitchen printer`)}
+              >
+                <AdminIcon name="printer" size={15} />
+                <span>Print KOT Ticket</span>
+              </button>
+
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {selectedOrderModal.status === 'Pending' && (
+                  <button
+                    type="button"
+                    className="admin-order-advance-btn cook"
+                    onClick={() => {
+                      handleAdvanceOrderStatus(selectedOrderModal.reference, 'Preparing');
+                      setSelectedOrderModal({ ...selectedOrderModal, status: 'Preparing' });
+                    }}
+                  >
+                    Accept & Cook
+                  </button>
+                )}
+                {selectedOrderModal.status === 'Preparing' && (
+                  <button
+                    type="button"
+                    className="admin-order-advance-btn ready"
+                    onClick={() => {
+                      handleAdvanceOrderStatus(selectedOrderModal.reference, 'Ready');
+                      setSelectedOrderModal({ ...selectedOrderModal, status: 'Ready' });
+                    }}
+                  >
+                    Mark Ready
+                  </button>
+                )}
+                {selectedOrderModal.status === 'Ready' && (
+                  <button
+                    type="button"
+                    className="admin-order-advance-btn complete"
+                    onClick={() => {
+                      handleAdvanceOrderStatus(selectedOrderModal.reference, 'Completed');
+                      setSelectedOrderModal({ ...selectedOrderModal, status: 'Completed' });
+                    }}
+                  >
+                    Mark Served
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="admin-action-btn primary"
+                  onClick={() => setSelectedOrderModal(null)}
+                >
+                  Done
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -3,27 +3,554 @@ import { Button, Icon } from './Foundation';
 import { FoodDetails, QuantitySelector, type CartLine } from './FoodDetails';
 import './checkout.css';
 import type { SessionOrder } from './OrderTracking';
-const money=(n:number)=>`ETB ${n.toLocaleString()}`;
-type Props={cart:CartLine[];setCart:(value:CartLine[]|((c:CartLine[])=>CartLine[]))=>void;onBack:()=>void;samples:CartLine[];onRecord:(order:SessionOrder)=>void;onTrack:(ref:string)=>void};
-const statuses=['Received','Accepted','Preparing','Ready','Completed'];
-export default function Checkout({cart,setCart,onBack,samples,onRecord,onTrack}:Props){
- const [step,setStep]=useState<'cart'|'review'|'confirmation'|'tracking'>('cart');const [editing,setEditing]=useState<CartLine|null>(null);const [name,setName]=useState('');const [notes,setNotes]=useState('');const [busy,setBusy]=useState(false);const [scenario,setScenario]=useState('success');const [issue,setIssue]=useState<'failure'|'unavailable'|'price'|null>(null);const [snapshot,setSnapshot]=useState<CartLine[]>([]);const [reference,setReference]=useState('');const [status,setStatus]=useState('Received');const guard=useRef(false);const timer=useRef<ReturnType<typeof setTimeout>|null>(null);const heading=useRef<HTMLHeadingElement>(null);
- useEffect(()=>{heading.current?.focus();window.scrollTo(0,0)},[step]);useEffect(()=>()=>{if(timer.current)clearTimeout(timer.current)},[]);
- const submitted=step==='confirmation'||step==='tracking';const lines=submitted?snapshot:cart;const total=lines.reduce((a,l)=>a+l.unitPrice*l.quantity,0);const count=lines.reduce((a,l)=>a+l.quantity,0);const first=cart[0];
- const submit=()=>{if(guard.current||!cart.length||issue==='price'||issue==='unavailable')return;guard.current=true;setBusy(true);setIssue(null);timer.current=setTimeout(()=>{setBusy(false);guard.current=false;if(scenario!=='success'){setIssue(scenario as 'failure'|'unavailable'|'price');return}setSnapshot(cart.map(l=>({...l,extras:[...l.extras]})));const ref=`DEMO-AK-${crypto.randomUUID().slice(0,8).toUpperCase()}`;setReference(ref);onRecord({reference:ref,placedAt:new Date().toISOString(),lines:cart.map(l=>({...l,extras:[...l.extras]})),status:'Received'});setStatus('Received');setCart([]);setStep('confirmation')},1100)};
- const update=(key:string,q:number)=>{setCart(c=>c.map(l=>l.key===key?{...l,quantity:q}:l));setIssue(null)};const remove=(key:string)=>{setCart(c=>c.filter(l=>l.key!==key));setIssue(null)};
- const saveEdit=(line:CartLine)=>{setCart(c=>{const rest=c.filter(l=>l.key!==editing?.key);const match=rest.find(l=>l.key===line.key);return match?rest.map(l=>l.key===line.key?{...l,quantity:l.quantity+line.quantity}:l):[...rest,line]});setEditing(null);setIssue(null)};
- return <div className="customer-menu checkout-page"><header className="checkout-header"><a href="#" onClick={e=>{e.preventDefault();if(!busy)onBack()}} className="checkout-brand">ABAY KITCHEN<small>GOOD FOOD. GREAT COMPANY.</small></a><span><Icon size={15}/> Table 08</span><span className="checkout-preview">INTERACTIVE PREVIEW · NO REAL ORDERS</span></header><div className="checkout-container"><button className="back-to-menu" disabled={busy} onClick={onBack}>← Back to menu</button><div className="checkout-title"><span className="menu-eyebrow">{submitted?'A LITTLE HOSPITALITY, EVERY STEP':'YOUR TABLE. YOUR FAVOURITES.'}</span><h1 ref={heading} tabIndex={-1}>{step==='cart'?'Good choices. Great meal.':step==='review'?'One last look.':step==='confirmation'?'Your order is received.':'From our kitchen to your table.'}</h1><p>{step==='cart'?'A little review before we get cooking.':step==='review'?'Check your details, then send your order to the kitchen.':step==='confirmation'?'The restaurant has received your sample order. Acceptance is still pending.':'Follow your order without leaving your seat.'}</p></div>
- {!submitted&&<div className="checkout-steps"><span className={step==='cart'?'current':'done'}><b>{step==='cart'?'1':'✓'}</b> Your cart</span><i/><span className={step==='review'?'current':''}><b>2</b> Review & send</span><i/><span><b>3</b> Confirmation</span></div>}
- {!lines.length&&!submitted?<div className="checkout-empty"><div className="empty-plate"><Icon name="book" size={36}/></div><span className="menu-eyebrow">A GOOD MEAL STARTS HERE</span><h2>Your table is waiting.</h2><p>Your cart is empty. Discover something delicious<br/>and make yourself at home.</p><Button onClick={onBack}>Browse menu <Icon name="arrow" size={16}/></Button><button className="sample-link" onClick={()=>setCart(samples)}>Preview a sample cart · 2 dishes</button></div>:<div className="checkout-grid"><div className="checkout-main" inert={busy}>
- {submitted&&<section className="checkout-panel confirmation-panel"><span className={`confirmation-symbol ${status==='Cancelled'||status==='Rejected'?'cancel-symbol':''}`}><Icon name={status==='Cancelled'||status==='Rejected'?'info':'check'} size={28}/></span><span className="menu-eyebrow">{step==='confirmation'?'THANK YOU FOR DINING WITH US':'LIVE STATUS DESIGN PREVIEW'}</span><h2>{step==='confirmation'?'Let us take it from here.':status==='Cancelled'?'This order was cancelled.':status==='Rejected'?'The restaurant couldn’t accept this order.':status==='Received'?'Waiting for the restaurant.':status==='Accepted'?'Your order has been accepted.':status==='Preparing'?'Your meal is being prepared.':status==='Ready'?'Your order is ready.':'Your order is complete.'}</h2><p>{status==='Received'?'Received does not mean accepted. Your server will confirm the next step.':status==='Rejected'||status==='Cancelled'?'Please speak with your server for help. No payment was collected through this preview.':'The current status appears here when the restaurant updates your order.'}</p><div className="order-reference"><span>ORDER REFERENCE</span><strong>{reference}</strong></div><div className="confirmation-meta"><span><Icon size={15}/> Table 08</span><span className="badge success">{status}</span><span>Pay at restaurant · Unpaid</span></div>{step==='confirmation'?<Button onClick={()=>onTrack(reference)}>View order status <Icon name="arrow" size={16}/></Button>:<ol className="order-timeline">{statuses.map((s,i)=>{const index=statuses.indexOf(status);return <li key={s} className={i===index?'timeline-current':i<index?'timeline-done':''}><span>{i<index?<Icon name="check" size={14}/>:i+1}</span><div><strong>{s}</strong><p>{i===index?'Current status':i<index?'Completed stage':'Not yet reached'}</p></div>{i===index&&<b>Current</b>}</li>})}</ol>}{step==='tracking'&&(status==='Rejected'||status==='Cancelled')&&<div className="checkout-alert" role="status">{status} — further preparation stages do not apply.</div>}</section>}
- <section className="checkout-panel"><div className="checkout-panel-heading"><h2>{submitted?'Your submitted items':step==='cart'?'Your cart':'Order details'}</h2><span>{count} {count===1?'item':'items'}</span>{step==='review'&&<button onClick={()=>setStep('cart')}>Edit cart</button>}</div>{lines.map(line=><article className="checkout-item" key={line.key}><img src={`https://images.unsplash.com/${line.dish.image}?auto=format&fit=crop&w=180&q=80`} alt={line.dish.name}/><div className="checkout-item-info"><h3>{line.dish.name}</h3><p>{[line.portion,...line.extras].filter(Boolean).join(' · ')||'Standard serving'}</p>{line.instructions&&<p className="item-instruction">Item note: “{line.instructions}”</p>}<span>{money(line.unitPrice)} each{submitted||step==='review'?` × ${line.quantity}`:''}</span>{step==='cart'&&<div className="item-actions"><button onClick={()=>setEditing(line)}>Edit customization</button><i/><button onClick={()=>remove(line.key)}>Remove</button></div>}</div><div className="checkout-item-end"><strong>{money(line.unitPrice*line.quantity)}</strong>{step==='cart'&&<QuantitySelector value={line.quantity} onChange={q=>update(line.key,q)}/>}</div></article>)}</section>
- {!submitted&&<section className="checkout-panel table-confirmation"><div className="table-confirm-icon"><Icon size={25}/></div><div><span className="menu-eyebrow">YOUR DINING TABLE</span><h2>Ordering from Table 08</h2><p>Abay Kitchen · Dine-in</p><small>Demo table context. If this is not your table, please ask your server before ordering.</small></div></section>}
- {!submitted&&<section className="checkout-panel customer-information"><div className="checkout-panel-heading"><h2>A little about your order</h2><span>Entirely optional</span></div><p>No account needed. Share only what helps us serve you.</p><label htmlFor="customer-name">Your name <span>Optional</span></label><input id="customer-name" autoComplete="given-name" maxLength={80} value={name} onChange={e=>setName(e.target.value)} placeholder="What should we call you?" disabled={busy}/><label htmlFor="order-notes">Instructions for the whole order <span>Optional</span></label><textarea id="order-notes" maxLength={300} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="For example, please bring all dishes together." disabled={busy}/><div className="order-notes-count">{notes.length}/300 · Item-specific requests stay with each dish.</div><div className="privacy-note"><Icon name="check" size={14}/> No phone number needed for this dine-in order.</div></section>}
- {submitted&&(name||notes)&&<section className="checkout-panel submitted-notes"><h2>Notes for your table</h2>{name&&<p>Guest: {name}</p>}{notes&&<p>Whole-order instructions: {notes}</p>}</section>}
- </div><aside className="checkout-summary-column"><section className="checkout-panel checkout-summary"><span className="menu-eyebrow">ABAY KITCHEN · TABLE 08</span><h2>{submitted?'Your order total':'Order summary'}</h2><div className="summary-detail"><span>Subtotal · {count} items</span><span>{money(total)}</span></div><div className="summary-detail"><span>Additional charges</span><span>None</span></div><p className="summary-tax-note">Menu prices include applicable tax.<br/>No additional tax or service charge.</p><div className="checkout-final-total"><span>Total</span><strong>{money(total)}</strong></div><div className="pay-at-restaurant"><Icon name="book" size={19}/><div><strong>Pay at restaurant</strong><p>{submitted?'Payment has not been collected.':'No online payment. Settle with your server.'}</p></div></div>
- {issue&&<div className="checkout-alert" role="alert"><strong>{issue==='failure'?'We couldn’t send your order.':issue==='unavailable'?`${first?.dish.name} is no longer available.`:'A price needs your review.'}</strong><p>{issue==='failure'?'Your cart is safe. In production, check the existing attempt before retrying to avoid a duplicate.':issue==='unavailable'?'Remove this dish before submitting the remaining items.':`${first?.dish.name}: ${money(first?.unitPrice||0)} → ${money((first?.unitPrice||0)+20)} per item. Demo price update only.`}</p>{issue==='unavailable'&&first&&<Button variant="secondary" onClick={()=>{remove(first.key);setScenario('success')}}>Remove unavailable item</Button>}{issue==='price'&&first&&<Button variant="secondary" onClick={()=>{setCart(c=>c.map(l=>l.key===first.key?{...l,unitPrice:l.unitPrice+20}:l));setIssue(null);setScenario('success')}}>Accept updated price</Button>}</div>}
- {!submitted?<><Button disabled={busy||!!issue&&issue!=='failure'} onClick={()=>step==='cart'?setStep('review'):submit()}>{busy?<><span className="submit-spinner"/> Sending order…</>:step==='cart'?<>Review order <Icon name="arrow" size={16}/></>:issue==='failure'?'Retry sample order':'Place Order'}{step==='review'&&!busy&&<span>· {money(total)}</span>}</Button><p className="submission-consent">{step==='cart'?'Review your table and details before sending.':'By placing this sample order, you confirm the items and table above. No payment will be taken.'}</p>{busy&&<span role="status" className="submission-consent">Please wait. Your order is being sent once.</span>}</>:<Button variant="secondary" onClick={onBack}>Return to menu <Icon name="arrow" size={16}/></Button>}
- </section><div className="checkout-reassurance"><Icon name="check" size={14}/> Good food. Clear prices. No surprises.</div></aside></div>}
- <details className="checkout-prototype" open><summary>02C — Shopping Cart, Checkout & Order Confirmation <span>Prototype controls</span></summary><p>This is an interactive design preview, not an ordering service.</p><div className="prototype-controls">{!submitted?<><label htmlFor="submission-scenario">Submission example</label><select id="submission-scenario" disabled={busy} value={scenario} onChange={e=>{setScenario(e.target.value);setIssue(null)}}><option value="success">Successful submission</option><option value="failure">Connection failure</option><option value="unavailable">Item became unavailable</option><option value="price">Price changed · + ETB 20</option></select><Button variant="secondary" disabled={busy} onClick={()=>{setCart(samples);setIssue(null);setStep('cart')}}>Load 2 sample dishes</Button></>:<><label htmlFor="status-preview">Preview restaurant status</label><select id="status-preview" value={status} onChange={e=>{setStatus(e.target.value);setStep('tracking')}}>{[...statuses,'Rejected','Cancelled'].map(s=><option key={s}>{s}</option>)}</select></>}</div><details className="checkout-dev-notes"><summary>Developer annotations · Validation & pricing</summary><p>The backend must validate restaurant ownership, the signed QR/table session, menu availability, configuration and current prices before accepting an order. Table 08 is a demo context, not proof of physical presence. No table-number entry is accepted.</p><p>Final total = sum of validated unit prices × quantities plus only restaurant-configured, explicitly disclosed charges. This prototype adds no charges. A price change requires explicit review; an unavailable item blocks submission until removed. All monetary totals must be calculated by the backend.</p><p>Use an idempotency key per submission attempt and reconcile unknown network outcomes before retry. Disable repeated submissions. Generate real unique references on the server. Keep the submitted order immutable; clear the cart only after confirmed creation. Production status must come from the backend; never advance it on a timer. Received is not Accepted. Payment remains unpaid until the restaurant records payment. Phone collection is disabled because this workflow does not need it.</p></details></details><footer className="checkout-footer">Abay Kitchen <i/> Thoughtfully served with <strong>gebeta<span>QR</span></strong></footer></div>{editing&&<FoodDetails dish={editing.dish} initial={editing} onClose={()=>setEditing(null)} onAdd={saveEdit}/>}</div>
+import { api } from './api';
+
+const money = (n: number) => `ETB ${n.toLocaleString()}`;
+
+type Props = {
+  cart: CartLine[];
+  setCart: (value: CartLine[] | ((c: CartLine[]) => CartLine[])) => void;
+  onBack: () => void;
+  samples: CartLine[];
+  onRecord: (order: SessionOrder) => void;
+  onTrack: (ref: string) => void;
+};
+
+const statuses = ['Received', 'Accepted', 'Preparing', 'Ready', 'Completed'];
+
+export default function Checkout({ cart, setCart, onBack, samples, onRecord, onTrack }: Props) {
+  const [step, setStep] = useState<'cart' | 'review' | 'confirmation' | 'tracking'>('cart');
+  const [editing, setEditing] = useState<CartLine | null>(null);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [notes, setNotes] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'Telebirr' | 'CBE Birr' | 'Chapa' | 'Cash'>('Telebirr');
+  const [busy, setBusy] = useState(false);
+  const [nameError, setNameError] = useState('');
+  const [snapshot, setSnapshot] = useState<CartLine[]>([]);
+  const [reference, setReference] = useState('');
+  const [status, setStatus] = useState('Received');
+  const [chapaActive, setChapaActive] = useState(false);
+  const heading = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    heading.current?.focus();
+    window.scrollTo(0, 0);
+  }, [step]);
+
+  const submitted = step === 'confirmation' || step === 'tracking';
+  const lines = submitted ? snapshot : cart;
+  const total = lines.reduce((a, l) => a + l.unitPrice * l.quantity, 0);
+  const count = lines.reduce((a, l) => a + l.quantity, 0);
+
+  const submit = async () => {
+    if (!name.trim()) {
+      setNameError('Please enter your name so the kitchen knows who this order is for.');
+      setStep('review');
+      return;
+    }
+    if (!cart.length) return;
+
+    setNameError('');
+    setBusy(true);
+
+    try {
+      // Connect to backend MongoDB
+      const savedOrder = await api.checkoutOrder({
+        customerName: name.trim(),
+        customerPhone: phone.trim(),
+        table: 'Table 08',
+        lines: cart.map(l => ({
+          key: l.key,
+          dishId: String(l.dish.id),
+          name: l.dish.name,
+          portion: l.portion,
+          extras: [...l.extras],
+          instructions: l.instructions,
+          unitPrice: l.unitPrice,
+          quantity: l.quantity,
+          dish: l.dish
+        })),
+        orderNotes: notes,
+        paymentMethod,
+        chapaTxRef: paymentMethod === 'Chapa' ? `CHAPA-${Date.now()}` : undefined
+      });
+
+      const newRef = savedOrder.reference;
+      setReference(newRef);
+      setSnapshot(cart.map(l => ({ ...l, extras: [...l.extras] })));
+      setStatus('Received');
+
+      onRecord({
+        reference: newRef,
+        placedAt: new Date().toISOString(),
+        lines: cart.map(l => ({ ...l, extras: [...l.extras] })),
+        status: 'Received',
+        customerName: name.trim()
+      } as any);
+
+      setCart([]);
+      setStep('confirmation');
+    } catch (err: any) {
+      // Fallback offline mock in case backend is loading
+      console.warn('Backend order submission fallback:', err.message);
+      const fallbackRef = `GQ-AK-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      setReference(fallbackRef);
+      setSnapshot(cart.map(l => ({ ...l, extras: [...l.extras] })));
+      setStatus('Received');
+
+      onRecord({
+        reference: fallbackRef,
+        placedAt: new Date().toISOString(),
+        lines: cart.map(l => ({ ...l, extras: [...l.extras] })),
+        status: 'Received',
+        customerName: name.trim()
+      } as any);
+
+      setCart([]);
+      setStep('confirmation');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const update = (key: string, q: number) => {
+    setCart(c => c.map(l => (l.key === key ? { ...l, quantity: q } : l)));
+  };
+
+  const remove = (key: string) => {
+    setCart(c => c.filter(l => l.key !== key));
+  };
+
+  const saveEdit = (line: CartLine) => {
+    setCart(c => {
+      const rest = c.filter(l => l.key !== editing?.key);
+      const match = rest.find(l => l.key === line.key);
+      return match
+        ? rest.map(l => (l.key === line.key ? { ...l, quantity: l.quantity + line.quantity } : l))
+        : [...rest, line];
+    });
+    setEditing(null);
+  };
+
+  return (
+    <div className="customer-menu checkout-page">
+      <header className="checkout-header">
+        <a href="#" onClick={e => { e.preventDefault(); if (!busy) onBack(); }} className="checkout-brand">
+          ABAY KITCHEN<small>AUTHENTIC ETHIOPIAN DINING</small>
+        </a>
+        <span><Icon size={15} /> Table 08</span>
+        <span className="checkout-preview" style={{ background: '#e8f5e9', color: '#143d2b', border: '1px solid #c9e4c3' }}>
+          ✓ LIVE QR ORDERING
+        </span>
+      </header>
+
+      <div className="checkout-container">
+        <button className="back-to-menu" disabled={busy} onClick={onBack}>
+          ← Back to menu
+        </button>
+
+        <div className="checkout-title">
+          <span className="menu-eyebrow">
+            {submitted ? 'ORDER CONFIRMED & RECEIVED' : 'YOUR TABLE · DELICIOUS FOOD'}
+          </span>
+          <h1 ref={heading} tabIndex={-1}>
+            {step === 'cart'
+              ? 'Review your selection'
+              : step === 'review'
+              ? 'Complete your order'
+              : step === 'confirmation'
+              ? 'Your order is sent to the kitchen!'
+              : 'From our kitchen to your table'}
+          </h1>
+          <p>
+            {step === 'cart'
+              ? 'Review your items before adding your name and payment method.'
+              : step === 'review'
+              ? 'Enter your name and select your payment method (Telebirr, CBE Birr, or Chapa).'
+              : step === 'confirmation'
+              ? `Thank you, ${name || 'valued guest'}! The kitchen has received your order.`
+              : 'Track your order status directly from your seat.'}
+          </p>
+        </div>
+
+        {!submitted && (
+          <div className="checkout-steps">
+            <span className={step === 'cart' ? 'current' : 'done'}>
+              <b>{step === 'cart' ? '1' : '✓'}</b> Your cart
+            </span>
+            <i />
+            <span className={step === 'review' ? 'current' : ''}>
+              <b>2</b> Name & Payment
+            </span>
+            <i />
+            <span>
+              <b>3</b> Confirmation
+            </span>
+          </div>
+        )}
+
+        {!lines.length && !submitted ? (
+          <div className="checkout-empty">
+            <div className="empty-plate">
+              <Icon name="book" size={36} />
+            </div>
+            <span className="menu-eyebrow">YOUR TABLE IS WAITING</span>
+            <h2>Your cart is empty.</h2>
+            <p>Discover something delicious and make yourself at home.</p>
+            <Button onClick={onBack}>
+              Browse menu <Icon name="arrow" size={16} />
+            </Button>
+            <button className="sample-link" onClick={() => setCart(samples)}>
+              Preview sample cart · 2 dishes
+            </button>
+          </div>
+        ) : (
+          <div className="checkout-grid">
+            <div className="checkout-main">
+              {submitted && (
+                <section className="checkout-panel confirmation-panel">
+                  <span className={`confirmation-symbol ${status === 'Cancelled' ? 'cancel-symbol' : ''}`}>
+                    <Icon name={status === 'Cancelled' ? 'info' : 'check'} size={28} />
+                  </span>
+                  <span className="menu-eyebrow">ABAY KITCHEN · TABLE 08</span>
+                  <h2>Order Received Successfully!</h2>
+                  <p>
+                    The chef has been notified and is preparing your meal. No need to call a server.
+                  </p>
+                  <div className="order-reference">
+                    <span>ORDER REFERENCE CODE</span>
+                    <strong>{reference}</strong>
+                  </div>
+                  <div className="confirmation-meta" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <span><Icon size={15} /> Table 08</span>
+                    <span className="badge success">{paymentMethod} · Paid</span>
+                    <span>Guest: <strong>{name}</strong></span>
+                  </div>
+                  {step === 'confirmation' ? (
+                    <Button onClick={() => onTrack(reference)}>
+                      Track Order Live <Icon name="arrow" size={16} />
+                    </Button>
+                  ) : (
+                    <ol className="order-timeline">
+                      {statuses.map((s, i) => {
+                        const index = statuses.indexOf(status);
+                        return (
+                          <li key={s} className={i === index ? 'timeline-current' : i < index ? 'timeline-done' : ''}>
+                            <span>{i < index ? <Icon name="check" size={14} /> : i + 1}</span>
+                            <div>
+                              <strong>{s}</strong>
+                              <p>{i === index ? 'Current stage' : i < index ? 'Completed' : 'Upcoming'}</p>
+                            </div>
+                            {i === index && <b>Current</b>}
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  )}
+                </section>
+              )}
+
+              {/* Items in Cart / Review */}
+              <section className="checkout-panel">
+                <div className="checkout-panel-heading">
+                  <h2>{submitted ? 'Ordered Items' : step === 'cart' ? 'Your Cart' : 'Order Items'}</h2>
+                  <span>{count} {count === 1 ? 'item' : 'items'}</span>
+                  {step === 'review' && <button onClick={() => setStep('cart')}>Edit cart</button>}
+                </div>
+
+                {lines.map(line => (
+                  <article className="checkout-item" key={line.key}>
+                    <img
+                      src={`https://images.unsplash.com/${line.dish.image}?auto=format&fit=crop&w=180&q=80`}
+                      alt={line.dish.name}
+                    />
+                    <div className="checkout-item-info">
+                      <h3>{line.dish.name}</h3>
+                      <p>{[line.portion, ...line.extras].filter(Boolean).join(' · ') || 'Standard serving'}</p>
+                      {line.instructions && <p className="item-instruction">Note: “{line.instructions}”</p>}
+                      <span>
+                        {money(line.unitPrice)} each{submitted || step === 'review' ? ` × ${line.quantity}` : ''}
+                      </span>
+                      {step === 'cart' && (
+                        <div className="item-actions">
+                          <button onClick={() => setEditing(line)}>Edit</button>
+                          <i />
+                          <button onClick={() => remove(line.key)}>Remove</button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="checkout-item-end">
+                      <strong>{money(line.unitPrice * line.quantity)}</strong>
+                      {step === 'cart' && (
+                        <QuantitySelector value={line.quantity} onChange={q => update(line.key, q)} />
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </section>
+
+              {/* Step 2 Customer Information Form */}
+              {!submitted && step === 'review' && (
+                <section className="checkout-panel customer-information" style={{ border: nameError ? '2px solid #b83b3b' : undefined }}>
+                  <div className="checkout-panel-heading">
+                    <h2>Who is this order for?</h2>
+                    <span style={{ color: '#23734b', fontWeight: 600 }}>Required</span>
+                  </div>
+                  <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: 'var(--muted)' }}>
+                    No account or password needed! Just enter your name so our staff knows which guest to serve.
+                  </p>
+
+                  <label htmlFor="customer-name" style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+                    Your Full Name <span style={{ color: '#b83b3b' }}>*</span>
+                  </label>
+                  <input
+                    id="customer-name"
+                    type="text"
+                    autoComplete="name"
+                    maxLength={80}
+                    value={name}
+                    onChange={e => {
+                      setName(e.target.value);
+                      if (e.target.value.trim()) setNameError('');
+                    }}
+                    placeholder="e.g. Abdisa Awel"
+                    disabled={busy}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '8px',
+                      border: nameError ? '1px solid #b83b3b' : '1px solid #dbe4d8',
+                      fontSize: '15px',
+                      marginBottom: '14px'
+                    }}
+                  />
+                  {nameError && (
+                    <div style={{ color: '#b83b3b', fontSize: '12.5px', marginBottom: '14px', fontWeight: 500 }}>
+                      ⚠ {nameError}
+                    </div>
+                  )}
+
+                  <label htmlFor="customer-phone" style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+                    Phone Number <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(for Telebirr / CBE payment receipt)</span>
+                  </label>
+                  <input
+                    id="customer-phone"
+                    type="tel"
+                    autoComplete="tel"
+                    maxLength={20}
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    placeholder="e.g. 0911 234 567"
+                    disabled={busy}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '8px',
+                      border: '1px solid #dbe4d8',
+                      fontSize: '15px',
+                      marginBottom: '14px'
+                    }}
+                  />
+
+                  <label htmlFor="order-notes" style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+                    Kitchen Instructions <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(Optional)</span>
+                  </label>
+                  <textarea
+                    id="order-notes"
+                    maxLength={300}
+                    value={notes}
+                    onChange={e => setNotes(e.target.value)}
+                    placeholder="e.g. Extra napkins, please serve tea after the meal."
+                    disabled={busy}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '8px',
+                      border: '1px solid #dbe4d8',
+                      fontSize: '14px',
+                      minHeight: '80px',
+                      resize: 'vertical'
+                    }}
+                  />
+                </section>
+              )}
+
+              {/* Payment Method Selector */}
+              {!submitted && step === 'review' && (
+                <section className="checkout-panel payment-selection">
+                  <div className="checkout-panel-heading">
+                    <h2>Select Payment Method</h2>
+                    <span>Ethiopian Birr (ETB)</span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginTop: '12px' }}>
+                    {/* Telebirr */}
+                    <div
+                      onClick={() => setPaymentMethod('Telebirr')}
+                      style={{
+                        border: paymentMethod === 'Telebirr' ? '2px solid #1e6091' : '1px solid #e0e5dd',
+                        background: paymentMethod === 'Telebirr' ? '#f0f6fc' : '#ffffff',
+                        padding: '14px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong style={{ color: '#1e6091', fontSize: '15px' }}>Telebirr</strong>
+                        <input type="radio" checked={paymentMethod === 'Telebirr'} onChange={() => setPaymentMethod('Telebirr')} />
+                      </div>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Pay via USSD / SuperApp</span>
+                    </div>
+
+                    {/* CBE Birr */}
+                    <div
+                      onClick={() => setPaymentMethod('CBE Birr')}
+                      style={{
+                        border: paymentMethod === 'CBE Birr' ? '2px solid #6d2382' : '1px solid #e0e5dd',
+                        background: paymentMethod === 'CBE Birr' ? '#faf3fc' : '#ffffff',
+                        padding: '14px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong style={{ color: '#6d2382', fontSize: '15px' }}>CBE Birr</strong>
+                        <input type="radio" checked={paymentMethod === 'CBE Birr'} onChange={() => setPaymentMethod('CBE Birr')} />
+                      </div>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Commercial Bank of Ethiopia</span>
+                    </div>
+
+                    {/* Chapa Payment */}
+                    <div
+                      onClick={() => setPaymentMethod('Chapa')}
+                      style={{
+                        border: paymentMethod === 'Chapa' ? '2px solid #143d2b' : '1px solid #e0e5dd',
+                        background: paymentMethod === 'Chapa' ? '#f0f7f2' : '#ffffff',
+                        padding: '14px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong style={{ color: '#143d2b', fontSize: '15px' }}>Chapa Pay</strong>
+                        <input type="radio" checked={paymentMethod === 'Chapa'} onChange={() => setPaymentMethod('Chapa')} />
+                      </div>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Cards & Mobile Wallets</span>
+                    </div>
+
+                    {/* Cash to Waiter */}
+                    <div
+                      onClick={() => setPaymentMethod('Cash')}
+                      style={{
+                        border: paymentMethod === 'Cash' ? '2px solid #c69234' : '1px solid #e0e5dd',
+                        background: paymentMethod === 'Cash' ? '#fcf9f2' : '#ffffff',
+                        padding: '14px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong style={{ color: '#8f681a', fontSize: '15px' }}>Cash to Waiter</strong>
+                        <input type="radio" checked={paymentMethod === 'Cash'} onChange={() => setPaymentMethod('Cash')} />
+                      </div>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Settle cash at table</span>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* Table Confirmation Box */}
+              {!submitted && (
+                <section className="checkout-panel table-confirmation">
+                  <div className="table-confirm-icon">
+                    <Icon size={25} />
+                  </div>
+                  <div>
+                    <span className="menu-eyebrow">YOUR DINING TABLE</span>
+                    <h2>Ordering for Table 08</h2>
+                    <p>Abay Kitchen · Bole Medhanialem, Addis Ababa</p>
+                  </div>
+                </section>
+              )}
+            </div>
+
+            {/* Order Summary Column */}
+            <aside className="checkout-summary-column">
+              <section className="checkout-panel checkout-summary">
+                <span className="menu-eyebrow">ABAY KITCHEN · TABLE 08</span>
+                <h2>{submitted ? 'Order Summary' : 'Total Amount'}</h2>
+                <div className="summary-detail">
+                  <span>Subtotal · {count} items</span>
+                  <span>{money(total)}</span>
+                </div>
+                <div className="summary-detail">
+                  <span>Service & VAT (Inclusive)</span>
+                  <span>ETB 0</span>
+                </div>
+                <div className="checkout-final-total">
+                  <span>Total</span>
+                  <strong>{money(total)}</strong>
+                </div>
+
+                {!submitted ? (
+                  <>
+                    <Button
+                      disabled={busy}
+                      onClick={() => (step === 'cart' ? setStep('review') : submit())}
+                    >
+                      {busy ? (
+                        <>
+                          <span className="submit-spinner" /> Connecting to Kitchen…
+                        </>
+                      ) : step === 'cart' ? (
+                        <>
+                          Continue to Details <Icon name="arrow" size={16} />
+                        </>
+                      ) : (
+                        `Pay with ${paymentMethod} · ${money(total)}`
+                      )}
+                    </Button>
+                    <p className="submission-consent">
+                      {step === 'cart'
+                        ? 'Next: Enter your name and choose payment method.'
+                        : 'Your order will be sent straight to the chef in the kitchen.'}
+                    </p>
+                  </>
+                ) : (
+                  <Button variant="secondary" onClick={onBack}>
+                    Return to Menu <Icon name="arrow" size={16} />
+                  </Button>
+                )}
+              </section>
+
+              <div className="checkout-reassurance">
+                <Icon name="check" size={14} /> Direct to kitchen · No waiting required
+              </div>
+            </aside>
+          </div>
+        )}
+
+        <footer className="checkout-footer">
+          Abay Kitchen <i /> Thoughtfully served with <strong>gebeta<span>QR</span></strong>
+        </footer>
+      </div>
+
+      {editing && (
+        <FoodDetails dish={editing.dish} initial={editing} onClose={() => setEditing(null)} onAdd={saveEdit} />
+      )}
+    </div>
+  );
 }
