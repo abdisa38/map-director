@@ -26,7 +26,7 @@ if (!MONGO_URI) {
 } else {
   // Connect to MongoDB Atlas
   mongoose
-    .connect(MONGO_URI)
+    .connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 })
     .then(async () => {
       console.log('✅ Successfully connected to MongoDB Atlas (gebeta_qr)');
       // Auto-seed initial data if collections are empty
