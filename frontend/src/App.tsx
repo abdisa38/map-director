@@ -306,7 +306,7 @@ export default function App(){
   if(admin)return <AdminDashboard sharedOrders={orders} onUpdateOrders={setOrders} onNavigateToCustomer={()=>{setAdmin(false);location.hash=''}} onLogout={handleStaffLogout}/>;
   if(tracking&&orders.some(o=>o.reference===tracking))return <OrderTracking order={orders.find(o=>o.reference===tracking)!} orders={orders} onBack={()=>{setTracking(null);setPanel(null);if(location.hash==='#tracking')location.hash=''}} onSelect={setTracking} onUpdate={order=>setOrders(c=>c.map(o=>o.reference===order.reference?order:o))}/>;
   if(panel==='cart')return <Checkout onRecord={order=>setOrders(c=>[order,...c])} onTrack={ref=>{setTracking(ref);location.hash='tracking'}} cart={cart} setCart={setCart} onBack={()=>setPanel(null)} onProfileSaved={(n, p) => { setCustomerName(n); setCustomerPhone(p); setProfileInputName(n); setProfileInputPhone(p); }} samples={[{key:'sample-doro',dish:dishes[0],portion:'Regular',extras:['Extra egg'],instructions:'Less spicy, please.',unitPrice:740,quantity:1},{key:'sample-tibs',dish:dishes[1],portion:'Regular',extras:[],instructions:'',unitPrice:720,quantity:1}]}/>;
-return <div className="customer-menu"><header className="restaurant-header"><div className="header-inner"><a className="restaurant-logo" href="#" aria-label="Abay Kitchen home"><span className="abay-symbol">a<span>k</span></span><span>ABAY KITCHEN<small>ROOTED IN TRADITION. MADE WITH LOVE.</small></span></a><div className="header-actions">{staffUser ? (<div className="navbar-auth-cluster"><button className="navbar-login-btn logged-in" onClick={()=>{setAdmin(true);location.hash='admin'}} title={`Signed in as ${staffUser.name} (${staffUser.role}) · Go to Dashboard`}><Icon name="check" size={14}/><span className="nav-btn-text">Dashboard ({staffUser.role})</span></button><button className="navbar-logout-btn" onClick={handleStaffLogout} title="Log out of Staff account" aria-label="Logout Staff"><MenuIcon name="logout"/><span className="nav-logout-text">Logout</span></button></div>) : customerName ? (<div className="navbar-auth-cluster"><button className="customer-profile-pill" onClick={() => { setProfileInputName(customerName); setProfileInputPhone(customerPhone); setPanel('profile'); }} title={`Logged in as ${customerName} · Click to view profile & active orders`} aria-label="Customer Profile"><span className="profile-chip-avatar">{customerName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</span><span className="profile-chip-name">{customerName.split(' ')[0]}</span></button><button className="navbar-logout-btn" onClick={handleCustomerLogout} title="Log out of customer account" aria-label="Logout Customer"><MenuIcon name="logout"/><span className="nav-logout-text">Logout</span></button></div>) : (<button className="navbar-login-btn" onClick={()=>{setLoginUsername('');setLoginPin('');setLoginCustomerName('');setLoginCustomerPhone('');setLoginError('');setLoginModalOpen(true)}} title="Login to Staff or Customer account"><Icon name="user" size={14}/><span>Login</span></button>)}{orders.length>0&&<button className="session-history-action" onClick={()=>{setTracking(orders[0].reference);location.hash='tracking'}} title="View active orders history"><Icon name="clock" size={16}/><span>Your orders</span><b>{orders.length}</b></button>}<button className="icon-action search-action" aria-label="Search menu" onClick={()=>searchRef.current?.focus()}><Icon name="search"/></button><button className="icon-action info-action" onClick={()=>setPanel('info')} aria-label="Restaurant information"><MenuIcon name="info"/><span>Restaurant info</span></button><button className="cart-action" onClick={()=>setPanel('cart')} aria-label={`View order, ${count} items`}><MenuIcon name="bag"/><span>Your order</span><b>{count}</b></button></div></div></header>
+return <div className="customer-menu"><header className="restaurant-header"><div className="header-inner"><a className="restaurant-logo" href="#" aria-label="Abay Kitchen home"><span className="abay-symbol">a<span>k</span></span><span>ABAY KITCHEN<small>ROOTED IN TRADITION. MADE WITH LOVE.</small></span></a><div className="header-actions">{staffUser ? (<div className="navbar-auth-cluster"><button className="navbar-login-btn logged-in" onClick={()=>{setAdmin(true);location.hash='admin'}} title={`Signed in as ${staffUser.name} (${staffUser.role}) · Go to Dashboard`}><Icon name="check" size={14}/><span className="nav-btn-text">Dashboard ({staffUser.role})</span></button><button className="navbar-logout-btn" onClick={handleStaffLogout} title="Log out of Staff account" aria-label="Logout Staff"><MenuIcon name="logout"/><span className="nav-logout-text">Logout</span></button></div>) : customerName ? (<div className="navbar-auth-cluster"><button className="customer-profile-pill" onClick={() => { setProfileInputName(customerName); setProfileInputPhone(customerPhone); setPanel('profile'); }} title={`Logged in as ${customerName} · Click to view profile & active orders`} aria-label="Customer Profile"><span className="profile-chip-avatar">{customerName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</span><span className="profile-chip-name">{customerName.split(' ')[0]}</span></button><button className="navbar-logout-btn" onClick={handleCustomerLogout} title="Log out of customer account" aria-label="Logout Customer"><MenuIcon name="logout"/><span className="nav-logout-text">Logout</span></button></div>) : (<button className="navbar-login-btn" onClick={()=>{setLoginUsername('');setLoginPin('');setLoginError('');setLoginModalOpen(true)}} title="Login to your account"><Icon name="user" size={14}/><span>Login</span></button>)}{orders.length>0&&<button className="session-history-action" onClick={()=>{setTracking(orders[0].reference);location.hash='tracking'}} title="View active orders history"><Icon name="clock" size={16}/><span>Your orders</span><b>{orders.length}</b></button>}<button className="icon-action search-action" aria-label="Search menu" onClick={()=>searchRef.current?.focus()}><Icon name="search"/></button><button className="icon-action info-action" onClick={()=>setPanel('info')} aria-label="Restaurant information"><MenuIcon name="info"/><span>Restaurant info</span></button><button className="cart-action" onClick={()=>setPanel('cart')} aria-label={`View order, ${count} items`}><MenuIcon name="bag"/><span>Your order</span><b>{count}</b></button></div></div></header>
 <div className="restaurant-cover"><img src={photo('photo-1593252719532-53f183016149',2000)} alt="Authentic Ethiopian dining with traditional injera and stews at Abay Kitchen"/><div className="cover-shade"/><div className="cover-content"><span className="cover-eyebrow">A TASTE OF HOME. A LITTLE DISCOVERY.</span><h1>Good food.<br/>Great company.</h1><p>Ethiopian soul. A world of flavour.<br className="mobile-break"/> Made fresh, shared generously.</p><span className="cover-location"><MenuIcon name="pin"/> Bole, Addis Ababa <i/> <span className="open-dot"/> Open until 10:00 PM</span></div><span className="cover-note">PULL UP A CHAIR. STAY A LITTLE LONGER.</span></div>
 <div className="menu-content"><div className="restaurant-welcome"><div><span className="menu-eyebrow">WELCOME TO OUR TABLE</span><h2>What sounds good today?</h2><p>Old favourites, new discoveries. Always made with care.</p></div><div className="table-welcome"><span className="table-welcome-icon"><Icon name="utensils" size={20}/></span><div>Welcome to <strong>Abay Kitchen</strong><small>Scan, order & enjoy authentic Ethiopian dining.</small></div></div></div>
 <div className="menu-tools"><div className="menu-search"><Icon name="search" size={19}/><input ref={searchRef} value={search} onChange={e=>setSearch(e.target.value)} placeholder="Find your next favourite…" aria-label="Search dishes"/>{search&&<button onClick={()=>setSearch('')} aria-label="Clear search"><MenuIcon name="close"/></button>}</div><span className="menu-diet-note"><MenuIcon name="leaf"/> A little something for everyone</span></div><nav className="category-nav" aria-label="Food categories">{categories.map(c=><button key={c} aria-pressed={category===c} className={category===c?'category-selected':''} onClick={()=>setCategory(c)}>{c}</button>)}</nav>
@@ -326,117 +326,54 @@ return <div className="customer-menu"><header className="restaurant-header"><div
       <div className="staff-login-dialog">
         <div className="staff-login-header">
           <div className="staff-login-avatar">
-            <Icon name={loginMode === 'staff' ? 'grid' : 'user'} size={24}/>
+            <Icon name="user" size={24}/>
           </div>
           <div>
-            <span className="menu-eyebrow">AUTHENTICATION & ACCESS</span>
-            <h2 id="login-dialog-title" style={{ margin: '4px 0 0', fontSize: '22px' }}>
-              {loginMode === 'staff' ? 'Staff & Admin Login' : 'Customer Account Login'}
-            </h2>
-            <p className="profile-status-desc">
-              {loginMode === 'staff'
-                ? 'Sign in to access restaurant management, orders, and menu catalog.'
-                : 'Sign in to access your personal dining dashboard and track orders.'}
-            </p>
+            <span className="menu-eyebrow">ACCOUNT ACCESS</span>
+            <h2 id="login-dialog-title" style={{ margin: '4px 0 0', fontSize: '22px' }}>Login</h2>
+            <p className="profile-status-desc">Enter your credentials to access your dashboard.</p>
           </div>
-        </div>
-
-        {/* Dual Mode Tabs */}
-        <div className="login-role-tabs">
-          <button
-            type="button"
-            className={`login-role-tab ${loginMode === 'staff' ? 'active' : ''}`}
-            onClick={() => { setLoginMode('staff'); setLoginError(''); }}
-          >
-            <Icon name="grid" size={14} />
-            <span>Staff & Admin</span>
-          </button>
-          <button
-            type="button"
-            className={`login-role-tab ${loginMode === 'customer' ? 'active' : ''}`}
-            onClick={() => { setLoginMode('customer'); setLoginError(''); }}
-          >
-            <Icon name="user" size={14} />
-            <span>Customer Dining</span>
-          </button>
         </div>
 
         {loginError && <div className="login-error-msg">⚠ {loginError}</div>}
 
-        {loginMode === 'staff' ? (
-          <form onSubmit={handleStaffLogin} className="staff-login-form">
-            <div className="profile-field-group">
-              <label htmlFor="login-username">Username or Email <span style={{ color: '#b83b3b' }}>*</span></label>
-              <input
-                id="login-username"
-                type="text"
-                value={loginUsername}
-                onChange={e => setLoginUsername(e.target.value)}
-                placeholder="Enter username or email"
-                required
-                autoFocus
-                disabled={loginBusy}
-              />
-            </div>
+        <form onSubmit={handleAuthLogin} className="staff-login-form">
+          <div className="profile-field-group">
+            <label htmlFor="login-username">Username or Email <span style={{ color: '#b83b3b' }}>*</span></label>
+            <input
+              id="login-username"
+              type="text"
+              value={loginUsername}
+              onChange={e => setLoginUsername(e.target.value)}
+              placeholder="Enter username or email"
+              required
+              autoFocus
+              disabled={loginBusy}
+            />
+          </div>
 
-            <div className="profile-field-group">
-              <label htmlFor="login-pin">Password / PIN <span style={{ color: '#b83b3b' }}>*</span></label>
-              <input
-                id="login-pin"
-                type="password"
-                value={loginPin}
-                onChange={e => setLoginPin(e.target.value)}
-                placeholder="Enter password or PIN"
-                required
-                disabled={loginBusy}
-              />
-            </div>
+          <div className="profile-field-group">
+            <label htmlFor="login-pin">Password / PIN <span style={{ color: '#b83b3b' }}>*</span></label>
+            <input
+              id="login-pin"
+              type="password"
+              value={loginPin}
+              onChange={e => setLoginPin(e.target.value)}
+              placeholder="Enter password or PIN"
+              required
+              disabled={loginBusy}
+            />
+          </div>
 
-            <div className="profile-dialog-buttons" style={{ marginTop: '8px' }}>
-              <Button type="submit" disabled={loginBusy}>
-                {loginBusy ? 'Signing in…' : <><Icon name="arrow" size={15}/> Sign In to Admin Dashboard</>}
-              </Button>
-              <Button variant="secondary" type="button" onClick={() => setLoginModalOpen(false)}>
-                Cancel
-              </Button>
-            </div>
-          </form>
-        ) : (
-          <form onSubmit={handleCustomerLogin} className="staff-login-form">
-            <div className="profile-field-group">
-              <label htmlFor="login-cust-name">Full Name <span style={{ color: '#b83b3b' }}>*</span></label>
-              <input
-                id="login-cust-name"
-                type="text"
-                value={loginCustomerName}
-                onChange={e => setLoginCustomerName(e.target.value)}
-                placeholder="Enter your full name"
-                required
-                autoFocus
-              />
-            </div>
-
-            <div className="profile-field-group">
-              <label htmlFor="login-cust-phone">Phone Number <small style={{ color: 'var(--muted)', fontWeight: 400 }}>(for Telebirr / CBE payment)</small></label>
-              <input
-                id="login-cust-phone"
-                type="tel"
-                value={loginCustomerPhone}
-                onChange={e => setLoginCustomerPhone(e.target.value)}
-                placeholder="e.g. 0911 234 567"
-              />
-            </div>
-
-            <div className="profile-dialog-buttons" style={{ marginTop: '8px' }}>
-              <Button type="submit">
-                <Icon name="arrow" size={15}/> Open Customer Dashboard
-              </Button>
-              <Button variant="secondary" type="button" onClick={() => setLoginModalOpen(false)}>
-                Cancel
-              </Button>
-            </div>
-          </form>
-        )}
+          <div className="profile-dialog-buttons" style={{ marginTop: '8px' }}>
+            <Button type="submit" disabled={loginBusy}>
+              {loginBusy ? 'Signing in…' : <><Icon name="arrow" size={15}/> Login</>}
+            </Button>
+            <Button variant="secondary" type="button" onClick={() => setLoginModalOpen(false)}>
+              Cancel
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
