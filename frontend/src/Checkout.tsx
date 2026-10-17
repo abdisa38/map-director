@@ -14,15 +14,16 @@ type Props = {
   samples: CartLine[];
   onRecord: (order: SessionOrder) => void;
   onTrack: (ref: string) => void;
+  onProfileSaved?: (name: string, phone: string) => void;
 };
 
 const statuses = ['Received', 'Accepted', 'Preparing', 'Ready', 'Completed'];
 
-export default function Checkout({ cart, setCart, onBack, samples, onRecord, onTrack }: Props) {
+export default function Checkout({ cart, setCart, onBack, samples, onRecord, onTrack, onProfileSaved }: Props) {
   const [step, setStep] = useState<'cart' | 'review' | 'confirmation' | 'tracking'>('cart');
   const [editing, setEditing] = useState<CartLine | null>(null);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState(() => localStorage.getItem('gebeta_customer_name') || '');
+  const [phone, setPhone] = useState(() => localStorage.getItem('gebeta_customer_phone') || '');
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'Telebirr' | 'CBE Birr' | 'Chapa' | 'Cash'>('Telebirr');
   const [busy, setBusy] = useState(false);
@@ -53,6 +54,12 @@ export default function Checkout({ cart, setCart, onBack, samples, onRecord, onT
 
     setNameError('');
     setBusy(true);
+
+    try {
+      localStorage.setItem('gebeta_customer_name', name.trim());
+      if (phone.trim()) localStorage.setItem('gebeta_customer_phone', phone.trim());
+      if (onProfileSaved) onProfileSaved(name.trim(), phone.trim());
+    } catch (e) {}
 
     try {
       const txRef = `GQ-AK-TX-${Date.now()}`;
