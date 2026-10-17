@@ -45,7 +45,12 @@ function AdminIcon({ name, size = 18 }: { name: string; size?: number }) {
     calendar: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>,
     fileText: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></>,
     filter: <><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></>,
-    arrowUpRight: <><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></>
+    arrowUpRight: <><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></>,
+    wifi: <><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></>,
+    creditCard: <><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></>,
+    store: <><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></>,
+    volume2: <><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></>,
+    receipt: <><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><line x1="8" x2="16" y1="8" y2="8"/><line x1="8" x2="16" y1="12" y2="12"/><line x1="8" x2="13" y1="16" y2="16"/></>
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -665,7 +670,7 @@ type Props = {
 };
 
 export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigateToCustomer }: Props) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories' | 'tables' | 'staff' | 'reports'>('reports');
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'menu' | 'categories' | 'tables' | 'staff' | 'reports' | 'settings'>('settings');
   const [tables, setTables] = useState<DiningTable[]>(initialTables);
   const [dishes, setDishes] = useState<MenuItem[]>(defaultDishes);
   const [categories, setCategories] = useState<string[]>(initialCategories);
@@ -743,6 +748,38 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
   const [selectedHistoricalOrder, setSelectedHistoricalOrder] = useState<HistoricalOrderRecord | null>(null);
   const [reportingRoleView, setReportingRoleView] = useState<StaffRole>('Owner');
   const [showCalculationRules, setShowCalculationRules] = useState(false);
+
+  // Settings & Configuration State (03F)
+  const [settingsSubTab, setSettingsSubTab] = useState<'profile' | 'ordering' | 'payments' | 'billing'>('profile');
+  const [profileForm, setProfileForm] = useState({
+    name: 'Abay Kitchen',
+    tagline: 'Authentic Ethiopian Flavors & Modern Dining',
+    cuisine: 'Ethiopian & Continental',
+    phone: '+251 91 123 4567',
+    email: 'contact@abaykitchen.et',
+    address: 'Bole Medhanialem, Camrose Bldg 2nd Floor, Addis Ababa',
+    openingHours: 'Mon – Sun: 07:00 AM – 11:00 PM',
+    wifiSsid: 'AbayKitchen_Guest',
+    wifiPassword: 'Enjera2026',
+    currency: 'ETB'
+  });
+  const [orderingSettings, setOrderingSettings] = useState({
+    directOrdering: true,
+    prepTimeEstimate: '15 – 20 mins',
+    allowSpecialNotes: true,
+    soundAlerts: true,
+    autoPrintTickets: false,
+    serviceCharge: 10,
+    taxVat: 15
+  });
+  const [paymentSettings, setPaymentSettings] = useState({
+    telebirrEnabled: true,
+    telebirrMerchantCode: '892341',
+    cbeBirrEnabled: true,
+    cbeBirrAccount: '100028471920',
+    cashEnabled: true,
+    posEnabled: true
+  });
 
   // Active Report Dataset
   const activeReport = useMemo(() => {
@@ -1047,10 +1084,12 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
             <span>Reports</span>
           </button>
 
-          <button className="admin-nav-item" onClick={() => showToast('Settings (Coming in 03F)')}>
+          <button
+            className={`admin-nav-item ${activeTab === 'settings' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('settings'); setMobileMenuOpen(false); }}
+          >
             <AdminIcon name="settings" size={18} />
             <span>Settings</span>
-            <span className="admin-nav-soon">03F</span>
           </button>
         </nav>
 
@@ -1096,7 +1135,9 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                   ? 'Tables & QR Codes'
                   : activeTab === 'staff'
                   ? 'Staff Management'
-                  : 'Reports & Analytics'}
+                  : activeTab === 'reports'
+                  ? 'Reports & Analytics'
+                  : 'Restaurant Settings'}
               </strong>
             </div>
           </div>
@@ -2229,6 +2270,555 @@ export default function AdminDashboard({ sharedOrders, onUpdateOrders, onNavigat
                     )}
                   </div>
                 </>
+              )}
+            </div>
+          )}
+
+          {/* =========================================================
+              03F — RESTAURANT SETTINGS, PROFILE & BILLING
+             ========================================================= */}
+          {activeTab === 'settings' && (
+            <div className="admin-settings-section">
+              {/* Header */}
+              <div className="admin-section-header">
+                <div>
+                  <h2 className="admin-section-title">Settings & Profile</h2>
+                  <p className="admin-section-subtitle">
+                    Configure your restaurant information, ordering rules, and payment methods
+                  </p>
+                </div>
+                <button
+                  className="admin-action-btn primary"
+                  onClick={() => showToast('Settings saved successfully')}
+                >
+                  <AdminIcon name="check" size={16} />
+                  <span>Save Changes</span>
+                </button>
+              </div>
+
+              {/* Sub-Tabs Bar */}
+              <div className="admin-settings-tabs-bar">
+                <button
+                  className={`admin-settings-tab-btn ${settingsSubTab === 'profile' ? 'active' : ''}`}
+                  onClick={() => setSettingsSubTab('profile')}
+                >
+                  <AdminIcon name="store" size={16} />
+                  <span>Restaurant Profile</span>
+                </button>
+                <button
+                  className={`admin-settings-tab-btn ${settingsSubTab === 'ordering' ? 'active' : ''}`}
+                  onClick={() => setSettingsSubTab('ordering')}
+                >
+                  <AdminIcon name="clock" size={16} />
+                  <span>Ordering Rules</span>
+                </button>
+                <button
+                  className={`admin-settings-tab-btn ${settingsSubTab === 'payments' ? 'active' : ''}`}
+                  onClick={() => setSettingsSubTab('payments')}
+                >
+                  <AdminIcon name="creditCard" size={16} />
+                  <span>Payment Channels</span>
+                </button>
+                <button
+                  className={`admin-settings-tab-btn ${settingsSubTab === 'billing' ? 'active' : ''}`}
+                  onClick={() => setSettingsSubTab('billing')}
+                >
+                  <AdminIcon name="receipt" size={16} />
+                  <span>Plan & Billing</span>
+                </button>
+              </div>
+
+              {/* TAB 1: RESTAURANT PROFILE */}
+              {settingsSubTab === 'profile' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  <div className="admin-card">
+                    <h3 className="admin-card-title" style={{ marginBottom: '6px' }}>General Information</h3>
+                    <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: 'var(--muted)' }}>
+                      Basic business profile displayed on customer digital menus and table tents.
+                    </p>
+
+                    <div className="admin-settings-form-grid">
+                      <div className="admin-form-group">
+                        <label>Restaurant Name</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={profileForm.name}
+                          onChange={e => setProfileForm({ ...profileForm, name: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label>Cuisine / Category</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={profileForm.cuisine}
+                          onChange={e => setProfileForm({ ...profileForm, cuisine: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="admin-form-group" style={{ gridColumn: '1 / -1' }}>
+                        <label>Tagline / Motto</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={profileForm.tagline}
+                          onChange={e => setProfileForm({ ...profileForm, tagline: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label>Phone Number</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={profileForm.phone}
+                          onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label>Contact Email</label>
+                        <input
+                          type="email"
+                          className="admin-input"
+                          value={profileForm.email}
+                          onChange={e => setProfileForm({ ...profileForm, email: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="admin-form-group" style={{ gridColumn: '1 / -1' }}>
+                        <label>Physical Address / Location</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={profileForm.address}
+                          onChange={e => setProfileForm({ ...profileForm, address: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label>Business Hours</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={profileForm.openingHours}
+                          onChange={e => setProfileForm({ ...profileForm, openingHours: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label>Operational Currency</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value="ETB (Ethiopian Birr)"
+                          disabled
+                          style={{ background: '#F8F9F7', cursor: 'not-allowed' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Guest Wi-Fi */}
+                  <div className="admin-card">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                      <AdminIcon name="wifi" size={18} />
+                      <h3 className="admin-card-title" style={{ margin: 0 }}>Guest Wi-Fi Details</h3>
+                    </div>
+                    <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: 'var(--muted)' }}>
+                      Automatically printed on table tents and QR cards so guests can connect and view the menu quickly.
+                    </p>
+
+                    <div className="admin-settings-form-grid">
+                      <div className="admin-form-group">
+                        <label>Wi-Fi Network Name (SSID)</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={profileForm.wifiSsid}
+                          onChange={e => setProfileForm({ ...profileForm, wifiSsid: e.target.value })}
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label>Wi-Fi Password</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={profileForm.wifiPassword}
+                          onChange={e => setProfileForm({ ...profileForm, wifiPassword: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: ORDERING RULES */}
+              {settingsSubTab === 'ordering' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  <div className="admin-card">
+                    <h3 className="admin-card-title" style={{ marginBottom: '6px' }}>Customer QR Ordering Rules</h3>
+                    <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: 'var(--muted)' }}>
+                      Control how guests interact with the digital menu at their tables.
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {/* Direct QR Ordering Toggle */}
+                      <div className="admin-switch-row">
+                        <div className="admin-switch-info">
+                          <strong>Direct QR Self-Ordering</strong>
+                          <span>Allow customers to place orders directly from their phones without calling a waiter</span>
+                        </div>
+                        <label className="admin-switch">
+                          <input
+                            type="checkbox"
+                            checked={orderingSettings.directOrdering}
+                            onChange={e => setOrderingSettings({ ...orderingSettings, directOrdering: e.target.checked })}
+                          />
+                          <span className="admin-switch-slider" />
+                        </label>
+                      </div>
+
+                      {/* Special Notes Toggle */}
+                      <div className="admin-switch-row">
+                        <div className="admin-switch-info">
+                          <strong>Allow Special Cooking Notes</strong>
+                          <span>Permit customers to enter custom dietary or allergy requests at checkout</span>
+                        </div>
+                        <label className="admin-switch">
+                          <input
+                            type="checkbox"
+                            checked={orderingSettings.allowSpecialNotes}
+                            onChange={e => setOrderingSettings({ ...orderingSettings, allowSpecialNotes: e.target.checked })}
+                          />
+                          <span className="admin-switch-slider" />
+                        </label>
+                      </div>
+
+                      {/* Sound Alert Toggle */}
+                      <div className="admin-switch-row">
+                        <div className="admin-switch-info">
+                          <strong>Audio Chime on New Orders</strong>
+                          <span>Play a distinctive notification sound on this dashboard when a new order arrives</span>
+                        </div>
+                        <label className="admin-switch">
+                          <input
+                            type="checkbox"
+                            checked={orderingSettings.soundAlerts}
+                            onChange={e => setOrderingSettings({ ...orderingSettings, soundAlerts: e.target.checked })}
+                          />
+                          <span className="admin-switch-slider" />
+                        </label>
+                      </div>
+
+                      {/* Auto Print Thermal Tickets */}
+                      <div className="admin-switch-row">
+                        <div className="admin-switch-info">
+                          <strong>Automatic Kitchen Thermal Print</strong>
+                          <span>Send orders directly to the POS receipt printer as soon as confirmed</span>
+                        </div>
+                        <label className="admin-switch">
+                          <input
+                            type="checkbox"
+                            checked={orderingSettings.autoPrintTickets}
+                            onChange={e => setOrderingSettings({ ...orderingSettings, autoPrintTickets: e.target.checked })}
+                          />
+                          <span className="admin-switch-slider" />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Timing & Service Charges */}
+                  <div className="admin-card">
+                    <h3 className="admin-card-title" style={{ marginBottom: '6px' }}>Timing & Surcharges</h3>
+                    <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: 'var(--muted)' }}>
+                      Estimated wait times and standard Ethiopian service & VAT percentages.
+                    </p>
+
+                    <div className="admin-settings-form-grid">
+                      <div className="admin-form-group">
+                        <label>Average Prep Time Estimate</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={orderingSettings.prepTimeEstimate}
+                          onChange={e => setOrderingSettings({ ...orderingSettings, prepTimeEstimate: e.target.value })}
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label>Restaurant Service Charge (%)</label>
+                        <input
+                          type="number"
+                          className="admin-input"
+                          value={orderingSettings.serviceCharge}
+                          onChange={e => setOrderingSettings({ ...orderingSettings, serviceCharge: Number(e.target.value) })}
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label>Government VAT / Tax (%)</label>
+                        <input
+                          type="number"
+                          className="admin-input"
+                          value={orderingSettings.taxVat}
+                          onChange={e => setOrderingSettings({ ...orderingSettings, taxVat: Number(e.target.value) })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: PAYMENT CHANNELS */}
+              {settingsSubTab === 'payments' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  <div className="admin-card">
+                    <h3 className="admin-card-title" style={{ marginBottom: '6px' }}>Ethiopian Payment Channels</h3>
+                    <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: 'var(--muted)' }}>
+                      Select which payment options are presented to customers on the digital checkout screen.
+                    </p>
+
+                    <div className="admin-payment-grid">
+                      {/* Telebirr */}
+                      <div className={`admin-payment-channel-card ${paymentSettings.telebirrEnabled ? 'active' : ''}`}>
+                        <div className="admin-payment-header">
+                          <div>
+                            <span className="admin-payment-badge telebirr">Telebirr Mobile Money</span>
+                            <h4 style={{ margin: '8px 0 2px 0', fontSize: '15px' }}>Telebirr Direct</h4>
+                          </div>
+                          <label className="admin-switch">
+                            <input
+                              type="checkbox"
+                              checked={paymentSettings.telebirrEnabled}
+                              onChange={e => setPaymentSettings({ ...paymentSettings, telebirrEnabled: e.target.checked })}
+                            />
+                            <span className="admin-switch-slider" />
+                          </label>
+                        </div>
+                        <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '0 0 14px 0' }}>
+                          Enables fast USSD and Telebirr SuperApp QR payments for dining guests.
+                        </p>
+                        <div className="admin-form-group">
+                          <label style={{ fontSize: '11px' }}>Merchant / Till Code</label>
+                          <input
+                            type="text"
+                            className="admin-input"
+                            value={paymentSettings.telebirrMerchantCode}
+                            disabled={!paymentSettings.telebirrEnabled}
+                            onChange={e => setPaymentSettings({ ...paymentSettings, telebirrMerchantCode: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      {/* CBE Birr */}
+                      <div className={`admin-payment-channel-card ${paymentSettings.cbeBirrEnabled ? 'active' : ''}`}>
+                        <div className="admin-payment-header">
+                          <div>
+                            <span className="admin-payment-badge cbe">Commercial Bank of Ethiopia</span>
+                            <h4 style={{ margin: '8px 0 2px 0', fontSize: '15px' }}>CBE Birr</h4>
+                          </div>
+                          <label className="admin-switch">
+                            <input
+                              type="checkbox"
+                              checked={paymentSettings.cbeBirrEnabled}
+                              onChange={e => setPaymentSettings({ ...paymentSettings, cbeBirrEnabled: e.target.checked })}
+                            />
+                            <span className="admin-switch-slider" />
+                          </label>
+                        </div>
+                        <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '0 0 14px 0' }}>
+                          Accept direct payments via CBE mobile banking and CBE Birr wallets.
+                        </p>
+                        <div className="admin-form-group">
+                          <label style={{ fontSize: '11px' }}>Account / Merchant Number</label>
+                          <input
+                            type="text"
+                            className="admin-input"
+                            value={paymentSettings.cbeBirrAccount}
+                            disabled={!paymentSettings.cbeBirrEnabled}
+                            onChange={e => setPaymentSettings({ ...paymentSettings, cbeBirrAccount: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Cash at Table */}
+                      <div className={`admin-payment-channel-card ${paymentSettings.cashEnabled ? 'active' : ''}`}>
+                        <div className="admin-payment-header">
+                          <div>
+                            <span className="admin-payment-badge inperson">In-Person</span>
+                            <h4 style={{ margin: '8px 0 2px 0', fontSize: '15px' }}>Cash to Waiter</h4>
+                          </div>
+                          <label className="admin-switch">
+                            <input
+                              type="checkbox"
+                              checked={paymentSettings.cashEnabled}
+                              onChange={e => setPaymentSettings({ ...paymentSettings, cashEnabled: e.target.checked })}
+                            />
+                            <span className="admin-switch-slider" />
+                          </label>
+                        </div>
+                        <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0 }}>
+                          Customers can select 'Pay with Cash' and the assigned waiter collects at the table.
+                        </p>
+                      </div>
+
+                      {/* POS Machine */}
+                      <div className={`admin-payment-channel-card ${paymentSettings.posEnabled ? 'active' : ''}`}>
+                        <div className="admin-payment-header">
+                          <div>
+                            <span className="admin-payment-badge inperson">POS Terminal</span>
+                            <h4 style={{ margin: '8px 0 2px 0', fontSize: '15px' }}>Card Machine at Table</h4>
+                          </div>
+                          <label className="admin-switch">
+                            <input
+                              type="checkbox"
+                              checked={paymentSettings.posEnabled}
+                              onChange={e => setPaymentSettings({ ...paymentSettings, posEnabled: e.target.checked })}
+                            />
+                            <span className="admin-switch-slider" />
+                          </label>
+                        </div>
+                        <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0 }}>
+                          Customers can request the portable debit/credit card machine brought to table.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: PLAN & BILLING */}
+              {settingsSubTab === 'billing' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* Hero Plan Card */}
+                  <div className="admin-card" style={{ border: '2px solid var(--accent)', background: '#FAF9F6' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                      <div>
+                        <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--accent)', background: '#F5EBD7', padding: '4px 10px', borderRadius: '20px' }}>
+                          Current Subscription
+                        </span>
+                        <h3 style={{ margin: '10px 0 4px 0', fontSize: '22px', color: 'var(--brand)' }}>GebetaQR Pro</h3>
+                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>
+                          Full-featured digital menu & table management for growing restaurants.
+                        </p>
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '26px', fontWeight: 700, color: 'var(--brand)' }}>2,400 ETB</div>
+                        <div style={{ fontSize: '12px', color: 'var(--muted)' }}>per month · Billed monthly</div>
+                        <div style={{ marginTop: '8px', fontSize: '12px', fontWeight: 600, color: '#2E6B4D' }}>
+                          ✓ Renews on 17 Nov 2026
+                        </div>
+                      </div>
+                    </div>
+
+                    <hr style={{ border: 0, borderTop: '1px solid #E5E9E2', margin: '20px 0' }} />
+
+                    <div className="admin-plan-features-grid">
+                      <div className="admin-plan-feature-item">
+                        <span style={{ color: 'var(--brand)' }}>✓</span>
+                        <span>Unlimited QR table scans & views</span>
+                      </div>
+                      <div className="admin-plan-feature-item">
+                        <span style={{ color: 'var(--brand)' }}>✓</span>
+                        <span>Live kitchen order board with chimes</span>
+                      </div>
+                      <div className="admin-plan-feature-item">
+                        <span style={{ color: 'var(--brand)' }}>✓</span>
+                        <span>Printable PDF table tents & QR stickers</span>
+                      </div>
+                      <div className="admin-plan-feature-item">
+                        <span style={{ color: 'var(--brand)' }}>✓</span>
+                        <span>Up to 15 staff accounts with roles</span>
+                      </div>
+                      <div className="admin-plan-feature-item">
+                        <span style={{ color: 'var(--brand)' }}>✓</span>
+                        <span>Telebirr & CBE Birr integrations</span>
+                      </div>
+                      <div className="admin-plan-feature-item">
+                        <span style={{ color: 'var(--brand)' }}>✓</span>
+                        <span>Analytics, CSV & PDF export reports</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Invoices */}
+                  <div className="admin-card">
+                    <h3 className="admin-card-title" style={{ marginBottom: '6px' }}>Invoice History</h3>
+                    <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: 'var(--muted)' }}>
+                      Official monthly subscription receipts for tax and accounting records.
+                    </p>
+
+                    <div className="admin-table-container">
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th>Invoice ID</th>
+                            <th>Billing Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th style={{ textAlign: 'right' }}>Receipt</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><strong>#INV-2026-09</strong></td>
+                            <td style={{ fontSize: '12px', color: 'var(--muted)' }}>17 Oct 2026</td>
+                            <td style={{ fontWeight: 600 }}>2,400 ETB</td>
+                            <td>
+                              <span className="admin-order-status-badge delivered">Paid</span>
+                            </td>
+                            <td style={{ textAlign: 'right' }}>
+                              <button
+                                className="admin-action-btn secondary sm"
+                                onClick={() => showToast('Receipt #INV-2026-09 downloaded (PDF)')}
+                              >
+                                <AdminIcon name="download" size={13} />
+                                <span>Download PDF</span>
+                              </button>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td><strong>#INV-2026-08</strong></td>
+                            <td style={{ fontSize: '12px', color: 'var(--muted)' }}>17 Sep 2026</td>
+                            <td style={{ fontWeight: 600 }}>2,400 ETB</td>
+                            <td>
+                              <span className="admin-order-status-badge delivered">Paid</span>
+                            </td>
+                            <td style={{ textAlign: 'right' }}>
+                              <button
+                                className="admin-action-btn secondary sm"
+                                onClick={() => showToast('Receipt #INV-2026-08 downloaded (PDF)')}
+                              >
+                                <AdminIcon name="download" size={13} />
+                                <span>Download PDF</span>
+                              </button>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td><strong>#INV-2026-07</strong></td>
+                            <td style={{ fontSize: '12px', color: 'var(--muted)' }}>17 Aug 2026</td>
+                            <td style={{ fontWeight: 600 }}>2,400 ETB</td>
+                            <td>
+                              <span className="admin-order-status-badge delivered">Paid</span>
+                            </td>
+                            <td style={{ textAlign: 'right' }}>
+                              <button
+                                className="admin-action-btn secondary sm"
+                                onClick={() => showToast('Receipt #INV-2026-07 downloaded (PDF)')}
+                              >
+                                <AdminIcon name="download" size={13} />
+                                <span>Download PDF</span>
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           )}
