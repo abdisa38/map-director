@@ -1,0 +1,10 @@
+{
+  "description": "Enables Ethiopian restaurants and cafés to offer customers QR-code digital menus for seamless browsing, ordering, and efficient staff order management.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
