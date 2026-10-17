@@ -8,30 +8,25 @@ const seedDatabase = require('./seed');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Dynamic CORS setup: permits Vercel deployments, Render, local dev, or custom CORS_ORIGIN
-const rawOrigins = process.env.CORS_ORIGIN || '*';
-const allowedList = rawOrigins.split(',').map(s => s.trim().replace(/\/$/, ''));
+// Universal bulletproof CORS: reflects request origin & handles preflight OPTIONS
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.setHeader('Vary', 'Origin');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, server-to-server, curl)
-    if (!origin) return callback(null, true);
-
-    // If wildcard or explicitly in CORS_ORIGIN list
-    if (rawOrigins === '*' || allowedList.includes('*') || allowedList.includes(origin)) {
-      return callback(null, origin);
-    }
-
-    // Automatically allow any Vercel deployment (*.vercel.app) or localhost
-    if (origin.endsWith('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      return callback(null, origin);
-    }
-
-    // Fallback: permit origin
-    return callback(null, origin);
-  },
-  credentials: true
-}));
+  // Fast preflight resolution for browser fetch/axios
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 app.use(express.json());
 
