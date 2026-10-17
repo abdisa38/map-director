@@ -1328,3 +1328,353 @@
     display: none;
   }
 }
+
+/* ========================================================
+   03B — Menu Management, Categories & Availability Styles
+   Simple, spacious, uncluttered, readable for nontechnical staff
+   ======================================================== */
+
+.admin-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.admin-food-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.admin-food-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5c5;
+}
+
+.admin-food-card.unavailable {
+  border-color: #e2e4dc;
+}
+
+.admin-food-thumb {
+  height: 175px;
+  width: 100%;
+  position: relative;
+  background: #edf0e6;
+  overflow: hidden;
+}
+
+.admin-food-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-food-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--brand);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.admin-soldout-badge {
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 38, 27, 0.72);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  backdrop-filter: blur(2px);
+}
+
+.admin-food-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-food-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+
+.admin-food-title-row h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--brand);
+  margin: 0;
+}
+
+.admin-food-category-badge {
+  font-size: 10px;
+  background: #edf2e8;
+  color: #3b5242;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-food-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+.admin-food-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid #f0f2eb;
+}
+
+.admin-food-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.admin-food-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.admin-food-actions button {
+  flex: 1;
+}
+
+/* 1-Click Availability Toggle */
+.admin-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-toggle {
+  width: 44px;
+  height: 24px;
+  background: #d8ded0;
+  border-radius: 12px;
+  padding: 2px;
+  cursor: pointer;
+  border: 0;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.admin-toggle.on {
+  background: #23734b;
+}
+
+.admin-toggle-knob {
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.admin-toggle.on .admin-toggle-knob {
+  transform: translateX(20px);
+}
+
+/* Category Management List */
+.admin-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.admin-category-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.admin-category-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.admin-category-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--brand);
+  margin: 0;
+}
+
+.admin-category-card p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+
+.admin-category-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #23734b;
+  background: #edf5eb;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.admin-category-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  border-top: 1px solid #f0f2eb;
+  padding-top: 12px;
+}
+
+/* Image Upload Box */
+.admin-image-dropzone {
+  border: 2px dashed #cfd6c7;
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  background: #fbfbf9;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.admin-image-dropzone:hover {
+  border-color: var(--brand);
+  background: #f5f8f0;
+}
+
+.admin-image-preview-wrap {
+  position: relative;
+  width: 100%;
+  height: 190px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.admin-image-preview-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-image-preview-actions {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+/* Customization Options Builder */
+.admin-options-builder {
+  background: #f9faf6;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.admin-option-item-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.admin-option-item-row input[type="text"] {
+  flex: 2;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.admin-option-item-row input[type="number"] {
+  flex: 1;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.admin-remove-option-btn {
+  background: transparent;
+  border: 0;
+  color: #b83b3b;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+}
+
+/* Mobile Phone Customer Preview Modal */
+.admin-phone-wrapper {
+  background: #14261c;
+  border-radius: 36px;
+  padding: 14px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.admin-phone-screen {
+  background: var(--canvas);
+  border-radius: 26px;
+  overflow: hidden;
+  max-height: 580px;
+  overflow-y: auto;
+  border: 1px solid #334438;
+}
+
+.admin-phone-header {
+  padding: 14px 16px 8px;
+  background: var(--canvas);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--brand);
+  display: flex;
+  justify-content: space-between;
+}
+
